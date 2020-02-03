@@ -1,8 +1,11 @@
 #include "main_menu.h"
 
+#include "core/dir.h"
 #include "core/string.h"
 #include "editor/editor.h"
+#include "game/file.h"
 #include "game/game.h"
+#include "game/save.h"
 #include "game/system.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
@@ -16,17 +19,20 @@
 #include "platform/version.h"
 #include "sound/music.h"
 #include "window/cck_selection.h"
+#include "window/city.h"
 #include "window/config.h"
 #include "window/file_dialog.h"
 #include "window/new_career.h"
 #include "window/plain_message_dialog.h"
 #include "window/popup_dialog.h"
 
-#define MAX_BUTTONS 6
+#define MAX_BUTTONS 7
 
 static void button_click(int type, int param2);
 
 static int focus_button_id;
+
+static const char *latest_saved_file;
 
 static generic_button buttons[] = {
     {192, 100, 256, 25, button_click, button_none, 1, 0},
@@ -35,6 +41,7 @@ static generic_button buttons[] = {
     {192, 220, 256, 25, button_click, button_none, 4, 0},
     {192, 260, 256, 25, button_click, button_none, 5, 0},
     {192, 300, 256, 25, button_click, button_none, 6, 0},
+    {192, 340, 256, 25, button_click, button_none, 7, 0},
 };
 
 static void draw_version_string(void)
@@ -76,14 +83,21 @@ static void draw_foreground(void)
         large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / 16, focus_button_id == i + 1 ? 1 : 0);
     }
 
-    lang_text_draw_centered(30, 1, 192, 106, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(30, 2, 192, 146, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(30, 3, 192, 186, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(9, 8, 192, 226, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(2, 0, 192, 266, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(30, 5, 192, 306, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(13, 5, 192, 106, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(30, 1, 192, 146, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(30, 2, 192, 186, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(30, 3, 192, 226, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(9, 8, 192, 266, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(2, 0, 192, 306, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(30, 5, 192, 346, 256, FONT_NORMAL_GREEN);
 
     graphics_reset_dialog();
+}
+
+static void handle_autosaves(void)
+{
+    game_save_prepare(0);
+    latest_saved_file = dir_get_last_file_with_extension("sav");
 }
 
 static void handle_mouse(const mouse *m)
@@ -102,12 +116,17 @@ static void confirm_exit(int accepted)
 static void button_click(int type, int param2)
 {
     if (type == 1) {
+        if (latest_saved_file && game_file_load_saved_game(latest_saved_file)) {
+            window_city_show();
+        }
+    }
+    else if (type == 2) {
         window_new_career_show();
-    } else if (type == 2) {
-        window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_LOAD);
     } else if (type == 3) {
-        window_cck_selection_show();
+        window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_LOAD);
     } else if (type == 4) {
+        window_cck_selection_show();
+    } else if (type == 5) {
         if (!editor_is_present() || !game_init_editor()) {
             window_plain_message_dialog_show(
                 "Editor not installed",
@@ -118,15 +137,16 @@ static void button_click(int type, int param2)
         } else {
             sound_music_play_editor();
         }
-    } else if (type == 5) {
-        window_config_show();
     } else if (type == 6) {
+        window_config_show();
+    } else if (type == 7) {
         window_popup_dialog_show(POPUP_DIALOG_QUIT, confirm_exit, 1);
     }
 }
 
 void window_main_menu_show(int restart_music)
 {
+    handle_autosaves();
     if (restart_music) {
         sound_music_play_intro();
     }

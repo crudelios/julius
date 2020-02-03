@@ -32,6 +32,7 @@ int empire_object_init_distant_battle_travel_months(int object_type);
 const empire_object *empire_object_get(int object_id);
 
 const empire_object *empire_object_get_our_city(void);
+int empire_object_get_our_city_name_id(void);
 
 void empire_object_foreach(void (*callback)(const empire_object *));
 

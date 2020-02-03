@@ -7,6 +7,7 @@
 #include "city/warning.h"
 #include "figure/formation.h"
 #include "game/orientation.h"
+#include "game/save.h"
 #include "game/settings.h"
 #include "game/state.h"
 #include "game/system.h"
@@ -311,6 +312,7 @@ void hotkey_end(void)
 static void confirm_exit(int accepted)
 {
     if (accepted) {
+        game_save_quicksave();
         system_exit();
     }
 }

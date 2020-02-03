@@ -32,6 +32,7 @@
 #include "figure/formation.h"
 #include "figuretype/crime.h"
 #include "game/file.h"
+#include "game/save.h"
 #include "game/settings.h"
 #include "game/time.h"
 #include "game/tutorial.h"
@@ -99,7 +100,7 @@ static void advance_month(void)
     city_festival_update();
     tutorial_on_month_tick();
     if (setting_monthly_autosave()) {
-        game_file_write_saved_game("autosave.sav");
+        game_save_autosave();
     }
 }
 

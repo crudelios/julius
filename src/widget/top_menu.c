@@ -4,6 +4,7 @@
 #include "city/finance.h"
 #include "city/population.h"
 #include "game/file.h"
+#include "game/save.h"
 #include "game/settings.h"
 #include "game/state.h"
 #include "game/system.h"
@@ -413,6 +414,7 @@ static void menu_file_delete_game(int param)
 static void menu_file_confirm_exit(int accepted)
 {
     if (accepted) {
+        game_save_quicksave();
         system_exit();
     } else {
         window_city_show();

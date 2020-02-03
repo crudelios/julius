@@ -312,6 +312,7 @@ set(GAME_FILES
     ${PROJECT_SOURCE_DIR}/src/game/mission.c
     ${PROJECT_SOURCE_DIR}/src/game/orientation.c
     ${PROJECT_SOURCE_DIR}/src/game/resource.c
+    ${PROJECT_SOURCE_DIR}/src/game/save.c
     ${PROJECT_SOURCE_DIR}/src/game/settings.c
     ${PROJECT_SOURCE_DIR}/src/game/state.c
     ${PROJECT_SOURCE_DIR}/src/game/tick.c

@@ -98,6 +98,7 @@ const dir_listing *dir_find_files_with_extension(const char *extension)
         if (file_has_extension(name, extension)) {
             strncpy(listing.files[listing.num_files], name, FILE_NAME_MAX);
             listing.files[listing.num_files][FILE_NAME_MAX - 1] = 0;
+            listing.last_modified[listing.num_files] = (int) file_info.st_mtime;
             ++listing.num_files;
         }
         dir_entry_close_name(name);
@@ -107,6 +108,21 @@ const dir_listing *dir_find_files_with_extension(const char *extension)
 
     return &listing;
 }
+
+const char *dir_get_last_file_with_extension(const char *extension)
+{
+    dir_find_files_with_extension(extension);
+    int latest_file = -1;
+    int latest_time = 0;
+    for (int i = 0; i < listing.num_files; ++i) {
+        if (listing.last_modified[i] > latest_time) {
+            latest_file = i;
+            latest_time = listing.last_modified[i];
+        }
+    }
+    return (latest_file != -1) ? listing.files[latest_file] : 0;
+}
+
 
 static int correct_case(const char *dir, char *filename)
 {

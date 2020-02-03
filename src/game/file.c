@@ -30,6 +30,7 @@
 #include "game/animation.h"
 #include "game/difficulty.h"
 #include "game/file_io.h"
+#include "game/save.h"
 #include "game/settings.h"
 #include "game/state.h"
 #include "game/time.h"
@@ -239,6 +240,8 @@ static void initialize_saved_game(void)
     map_tiles_determine_gardens();
 
     city_message_clear_scroll();
+
+    game_save_prepare(empire_get_our_city_name());
 
     game_state_unpause();
 }

@@ -5,6 +5,7 @@
 #include "city/population.h"
 #include "city/resource.h"
 #include "core/calc.h"
+#include "core/lang.h"
 #include "core/log.h"
 #include "core/io.h"
 #include "empire/city.h"
@@ -54,6 +55,15 @@ void empire_load(int is_custom_scenario, int empire_id)
     }
     buffer_init(&buf, raw_data, EMPIRE_DATA_SIZE);
     empire_object_load(&buf);
+}
+
+const uint8_t *empire_get_our_city_name(void)
+{
+    int city_name_id = empire_object_get_our_city_name_id();
+    if (city_name_id != -1) {
+        return lang_get_string(21, city_name_id);
+    }
+    return 0;
 }
 
 static void check_scroll_boundaries(void)
