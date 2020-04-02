@@ -6,6 +6,7 @@
 #include "core/lang.h"
 #include "core/string.h"
 #include "game/game.h"
+#include "game/system.h"
 #include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
@@ -22,7 +23,7 @@
 
 #include <string.h>
 
-#define NUM_CHECKBOXES 10
+#define NUM_CHECKBOXES 11
 #define NUM_BOTTOM_BUTTONS 4
 #define MAX_LANGUAGE_DIRS 20
 
@@ -36,13 +37,14 @@ static generic_button checkbox_buttons[] = {
     { 20, 102, 20, 20, toggle_switch, button_none, CONFIG_UI_SHOW_INTRO_VIDEO },
     { 20, 126, 20, 20, toggle_switch, button_none, CONFIG_UI_SIDEBAR_INFO },
     { 20, 150, 20, 20, toggle_switch, button_none, CONFIG_UI_SMOOTH_SCROLLING },
-    { 20, 174, 20, 20, toggle_switch, button_none, CONFIG_UI_VISUAL_FEEDBACK_ON_DELETE },
-    { 20, 198, 20, 20, toggle_switch, button_none, CONFIG_UI_ALLOW_CYCLING_TEMPLES },
-    { 20, 222, 20, 20, toggle_switch, button_none, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE },
-    { 20, 246, 20, 20, toggle_switch, button_none, CONFIG_UI_SHOW_CONSTRUCTION_SIZE },
-    { 20, 318, 20, 20, toggle_switch, button_none, CONFIG_GP_FIX_IMMIGRATION_BUG },
-    { 20, 342, 20, 20, toggle_switch, button_none, CONFIG_GP_FIX_100_YEAR_GHOSTS },
-    { 20, 366, 20, 20, toggle_switch, button_none, CONFIG_GP_FIX_EDITOR_EVENTS }
+    { 20, 174, 20, 20, toggle_switch, button_none, CONFIG_UI_ZOOM },
+    { 20, 198, 20, 20, toggle_switch, button_none, CONFIG_UI_VISUAL_FEEDBACK_ON_DELETE },
+    { 20, 222, 20, 20, toggle_switch, button_none, CONFIG_UI_ALLOW_CYCLING_TEMPLES },
+    { 20, 246, 20, 20, toggle_switch, button_none, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE },
+    { 20, 270, 20, 20, toggle_switch, button_none, CONFIG_UI_SHOW_CONSTRUCTION_SIZE },
+    { 20, 342, 20, 20, toggle_switch, button_none, CONFIG_GP_FIX_IMMIGRATION_BUG },
+    { 20, 366, 20, 20, toggle_switch, button_none, CONFIG_GP_FIX_100_YEAR_GHOSTS },
+    { 20, 390, 20, 20, toggle_switch, button_none, CONFIG_GP_FIX_EDITOR_EVENTS }
 };
 
 static generic_button language_button = {
@@ -85,6 +87,7 @@ static struct {
 } data;
 
 static int config_change_basic(config_key key);
+static int config_change_zoom(config_key key);
 static int config_change_string_basic(config_string_key key);
 static int config_change_string_language(config_string_key key);
 
@@ -93,6 +96,7 @@ static void init_config_values(void)
     for (int i = 0; i < CONFIG_MAX_ENTRIES; ++i) {
         data.config_values[i].change_action = config_change_basic;
     }
+    data.config_values[CONFIG_UI_ZOOM].change_action = config_change_zoom;
     for (int i = 0; i < CONFIG_STRING_MAX_ENTRIES; ++i) {
         data.config_string_values[i].change_action = config_change_string_basic;
     }
@@ -134,7 +138,7 @@ static void init(void)
 
 static void draw_background(void)
 {
-    graphics_clear_screen();
+    graphics_clear_screens();
 
     image_draw_fullscreen_background(image_group(GROUP_CONFIG));
 
@@ -151,15 +155,16 @@ static void draw_background(void)
     text_draw(string_from_ascii("Play intro videos"), 50, 107, FONT_NORMAL_BLACK, 0);
     text_draw(string_from_ascii("Extra information in the control panel"), 50, 131, FONT_NORMAL_BLACK, 0);
     text_draw(string_from_ascii("Enable smooth scrolling"), 50, 155, FONT_NORMAL_BLACK, 0);
-    text_draw(string_from_ascii("Improve visual feedback when clearing land"), 50, 179, FONT_NORMAL_BLACK, 0);
-    text_draw(string_from_ascii("Allow building each temple in succession"), 50, 203, FONT_NORMAL_BLACK, 0);
-    text_draw(string_from_ascii("Show range when building reservoirs, fountains and wells"), 50, 227, FONT_NORMAL_BLACK, 0);
-    text_draw(string_from_ascii("Show draggable construction size"), 50, 251, FONT_NORMAL_BLACK, 0);
+    text_draw(string_from_ascii("Enable zoom (can be slow, uses more RAM)"), 50, 179, FONT_NORMAL_BLACK, 0);
+    text_draw(string_from_ascii("Improve visual feedback when clearing land"), 50, 203, FONT_NORMAL_BLACK, 0);
+    text_draw(string_from_ascii("Allow building each temple in succession"), 50, 227, FONT_NORMAL_BLACK, 0);
+    text_draw(string_from_ascii("Show range when building reservoirs, fountains and wells"), 50, 251, FONT_NORMAL_BLACK, 0);
+    text_draw(string_from_ascii("Show draggable construction size"), 50, 275, FONT_NORMAL_BLACK, 0);
   
-    text_draw(string_from_ascii("Gameplay changes"), 20, 299, FONT_NORMAL_BLACK, 0);
-    text_draw(string_from_ascii("Fix immigration bug on very hard"), 50, 323, FONT_NORMAL_BLACK, 0);
-    text_draw(string_from_ascii("Fix 100-year-old ghosts"), 50, 347, FONT_NORMAL_BLACK, 0);
-    text_draw(string_from_ascii("Fix Emperor change and survival time in custom missions"), 50, 371, FONT_NORMAL_BLACK, 0);
+    text_draw(string_from_ascii("Gameplay changes"), 20, 323, FONT_NORMAL_BLACK, 0);
+    text_draw(string_from_ascii("Fix immigration bug on very hard"), 50, 347, FONT_NORMAL_BLACK, 0);
+    text_draw(string_from_ascii("Fix 100-year-old ghosts"), 50, 371, FONT_NORMAL_BLACK, 0);
+    text_draw(string_from_ascii("Fix Emperor change and survival time in custom missions"), 50, 395, FONT_NORMAL_BLACK, 0);
 
     for (int i = 0; i < NUM_CHECKBOXES; i++) {
         generic_button *btn = &checkbox_buttons[i];
@@ -315,6 +320,13 @@ static int config_change_string_basic(config_string_key key)
 {
     config_set_string(key, data.config_string_values[key].new_value);
     strncpy(data.config_string_values[key].original_value, data.config_string_values[key].new_value, CONFIG_STRING_VALUE_MAX - 1);
+    return 1;
+}
+
+static int config_change_zoom(config_key key)
+{
+    config_change_basic(key);
+    system_reload_textures();
     return 1;
 }
 

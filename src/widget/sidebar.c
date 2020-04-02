@@ -31,6 +31,7 @@
 #include "sound/effect.h"
 #include "widget/city.h"
 #include "widget/minimap.h"
+#include "widget/top_menu.h"
 #include "window/advisors.h"
 #include "window/build_menu.h"
 #include "window/city.h"
@@ -610,6 +611,12 @@ static void update_progress(void)
     data.progress = diff / 5;
 }
 
+static void draw_sliding_background(void)
+{
+    widget_top_menu_draw(1);
+    window_city_draw();
+}
+
 static void draw_sliding_foreground(void)
 {
     window_request_refresh();
@@ -665,7 +672,7 @@ static void slide_sidebar(void)
     
     window_type window = {
         WINDOW_SLIDING_SIDEBAR,
-        window_city_draw,
+        draw_sliding_background,
         draw_sliding_foreground,
         0,
         0
