@@ -13,7 +13,10 @@
 #include "core/time.h"
 #include "figure/formation_legion.h"
 #include "game/resource.h"
+#include "graphics/graphics.h"
 #include "graphics/image.h"
+#include "graphics/screen.h"
+#include "graphics/text.h"
 #include "graphics/window.h"
 #include "map/building.h"
 #include "map/figure.h"
@@ -502,6 +505,48 @@ static void deletion_draw_remaining(int x, int y, int grid_offset)
     draw_hippodrome_ornaments(x, y, grid_offset);
 }
 
+static void draw_grid_pixel(int x, int y, int i, int x_positive, int y_positive, int width_offset)
+{
+        int xx = x + i * 2 * x_positive;
+        int yy = y + i * y_positive;;
+        if(xx < 0 || xx >= screen_width() - width_offset || yy < 24 || yy >= screen_height()) {
+            return;
+        }
+        color_t *pixel = graphics_get_pixel(xx, yy);
+        *pixel = COLOR_BLACK;
+        if(xx + 1 >= screen_width() - width_offset) {
+            return;
+        }
+        pixel++;
+        *pixel = COLOR_BLACK;
+}
+
+static void draw_grid(int x, int y)
+{
+    x+= 28;
+    int width_offset = city_view_is_sidebar_collapsed() ? 42 :162;
+    for(int i = 0; i < 15; ++ i) {
+        draw_grid_pixel(x, y, i, 1, 1, width_offset);
+        draw_grid_pixel(x, y, i, -1, 1, width_offset);
+        draw_grid_pixel(x, y, i, 1, -1, width_offset);
+        draw_grid_pixel(x, y, i, -1, -1, width_offset);
+    }
+}
+
+static void draw_grid_and_debug_info(int x, int y, int grid_offset)
+{
+    if(!map_grid_is_valid_offset(grid_offset)) {
+        return;
+    }
+    draw_grid(x, y);
+    x += 10;
+    y += 5;
+    graphics_draw_rect(x, y, 25, 20, COLOR_BLACK);
+    graphics_fill_rect(x + 1, y + 1, 23, 18, COLOR_WHITE);
+    text_draw_number_centered(map_grid_offset_to_x(grid_offset), x + 2, y + 2, 12, FONT_SMALL_PLAIN);
+    text_draw_number_centered(map_grid_offset_to_y(grid_offset), x + 2, y + 10, 12, FONT_SMALL_PLAIN);
+}
+
 void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_coord, const map_tile *tile)
 {
     int highlighted_formation = 0;
@@ -539,4 +584,5 @@ void city_without_overlay_draw(int selected_figure_id, pixel_coordinate *figure_
         city_view_foreach_map_tile(deletion_draw_figures_animations);
         city_view_foreach_map_tile(deletion_draw_remaining);
     }
+    city_view_foreach_map_tile(draw_grid_and_debug_info);
 }
