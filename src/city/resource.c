@@ -24,6 +24,16 @@ static struct {
     resource_list food_list;
 } available;
 
+int city_resource_is_food(resource_type resource)
+{
+    return resource >= RESOURCE_MIN_FOOD && resource < RESOURCE_MAX_FOOD;
+}
+
+int city_resource_count_food_on_granary(resource_type food)
+{
+    return city_data.resource.granary_food_stored[food];
+}
+
 int city_resource_count(resource_type resource)
 {
     return city_data.resource.stored_in_warehouses[resource];
