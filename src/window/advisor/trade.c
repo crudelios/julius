@@ -19,6 +19,7 @@
 #include "empire/city.h"
 #include "translation/translation.h"
 #include "window/empire.h"
+#include "window/option_popup.h"
 #include "window/resource_settings.h"
 #include "window/trade_prices.h"
 
@@ -50,6 +51,19 @@ static generic_button resource_buttons[] = {
     {64, 261, 480, RESOURCE_ROW_HEIGHT - 2, button_resource, button_none, 5, 0},
     {64, 302, 480, RESOURCE_ROW_HEIGHT - 2, button_resource, button_none, 6, 0},
     {64, 343, 480, RESOURCE_ROW_HEIGHT - 2, button_resource, button_none, 7, 0}
+};
+
+static option_menu_item policy_options[TRADE_POLICY_MAX_TYPES][3] = {
+    {
+        { TR_BUILDING_CARAVANSERAI_POLICY_1_TITLE, TR_BUILDING_CARAVANSERAI_POLICY_1 },
+        { TR_BUILDING_CARAVANSERAI_POLICY_2_TITLE, TR_BUILDING_CARAVANSERAI_POLICY_2 },
+        { TR_BUILDING_CARAVANSERAI_POLICY_3_TITLE, TR_BUILDING_CARAVANSERAI_POLICY_3 }
+    },
+    {
+        { TR_BUILDING_LIGHTHOUSE_POLICY_1_TITLE, TR_BUILDING_LIGHTHOUSE_POLICY_1 },
+        { TR_BUILDING_LIGHTHOUSE_POLICY_2_TITLE, TR_BUILDING_LIGHTHOUSE_POLICY_2 },
+        { TR_BUILDING_LIGHTHOUSE_POLICY_3_TITLE, TR_BUILDING_LIGHTHOUSE_POLICY_3 }
+    }
 };
 
 static struct {
@@ -235,12 +249,13 @@ static void button_empire(int param1, int param2)
     window_empire_show();
 }
 
-static void button_policy(int param1, int param2)
+static void button_policy(int policy_type, int param2)
 {
-    if ((param1 && building_monument_working(BUILDING_CARAVANSERAI)) ||
-        (!param1 && building_monument_working(BUILDING_LIGHTHOUSE))) {
-        window_policy_show(param1);
+    if (policy_type == LAND_TRADE_POLICY && !building_monument_working(BUILDING_CARAVANSERAI) ||
+        (policy_type == SEA_TRADE_POLICY && !building_monument_working(BUILDING_LIGHTHOUSE))) {
+        return;
     }
+
 }
 
 static void button_resource(int resource_index, int param2)
