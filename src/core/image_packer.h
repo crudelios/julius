@@ -62,7 +62,7 @@ typedef struct {
 /**
  * @brief Initiates an image_packer object, allocating memory as needed.
  *
- * Don't use any other iamge_packer_* function on a japacker_t without calling image_packer_init() first.
+ * Don't use any other image_packer_* function on an image_packer without calling image_packer_init() first.
  *
  * @param packer The packer to init.
  * @param num_rectangles The total number of rectangles that need to be packed.

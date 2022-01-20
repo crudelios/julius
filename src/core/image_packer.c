@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TOLERABLE_AREA_DIFFERENCE_PERCENTAGE 2
+#define TOLERABLE_AREA_DIFFERENCE_PERCENTAGE 2.0f
 
 typedef struct empty_area {
     unsigned int x, y;
@@ -264,6 +264,10 @@ static int pack_rect(internal_data *data, image_packer_rect *rect, int allow_rot
         height = rect->input.width;
     }
 
+    if (!width || !height) {
+        return 1;
+    }
+
     for (empty_area *area = data->empty_areas.first; area; area = area->next) {
         if (height > area->height || width > area->width) {
             continue;
@@ -319,7 +323,7 @@ static void reduce_last_image_size(image_packer *packer, unsigned int rects_area
 
     unsigned int current_area = data->image_width * data->image_height;
 
-    if (current_area * 100 / rects_area < 100 + TOLERABLE_AREA_DIFFERENCE_PERCENTAGE) {
+    if (current_area * 100.0f / (float) rects_area < 100.0f + TOLERABLE_AREA_DIFFERENCE_PERCENTAGE) {
         return;
     }
 
@@ -361,9 +365,9 @@ static void reduce_last_image_size(image_packer *packer, unsigned int rects_area
             last_successful_width = packer->result.last_image_width;
             last_successful_height = packer->result.last_image_height;
 
-            unsigned int area_percentage_difference = last_successful_width * last_successful_height * 100 / rects_area;
+            float area_percentage_difference = last_successful_width * last_successful_height * 100.0f / (float) rects_area;
 
-            if (area_percentage_difference < 100 + TOLERABLE_AREA_DIFFERENCE_PERCENTAGE) {
+            if (area_percentage_difference < 100.0f + TOLERABLE_AREA_DIFFERENCE_PERCENTAGE) {
                 return;
             }
         }
@@ -458,7 +462,6 @@ int image_packer_pack(image_packer *packer)
                 continue;
             }
             rect->output.packed = 0;
-
             if (!pack_rect(data, rect, packer->options.allow_rotation)) {
                 if (packer->options.fail_policy == IMAGE_PACKER_CONTINUE) {
                     continue;
@@ -495,8 +498,11 @@ int image_packer_pack(image_packer *packer)
 void image_packer_free(image_packer *packer)
 {
     internal_data *data = packer->internal_data;
-    free(data->empty_areas.list);
-    free(data->sorted_rects);
-    free(data);
-    packer->internal_data = 0;
+    if (data) {
+        free(data->empty_areas.list);
+        free(data->sorted_rects);
+        free(data);
+    }
+    free(packer->rects);
+    memset(packer, 0, sizeof(image_packer));
 }
