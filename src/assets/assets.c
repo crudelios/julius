@@ -89,5 +89,5 @@ void assets_load_unpacked_asset(int image_id)
     if (!img) {
         return;
     }
-    graphics_renderer()->load_unpacked_asset(&img->img, img->data);
+    graphics_renderer()->load_unpacked_image(&img->img, img->data);
 }

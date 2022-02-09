@@ -17,8 +17,6 @@
 #define ASSET_ARRAY_SIZE 2000
 #define IMAGES_IN_RAM_ARRAY_SIZE 32
 
-#define MAX_PACKED_IMAGE_SIZE 64000
-
 static array(asset_image) asset_images;
 
 static void load_image_layers(asset_image *img, color_t **main_images, int *main_image_widths)
@@ -59,11 +57,6 @@ static int has_top_part(const asset_image *img)
         }
     }
     return 0;
-}
-
-static int should_pack_asset(const asset_image *img)
-{
-    return img->img.width * img->img.height < MAX_PACKED_IMAGE_SIZE;
 }
 
 static int load_image(asset_image *img, color_t **main_images, int *main_image_widths)
@@ -218,6 +211,8 @@ asset_image *asset_image_get_from_id(int image_id)
 void asset_image_unload(asset_image *img)
 {
     unload_image_layers(img);
+    free((color_t *) img->data); // Freeing a const pointer - ugly but necessary
+    img->data = 0;
     img->active = 0;
 }
 
@@ -237,8 +232,7 @@ int asset_image_init_array(void)
     asset_image *image;
     array_foreach(asset_images, image)
     {
-        free((color_t *)image->data); // Freeing a const pointer - ugly but necessary
-
+        asset_image_unload(image);
     }
     return array_init(asset_images, ASSET_ARRAY_SIZE, new_image, is_image_active);
 }
@@ -300,7 +294,7 @@ int asset_image_load_all(color_t **main_images, int *main_image_widths)
         int width = image->img.width;
         int height = image->img.height;
 
-        if (should_pack_asset(image)) {
+        if (graphics_renderer()->should_pack_image(image->img.width, image->img.height)) {
             if (image->img.is_isometric) {
                 trim_image(image);
             } else {
@@ -335,7 +329,7 @@ int asset_image_load_all(color_t **main_images, int *main_image_widths)
     int total_unpacked_assets = 0;
 
     array_foreach(asset_images, image) {
-        if (should_pack_asset(image)) {
+        if (graphics_renderer()->should_pack_image(image->img.width, image->img.height)) {
             image_packer_rect *rect = &packer.rects[i];
             image->img.atlas.x_offset = rect->output.x;
             image->img.atlas.y_offset = rect->output.y;

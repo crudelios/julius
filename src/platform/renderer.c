@@ -27,7 +27,9 @@
 #define HAS_RENDER_GEOMETRY 0
 #endif
 
-#define MAX_UNPACKED_ASSETS 10
+#define MAX_UNPACKED_IMAGES 10
+
+#define MAX_PACKED_IMAGE_SIZE 64000
 
 typedef struct buffer_texture {
     SDL_Texture *texture;
@@ -71,7 +73,7 @@ static struct {
         int id;
         time_millis last_used;
         SDL_Texture *texture;
-    } unpacked_assets[MAX_UNPACKED_ASSETS];
+    } unpacked_assets[MAX_UNPACKED_IMAGES];
     graphics_renderer_interface renderer_interface;
 #ifdef USE_RENDER_GEOMETRY
     SDL_ScaleMode city_scale_mode;
@@ -341,7 +343,7 @@ static SDL_Texture *get_texture(int texture_id)
         return data.custom_textures[CUSTOM_IMAGE_EXTERNAL].texture;
     } else if (type == ATLAS_UNPACKED_EXTRA_ASSET) {
         int unpacked_asset_id = texture_id & IMAGE_ATLAS_BIT_MASK;
-        for (int i = 0; i < MAX_UNPACKED_ASSETS; i++) {
+        for (int i = 0; i < MAX_UNPACKED_IMAGES; i++) {
             if (data.unpacked_assets[i].id == unpacked_asset_id && data.unpacked_assets[i].texture) {
                 return data.unpacked_assets[i].texture;
             }
@@ -819,12 +821,12 @@ static int has_custom_texture(custom_image_type type)
     return data.custom_textures[type].texture != 0;
 }
 
-static void load_unpacked_asset(const image *img, const color_t *pixels)
+static void load_unpacked_image(const image *img, const color_t *pixels)
 {
     int unpacked_asset_id = img->atlas.id & IMAGE_ATLAS_BIT_MASK;
     int first_empty = -1;
     int oldest_texture_index = 0;
-    for (int i = 0; i < MAX_UNPACKED_ASSETS; i++) {
+    for (int i = 0; i < MAX_UNPACKED_IMAGES; i++) {
         if (data.unpacked_assets[i].id == unpacked_asset_id && data.unpacked_assets[i].texture) {
             return;
         }
@@ -853,7 +855,7 @@ static void load_unpacked_asset(const image *img, const color_t *pixels)
     data.unpacked_assets[index].texture = SDL_CreateTextureFromSurface(data.renderer, surface);
     while (!data.unpacked_assets[index].texture) {
         int oldest_texture_index = -1;
-        for (int i = 0; i < MAX_UNPACKED_ASSETS; i++) {
+        for (int i = 0; i < MAX_UNPACKED_IMAGES; i++) {
             if (data.unpacked_assets[oldest_texture_index].texture &&
                 data.unpacked_assets[oldest_texture_index].last_used < data.unpacked_assets[i].last_used) {
                 oldest_texture_index = i;
@@ -870,6 +872,11 @@ static void load_unpacked_asset(const image *img, const color_t *pixels)
     }
     SDL_SetTextureBlendMode(data.unpacked_assets[index].texture, SDL_BLENDMODE_BLEND);
     SDL_FreeSurface(surface);
+}
+
+static int should_pack_image(int width, int height)
+{
+    return width * height < MAX_PACKED_IMAGE_SIZE;
 }
 
 static int isometric_images_are_joined(void)
@@ -910,7 +917,8 @@ static void create_renderer_interface(void)
     data.renderer_interface.create_image_atlas = create_texture_atlas;
     data.renderer_interface.has_image_atlas = has_texture_atlas;
     data.renderer_interface.free_image_atlas = free_texture_atlas_and_data;
-    data.renderer_interface.load_unpacked_asset = load_unpacked_asset;
+    data.renderer_interface.load_unpacked_image = load_unpacked_image;
+    data.renderer_interface.should_pack_image = should_pack_image;
     data.renderer_interface.isometric_images_are_joined = isometric_images_are_joined;
     data.renderer_interface.update_scale_mode = update_scale_mode;
 

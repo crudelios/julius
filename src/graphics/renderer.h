@@ -73,7 +73,9 @@ typedef struct {
     int (*has_image_atlas)(atlas_type type);
     void (*free_image_atlas)(atlas_type type);
 
-    void (*load_unpacked_asset)(const image *img, const color_t *pixels);
+    void (*load_unpacked_image)(const image *img, const color_t *pixels);
+
+    int (*should_pack_image)(int width, int height);
 
     int (*isometric_images_are_joined)(void);
 
