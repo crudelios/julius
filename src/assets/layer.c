@@ -12,10 +12,6 @@
 #include <string.h>
 
 static color_t DUMMY_LAYER_DATA = COLOR_BLACK;
-static image DUMMY_IMAGE = {
-    .width = 1,
-    .height = 1,
-};
 
 static void load_dummy_layer(layer *l)
 {
@@ -154,7 +150,7 @@ void layer_unload(layer *l)
     free(l->original_image_group);
     free(l->original_image_id);
 #endif
-    if (!l->calculated_image_id) {
+    if (!l->calculated_image_id && l->data != &DUMMY_LAYER_DATA) {
         free((color_t *)l->data); // Freeing a const pointer. Ugly but necessary
     }
     if (l->prev) {
