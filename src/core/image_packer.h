@@ -46,7 +46,6 @@ typedef struct {
     struct {
         int allow_rotation;
         int rects_are_sorted;
-        int always_repack;
         int reduce_image_size;
         image_packer_sort_type sort_by;
         image_packer_fail_policy fail_policy;

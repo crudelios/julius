@@ -600,7 +600,7 @@ static int crop_and_pack_images(buffer *buf, image *images, image_draw_data *dra
                 if (draw_data->buffer) {
                     int reduce_width = type != ATLAS_FONT;
                     if (type == ATLAS_MAIN) {
-                        reduce_width = i < image_group(GROUP_FONT) || i >= image_group(GROUP_FONT) + 1340;
+                        reduce_width = i < image_group(GROUP_FONT) || i >= image_group(GROUP_FONT) + BASE_FONT_ENTRIES;
                     }
                     draw_data->original_width = img->width;
                     memset(draw_data->buffer, 0, img->width * img->height * sizeof(color_t));
