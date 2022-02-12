@@ -59,6 +59,7 @@ static int has_top_part(const asset_image *img)
     return 0;
 }
 
+#ifndef BUILDING_ASSET_PACKER
 static int load_image(asset_image *img, color_t **main_images, int *main_image_widths)
 {
     load_image_layers(img, main_images, main_image_widths);
@@ -125,6 +126,7 @@ static int load_image(asset_image *img, color_t **main_images, int *main_image_w
 
     return 1;
 }
+#endif
 
 static inline int layer_is_empty(const layer *l)
 {
@@ -244,6 +246,7 @@ asset_image *asset_image_create(void)
     return result;
 }
 
+#ifndef BUILDING_ASSET_PACKER
 static void copy_asset_to_atlas_image(color_t *dst, const asset_image *img, int src_width, int dst_width)
 {
     if (!graphics_renderer()->isometric_images_are_joined() && img->img.is_isometric) {
@@ -272,6 +275,7 @@ static void trim_image(asset_image *img)
         img->img.top_height = 0;
     }
 }
+#endif
 
 int asset_image_load_all(color_t **main_images, int *main_image_widths)
 {

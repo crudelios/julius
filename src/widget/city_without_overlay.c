@@ -118,10 +118,7 @@ static void draw_footprint(int x, int y, int grid_offset)
 {
     sound_city_progress_ambient();
     building_construction_record_view_position(x, y, grid_offset);
-    if (grid_offset < 0) {
-        // Outside map: draw black tile
-        return;
-    } else if (map_property_is_draw_tile(grid_offset)) {
+    if (grid_offset >= 0 && map_property_is_draw_tile(grid_offset)) {
         // Valid grid_offset and leftmost tile -> draw
         int building_id = map_building_at(grid_offset);
         color_t color_mask = 0;
@@ -240,13 +237,6 @@ static void draw_entertainment_spectators(building *b, int x, int y, color_t col
 {
     if (b->type == BUILDING_AMPHITHEATER && b->num_workers > 0) {
         image_draw(image_group(GROUP_BUILDING_AMPHITHEATER_SHOW), x + 36, y - 47, color_mask, draw_context.scale);
-    }
-    if (b->type == BUILDING_COLOSSEUM && b->data.monument.phase <= 0) {
-        if (b->num_workers > 0) {
-            image_draw(assets_get_image_id("Colosseum", "Coloseum ON"), x, y - 123, color_mask, draw_context.scale);
-        } else {
-            image_draw(assets_get_image_id("Colosseum", "Coloseum OFF"), x, y - 123, color_mask, draw_context.scale);
-        }
     }
     if (b->type == BUILDING_HIPPODROME && building_main(b)->num_workers > 0
         && city_entertainment_hippodrome_has_race()) {

@@ -27,7 +27,7 @@
 		<layer src="Colosseum_ON_Overlay"/>
 	</image>
 	<!-- Note: Colosseum ON state -->
-	<image id="Coloseum ON" width="298" height="213" isometric="true">
+	<image id="Coloseum ON" width="298" height="213">
 		<layer group="this" image="Coloseum OFF" x="0" y="0"/>
 		<layer group="this" image="Col Crowd Fix" x="70" y="33"/>
 	</image>
@@ -85,7 +85,7 @@
 		<layer src="Colosseum_Fight_Overlay"/>
 	</image>
 	<!-- Note: Colosseum Gladiator Fight animations (Fixed vanilla ON state) -->
-	<image id="Col Glad Fight" width="298" height="213">
+	<image id="Col Glad Fight" width="298" height="213" isometric="true">
 		<layer group="this" image="Coloseum ON"/>
 		<animation speed="5" x="122" y="57" reversible="false">
 			<frame group="this" image="Col Glad fix 01"/>
@@ -104,7 +104,7 @@
 		</animation>
 	</image>
 	<!-- Note: Colosseum 'Naumachia' games animations -->
-	<image id="Col Naumachia" width="298" height="213">
+	<image id="Col Naumachia" width="298" height="213" isometric="true">
 		<layer group="this" image="Coloseum ON"/>
 		<animation speed="9" x="57" y="12" reversible="false">
 			<frame src="Naumachia_01"/>
@@ -122,7 +122,7 @@
 		</animation>
 	</image>
 	<!-- Note: Colosseum 'Imperial Games' animations -->
-	<image id="Col Imp Games" width="298" height="213">
+	<image id="Col Imp Games" width="298" height="213" isometric="true">
 		<layer group="this" image="Coloseum ON"/>
 		<animation speed="9" x="57" y="12" reversible="false">
 			<frame src="Imperial_Games_01"/>
@@ -134,7 +134,7 @@
 		</animation>
 	</image>
 	<!-- Note: Colosseum 'Imperial Games' animations -->
-	<image id="Col Exec" width="298" height="213">
+	<image id="Col Exec" width="298" height="213" isometric="true">
 		<layer group="this" image="Coloseum ON"/>
 		<animation speed="9" x="57" y="12" reversible="false">
 			<frame src="Executions_01"/>

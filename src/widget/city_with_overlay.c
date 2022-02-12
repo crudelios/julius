@@ -9,7 +9,9 @@
 #include "core/log.h"
 #include "game/resource.h"
 #include "game/state.h"
+#include "graphics/graphics.h"
 #include "graphics/image.h"
+#include "graphics/renderer.h"
 #include "map/bridge.h"
 #include "map/building.h"
 #include "map/figure.h"
@@ -352,8 +354,7 @@ static void draw_footprint(int x, int y, int grid_offset)
 {
     building_construction_record_view_position(x, y, grid_offset);
     if (grid_offset < 0) {
-        // Outside map: draw black tile
-        image_draw_isometric_footprint_from_draw_tile(image_group(GROUP_TERRAIN_BLACK), x, y, 0, scale);
+        return;
     } else if (overlay->draw_custom_footprint) {
         overlay->draw_custom_footprint(x, y, scale, grid_offset);
     } else if (map_property_is_draw_tile(grid_offset)) {
@@ -556,14 +557,8 @@ static void draw_animation(int x, int y, int grid_offset)
                     if (animation_offset > img->animation.num_sprites) {
                         animation_offset = img->animation.num_sprites;
                     }
-                    int ydiff = 0;
-                    switch (map_property_multi_tile_size(grid_offset)) {
-                        case 1: ydiff = 30; break;
-                        case 2: ydiff = 45; break;
-                        case 3: ydiff = 60; break;
-                        case 4: ydiff = 75; break;
-                        case 5: ydiff = 90; break;
-                    }
+                    int y_offset = graphics_renderer()->isometric_images_are_joined() ? 15 : 30;
+                    int ydiff = y_offset * map_property_multi_tile_size(grid_offset) + 15;
                     image_draw(image_id + img->animation.start_offset + animation_offset,
                         x + img->animation.sprite_offset_x,
                         y + ydiff + img->animation.sprite_offset_y - img->height,
@@ -637,6 +632,9 @@ void city_with_overlay_draw(const map_tile *tile)
 
     scale = city_view_get_scale() / 100.0f;
 
+    int x, y, width, height;
+    city_view_get_viewport(&x, &y, &width, &height);
+    graphics_fill_rect(x, y, width, height, COLOR_BLACK);
     int should_mark_deleting = city_building_ghost_mark_deleting(tile);
     city_view_foreach_map_tile(draw_footprint);
     if (!should_mark_deleting) {

@@ -21,6 +21,7 @@ static void load_dummy_layer(layer *l)
     l->calculated_image_id = 0;
 }
 
+#ifndef BUILDING_ASSET_PACKER
 static void copy_regular_image(layer *l, color_t *dst, const image *img, const color_t *atlas_pixels, int atlas_width)
 {
     for (int y = 0; y < l->height; y++) {
@@ -111,6 +112,7 @@ static void load_layer_from_another_image(layer *l, color_t **main_data, int *ma
     l->calculated_image_id = 0;
     l->data = data;
 }
+#endif
 
 void layer_load(layer *l, color_t **main_data, int *main_image_widths)
 {
@@ -239,6 +241,7 @@ static char *copy_attribute(const char *attribute)
 }
 #endif
 
+#ifndef BUILDING_ASSET_PACKER
 static int determine_layer_height(const image *img, layer_isometric_part part)
 {
     if (!img->is_isometric || graphics_renderer()->isometric_images_are_joined()) {
@@ -257,6 +260,7 @@ static int determine_layer_height(const image *img, layer_isometric_part part)
         return 0;
     }
 }
+#endif
 
 int layer_add_from_image_id(layer *l, const char *group_id, const char *image_id, int offset_x, int offset_y)
 {
