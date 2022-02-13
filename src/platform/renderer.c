@@ -31,6 +31,13 @@
 
 #define MAX_PACKED_IMAGE_SIZE 64000
 
+#ifdef __ANDROID__
+// On the arm versions of android, for some reason, atlas textures that are too large will make the renderer fetch
+// some images from the atlas with an off-by-one pixel, making things look terrible. Defining a smaller atlas texture
+// prevents the problem, at the cost of performance due to the extra texture context switching.
+#define ANDROID_MAX_TEXTURE_SIZE 1024
+#endif
+
 typedef struct buffer_texture {
     SDL_Texture *texture;
     int id;
@@ -954,13 +961,11 @@ int platform_renderer_init(SDL_Window *window)
     }
 
 #ifdef __ANDROID__
-    // On the arm versions of android, for some reason, textures any larger than 2048x2048 will make the renderer fetch
-    // some images from the atlas with an off-by-one pixel, making things look terrible. 
-    if (data.max_texture_size.width > 2048) {
-        data.max_texture_size.width = 2048;
+    if (data.max_texture_size.width > ANDROID_MAX_TEXTURE_SIZE) {
+        data.max_texture_size.width = ANDROID_MAX_TEXTURE_SIZE;
     }
-    if (data.max_texture_size.height > 2048) {
-        data.max_texture_size.height = 2048;
+    if (data.max_texture_size.height > ANDROID_MAX_TEXTURE_SIZE) {
+        data.max_texture_size.height = ANDROID_MAX_TEXTURE_SIZE;
     }
 #endif
 
