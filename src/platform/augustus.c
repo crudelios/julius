@@ -246,6 +246,13 @@ static void handle_event(SDL_Event *event)
         case SDL_WINDOWEVENT:
             handle_window_event(&event->window, &data.active);
             break;
+
+#if SDL_VERSION_ATLEAST(2, 0, 2)
+        case SDL_RENDER_TARGETS_RESET:
+            window_request_refresh();
+            break;
+#endif
+
         case SDL_KEYDOWN:
             platform_handle_key_down(&event->key);
             break;

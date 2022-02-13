@@ -869,7 +869,7 @@ static void load_unpacked_image(const image *img, const color_t *pixels)
             }
         }
         if (oldest_texture_index == -1) {
-            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to create surface for texture", SDL_GetError());
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to create surface for texture - %s", SDL_GetError());
             SDL_FreeSurface(surface);
             return;
         }
