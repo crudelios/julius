@@ -227,6 +227,15 @@ static struct {
     int max_image_height;
 } data;
 
+static void read_header(buffer *buf)
+{
+    buffer_skip(buf, 80); // header integers
+    for (int i = 0; i < 300; i++) {
+        data.group_image_ids[i] = buffer_read_u16(buf);
+    }
+    buffer_read_raw(buf, data.bitmaps, 20000);
+}
+
 static void read_index_entry(buffer *buf, image *img, image_draw_data *draw_data)
 {
     draw_data->offset = buffer_read_i32(buf);
@@ -258,6 +267,11 @@ static void read_index_entry(buffer *buf, image *img, image_draw_data *draw_data
     buffer_skip(buf, 5);
 }
 
+static int is_external(const image *img)
+{
+    return (img->atlas.id >> IMAGE_ATLAS_BIT_OFFSET) == ATLAS_EXTERNAL;
+}
+
 static void set_image_heights(image *img, image_draw_data *draw_data)
 {
     if (draw_data->is_compressed) {
@@ -274,11 +288,6 @@ static void set_image_heights(image *img, image_draw_data *draw_data)
     } else {
         img->top_height = 0;
     }
-}
-
-static int is_external(const image *img)
-{
-    return (img->atlas.id >> IMAGE_ATLAS_BIT_OFFSET) == ATLAS_EXTERNAL;
 }
 
 static int prepare_images(buffer *buf, image *images, image_draw_data *draw_datas, int size, atlas_type image_type)
@@ -299,13 +308,67 @@ static int prepare_images(buffer *buf, image *images, image_draw_data *draw_data
     return 1;
 }
 
-static void read_header(buffer *buf)
+static void convert_compressed(buffer *buf, const image *img, int buf_length, color_t *dst, int dst_width);
+
+static int crop_and_pack_images(buffer *buf, image *images, image_draw_data *draw_datas,
+    int num_images, atlas_type type)
 {
-    buffer_skip(buf, 80); // header integers
-    for (int i = 0; i < 300; i++) {
-        data.group_image_ids[i] = buffer_read_u16(buf);
+    if (image_packer_init(&data.packer, num_images, data.max_image_width, data.max_image_height) != IMAGE_PACKER_OK) {
+        return 0;
     }
-    buffer_read_raw(buf, data.bitmaps, 20000);
+    data.packer.options.fail_policy = IMAGE_PACKER_NEW_IMAGE;
+    data.packer.options.reduce_image_size = 1;
+    data.packer.options.sort_by = IMAGE_PACKER_SORT_BY_AREA;
+
+    int offset = 4;
+    for (int i = 1; i < num_images; i++) {
+        image *img = &images[i];
+        image_draw_data *draw_data = &draw_datas[i];
+
+        if (is_external(img)) {
+            image_draw_data *external_data = &data.external_draw_data[img->atlas.id & IMAGE_ATLAS_BIT_MASK];
+            memcpy(external_data, draw_data, sizeof(image_draw_data));
+            if (!external_data->offset) {
+                external_data->offset = 1;
+            }
+        } else {
+            draw_data->offset = offset;
+            offset += draw_data->data_length;
+
+            if (!img->is_isometric && draw_data->is_compressed) {
+                draw_data->buffer = malloc(img->width * img->height * sizeof(color_t));
+                if (draw_data->buffer) {
+                    int reduce_width = type != ATLAS_FONT;
+                    if (type == ATLAS_MAIN) {
+                        reduce_width = i < image_group(GROUP_FONT) || i >= image_group(GROUP_FONT) + BASE_FONT_ENTRIES;
+                    }
+                    draw_data->original_width = img->width;
+                    memset(draw_data->buffer, 0, img->width * img->height * sizeof(color_t));
+                    buffer_set(buf, draw_data->offset);
+                    convert_compressed(buf, img, draw_data->data_length, draw_data->buffer, img->width);
+                    image_crop(img, draw_data->buffer, reduce_width);
+                }
+            }
+
+            image_packer_rect *rect = &data.packer.rects[i];
+            rect->input.width = img->width;
+            rect->input.height = img->height;
+        }
+    }
+
+    image_packer_pack(&data.packer);
+
+    for (int i = 0; i < num_images; i++) {
+        image *img = &images[i];
+        if (is_external(img)) {
+            continue;
+        }
+        image_packer_rect *rect = &data.packer.rects[i];
+        img->atlas.id = (type << IMAGE_ATLAS_BIT_OFFSET) + rect->output.image_index;
+        img->atlas.x_offset = rect->output.x;
+        img->atlas.y_offset = rect->output.y;
+    }
+    return 1;
 }
 
 static color_t to_32_bit(uint16_t c)
@@ -324,6 +387,15 @@ static void convert_uncompressed(buffer *buf, const image *img, color_t *dst, in
             color_t color = to_32_bit(buffer_read_u16(buf));
             pixel[x] = color == COLOR_SG2_TRANSPARENT ? ALPHA_TRANSPARENT : color;
         }
+    }
+}
+
+static void copy_compressed(const image *img, image_draw_data *draw_data, color_t *dst, int dst_width)
+{
+    for (int y = 0; y < img->height; y++) {
+        memcpy(&dst[(img->atlas.y_offset + y) * dst_width + img->atlas.x_offset],
+            &((color_t *) draw_data->buffer)[(y + img->y_offset) * draw_data->original_width + img->x_offset],
+            img->width * sizeof(color_t));
     }
 }
 
@@ -401,15 +473,6 @@ static void convert_isometric_footprint(buffer *buf, const image *img, color_t *
     }
 }
 
-static void copy_compressed(const image *img, image_draw_data *draw_data, color_t *dst, int dst_width)
-{
-    for (int y = 0; y < img->height; y++) {
-        memcpy(&dst[(img->atlas.y_offset + y) * dst_width + img->atlas.x_offset],
-            &((color_t *) draw_data->buffer)[(y + img->y_offset) * draw_data->original_width + img->x_offset],
-            img->width * sizeof(color_t));
-    }
-}
-
 static void convert_images(image *images, image_draw_data *draw_datas, int size, buffer *buf,
     const image_atlas_data *atlas_data)
 {
@@ -475,160 +538,6 @@ static void make_plain_fonts_white(const image *img_info, const image_atlas_data
     for (int i = 0; i < limit; i++) {
         make_font_white(&img_info[i + start_font_offset], atlas_data);
     }
-}
-
-void image_crop(image *img, const color_t *pixels, int reduce_width)
-{
-    if (!img->width || !img->height) {
-        return;
-    }
-    int x_first_opaque = 0;
-    int x_last_opaque = 0;
-    int y_first_opaque = 0;
-    int y_last_opaque = 0;
-
-    int found_opaque = 0;
-
-    // Check all four sides of the rect
-    for (int y = 0; y < img->height; y++) {
-        const color_t *row = &pixels[y * img->width];
-        for (int x = 0; x < img->width; x++) {
-            if ((row[x] & COLOR_CHANNEL_ALPHA) != ALPHA_TRANSPARENT) {
-                y_first_opaque = y;
-                y_last_opaque = y;
-                if (reduce_width) {
-                    x_first_opaque = x;
-                    x_last_opaque = x;
-                }
-                found_opaque = 1;
-                break;
-            }
-        }
-        if (found_opaque) {
-            break;
-        }
-    }
-    if (!found_opaque) {
-        img->width = 0;
-        img->height = 0;
-        return;
-    }
-    found_opaque = 0;
-    for (int y = img->height - 1; y > y_last_opaque; y--) {
-        const color_t *row = &pixels[y * img->width];
-        for (int x = img->width - 1; x >= 0; x--) {
-            if ((row[x] & COLOR_CHANNEL_ALPHA) != ALPHA_TRANSPARENT) {
-                y_last_opaque = y;
-                if (reduce_width) {
-                    if (x_first_opaque > x) {
-                        x_first_opaque = x;
-                    }
-                    if (x_last_opaque < x) {
-                        x_last_opaque = x;
-                    }
-                }
-                found_opaque = 1;
-                break;
-            }
-        }
-        if (found_opaque) {
-            break;
-        }
-    }
-    if (reduce_width) {
-        found_opaque = 0;
-        for (int x = 0; x < x_first_opaque; x++) {
-            for (int y = y_first_opaque; y < y_last_opaque; y++) {
-                if ((pixels[y * img->width + x] & COLOR_CHANNEL_ALPHA) != ALPHA_TRANSPARENT) {
-                    x_first_opaque = x;
-                    found_opaque = 1;
-                    break;
-                }
-            }
-            if (found_opaque) {
-                break;
-            }
-        }
-        found_opaque = 0;
-        for (int x = img->width - 1; x > x_last_opaque; x--) {
-            for (int y = y_first_opaque; y < y_last_opaque; y++) {
-                if ((pixels[y * img->width + x] & COLOR_CHANNEL_ALPHA) != ALPHA_TRANSPARENT) {
-                    x_last_opaque = x;
-                    found_opaque = 1;
-                    break;
-                }
-            }
-            if (found_opaque) {
-                break;
-            }
-        }
-
-        img->x_offset = x_first_opaque;
-        img->width = x_last_opaque - x_first_opaque + 1;
-    }
-    img->y_offset = y_first_opaque;
-    img->height = y_last_opaque - y_first_opaque + 1;
-}
-
-static int crop_and_pack_images(buffer *buf, image *images, image_draw_data *draw_datas,
-    int num_images, atlas_type type)
-{
-    if (image_packer_init(&data.packer, num_images, data.max_image_width, data.max_image_height) != IMAGE_PACKER_OK) {
-        return 0;
-    }
-    data.packer.options.fail_policy = IMAGE_PACKER_NEW_IMAGE;
-    data.packer.options.reduce_image_size = 1;
-    data.packer.options.sort_by = IMAGE_PACKER_SORT_BY_AREA;
-
-    int offset = 4;
-    for (int i = 1; i < num_images; i++) {
-        image *img = &images[i];
-        image_draw_data *draw_data = &draw_datas[i];
-
-        if (is_external(img)) {
-            image_draw_data *external_data = &data.external_draw_data[img->atlas.id & IMAGE_ATLAS_BIT_MASK];
-            memcpy(external_data, draw_data, sizeof(image_draw_data));
-            if (!external_data->offset) {
-                external_data->offset = 1;
-            }
-        } else {
-            draw_data->offset = offset;
-            offset += draw_data->data_length;
-
-            if (!img->is_isometric && draw_data->is_compressed) {
-                draw_data->buffer = malloc(img->width * img->height * sizeof(color_t));
-                if (draw_data->buffer) {
-                    int reduce_width = type != ATLAS_FONT;
-                    if (type == ATLAS_MAIN) {
-                        reduce_width = i < image_group(GROUP_FONT) || i >= image_group(GROUP_FONT) + BASE_FONT_ENTRIES;
-                    }
-                    draw_data->original_width = img->width;
-                    memset(draw_data->buffer, 0, img->width * img->height * sizeof(color_t));
-                    buffer_set(buf, draw_data->offset);
-                    convert_compressed(buf, img, draw_data->data_length, draw_data->buffer, img->width);
-                    image_crop(img, draw_data->buffer, reduce_width);
-                }
-            }
-
-            image_packer_rect *rect = &data.packer.rects[i];
-            rect->input.width = img->width;
-            rect->input.height = img->height;
-        }
-    }
-
-    image_packer_pack(&data.packer);
-
-    for (int i = 0; i < num_images; i++) {
-        image *img = &images[i];
-        if (is_external(img)) {
-            continue;
-        }
-        image_packer_rect *rect = &data.packer.rects[i];
-        img->atlas.id = (type << IMAGE_ATLAS_BIT_OFFSET) + rect->output.image_index;
-        img->atlas.x_offset = rect->output.x;
-        img->atlas.y_offset = rect->output.y;
-    }
-    return 1;
 }
 
 int image_load_climate(int climate_id, int is_editor, int force_reload)
@@ -1148,6 +1057,99 @@ void image_load_external_data(int image_id)
         graphics_renderer()->update_custom_image(CUSTOM_IMAGE_EXTERNAL);
     }
     graphics_renderer()->release_custom_image_buffer(CUSTOM_IMAGE_EXTERNAL);
+}
+
+void image_crop(image *img, const color_t *pixels, int reduce_width)
+{
+    if (!img->width || !img->height) {
+        return;
+    }
+    int x_first_opaque = 0;
+    int x_last_opaque = 0;
+    int y_first_opaque = 0;
+    int y_last_opaque = 0;
+
+    int found_opaque = 0;
+
+    // Check all four sides of the rect
+    for (int y = 0; y < img->height; y++) {
+        const color_t *row = &pixels[y * img->width];
+        for (int x = 0; x < img->width; x++) {
+            if ((row[x] & COLOR_CHANNEL_ALPHA) != ALPHA_TRANSPARENT) {
+                y_first_opaque = y;
+                y_last_opaque = y;
+                if (reduce_width) {
+                    x_first_opaque = x;
+                    x_last_opaque = x;
+                }
+                found_opaque = 1;
+                break;
+            }
+        }
+        if (found_opaque) {
+            break;
+        }
+    }
+    if (!found_opaque) {
+        img->width = 0;
+        img->height = 0;
+        return;
+    }
+    found_opaque = 0;
+    for (int y = img->height - 1; y > y_last_opaque; y--) {
+        const color_t *row = &pixels[y * img->width];
+        for (int x = img->width - 1; x >= 0; x--) {
+            if ((row[x] & COLOR_CHANNEL_ALPHA) != ALPHA_TRANSPARENT) {
+                y_last_opaque = y;
+                if (reduce_width) {
+                    if (x_first_opaque > x) {
+                        x_first_opaque = x;
+                    }
+                    if (x_last_opaque < x) {
+                        x_last_opaque = x;
+                    }
+                }
+                found_opaque = 1;
+                break;
+            }
+        }
+        if (found_opaque) {
+            break;
+        }
+    }
+    if (reduce_width) {
+        found_opaque = 0;
+        for (int x = 0; x < x_first_opaque; x++) {
+            for (int y = y_first_opaque; y < y_last_opaque; y++) {
+                if ((pixels[y * img->width + x] & COLOR_CHANNEL_ALPHA) != ALPHA_TRANSPARENT) {
+                    x_first_opaque = x;
+                    found_opaque = 1;
+                    break;
+                }
+            }
+            if (found_opaque) {
+                break;
+            }
+        }
+        found_opaque = 0;
+        for (int x = img->width - 1; x > x_last_opaque; x--) {
+            for (int y = y_first_opaque; y < y_last_opaque; y++) {
+                if ((pixels[y * img->width + x] & COLOR_CHANNEL_ALPHA) != ALPHA_TRANSPARENT) {
+                    x_last_opaque = x;
+                    found_opaque = 1;
+                    break;
+                }
+            }
+            if (found_opaque) {
+                break;
+            }
+        }
+
+        img->x_offset = x_first_opaque;
+        img->width = x_last_opaque - x_first_opaque + 1;
+    }
+    img->y_offset = y_first_opaque;
+    img->height = y_last_opaque - y_first_opaque + 1;
 }
 
 int image_group(int group)
