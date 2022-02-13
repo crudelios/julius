@@ -10,6 +10,7 @@
 #include "game/settings.h"
 #include "game/system.h"
 #include "graphics/screen.h"
+#include "graphics/window.h"
 #include "input/mouse.h"
 #include "input/touch.h"
 #include "platform/arguments.h"
@@ -249,7 +250,7 @@ static void handle_event(SDL_Event *event)
 
 #if SDL_VERSION_ATLEAST(2, 0, 2)
         case SDL_RENDER_TARGETS_RESET:
-            window_request_refresh();
+            window_invalidate();
             break;
 #endif
 
