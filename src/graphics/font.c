@@ -163,18 +163,18 @@ static struct {
     int multibyte;
 } data;
 
-static int image_y_offset_none(uint8_t c, int image_height, int y_offset, int line_height)
+static int image_y_offset_none(uint8_t c, int image_height, int line_height)
 {
-    int offset = image_height + y_offset - line_height;
+    int offset = image_height - line_height;
     if (offset < 0 || c < 0x80) {
         offset = 0;
     }
     return offset;
 }
 
-static int image_y_offset_default(uint8_t c, int image_height, int y_offset, int line_height)
+static int image_y_offset_default(uint8_t c, int image_height, int line_height)
 {
-    int offset = image_height + y_offset - line_height;
+    int offset = image_height - line_height;
     if (offset < 0) {
         offset = 0;
     }
@@ -184,9 +184,9 @@ static int image_y_offset_default(uint8_t c, int image_height, int y_offset, int
     return offset;
 }
 
-static int image_y_offset_eastern(uint8_t c, int image_height, int y_offset, int line_height)
+static int image_y_offset_eastern(uint8_t c, int image_height, int line_height)
 {
-    int offset = image_height + y_offset - line_height;
+    int offset = image_height - line_height;
     if (offset < 0) {
         offset = 0;
     }
@@ -196,7 +196,7 @@ static int image_y_offset_eastern(uint8_t c, int image_height, int y_offset, int
     return offset;
 }
 
-static int image_y_offset_cyrillic_normal_small_plain(uint8_t c, int image_height, int y_offset, int line_height)
+static int image_y_offset_cyrillic_normal_small_plain(uint8_t c, int image_height, int line_height)
 {
     switch (c) {
         case 36:
@@ -210,12 +210,12 @@ static int image_y_offset_cyrillic_normal_small_plain(uint8_t c, int image_heigh
     }
 }
 
-static int image_y_offset_cyrillic_normal_colored(uint8_t c, int image_height, int y_offset, int line_height)
+static int image_y_offset_cyrillic_normal_colored(uint8_t c, int image_height, int line_height)
 {
     return c == 201 ? 3 : 0;
 }
 
-static int image_y_offset_cyrillic_large_plain(uint8_t c, int image_height, int y_offset, int line_height)
+static int image_y_offset_cyrillic_large_plain(uint8_t c, int image_height, int line_height)
 {
     switch (c) {
         case 36:
@@ -244,7 +244,7 @@ static int image_y_offset_cyrillic_large_plain(uint8_t c, int image_height, int 
     }
 }
 
-static int image_y_offset_cyrillic_large_black(uint8_t c, int image_height, int y_offset, int line_height)
+static int image_y_offset_cyrillic_large_black(uint8_t c, int image_height, int line_height)
 {
     switch (c) {
         case 36:
@@ -277,7 +277,7 @@ static int image_y_offset_cyrillic_large_black(uint8_t c, int image_height, int 
     }
 }
 
-static int image_y_offset_cyrillic_large_brown(uint8_t c, int image_height, int y_offset, int line_height)
+static int image_y_offset_cyrillic_large_brown(uint8_t c, int image_height, int line_height)
 {
     switch (c) {
         case 36:
@@ -310,7 +310,7 @@ static int image_y_offset_cyrillic_large_brown(uint8_t c, int image_height, int 
     }
 }
 
-static int image_y_offset_cyrillic_normal_brown(uint8_t c, int image_height, int y_offset, int line_height)
+static int image_y_offset_cyrillic_normal_brown(uint8_t c, int image_height, int line_height)
 {
     switch (c) {
         case 36:
@@ -341,7 +341,7 @@ static int image_y_offset_cyrillic_normal_brown(uint8_t c, int image_height, int
     }
 }
 
-static int image_y_offset_chinese(uint8_t c, int image_height, int y_offset, int line_height)
+static int image_y_offset_chinese(uint8_t c, int image_height, int line_height)
 {
     if (line_height == 15) {
         if (c < 0x80) {
@@ -353,10 +353,10 @@ static int image_y_offset_chinese(uint8_t c, int image_height, int y_offset, int
     if (c < 0x80) {
         return 0;
     }
-    return image_height + y_offset - line_height;
+    return image_height - line_height;
 }
 
-static int image_y_offset_korean(uint8_t c, int image_height, int y_offset, int line_height)
+static int image_y_offset_korean(uint8_t c, int image_height, int line_height)
 {
     if (line_height == 15) {
         if (c < 0x80) {
@@ -369,13 +369,13 @@ static int image_y_offset_korean(uint8_t c, int image_height, int y_offset, int 
         return 0;
     }
     if (line_height == 11) {
-        if (image_height + y_offset == 12) {
+        if (image_height == 12) {
             return 0;
-        } else if (image_height + y_offset == 15) {
+        } else if (image_height == 15) {
             return 3;
         }
     }
-    return image_height + y_offset - line_height;
+    return image_height - line_height;
 }
 
 void font_set_encoding(encoding_type encoding)

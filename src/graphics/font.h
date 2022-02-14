@@ -31,11 +31,10 @@ typedef struct {
     * Returns the height offset for the specified character
     * @param c Character
     * @param image_height Height of the letter image
-    * @param y_offset The extra transparent height of the letter that was cropped
     * @param line_height Line height for the font
     * @return Offset to subtract from y coordinate
     */
-    int (*image_y_offset)(uint8_t c, int image_height, int y_offset, int line_height);
+    int (*image_y_offset)(uint8_t c, int image_height, int line_height);
 } font_definition;
 
 /**

@@ -287,7 +287,7 @@ int text_draw_scaled(const uint8_t *str, int x, int y, font_t font, color_t colo
                 width = def->space_width;
             } else {
                 const image *img = image_letter(letter_id);
-                int height = def->image_y_offset(*str, img->height, img->y_offset, def->line_height);
+                int height = def->image_y_offset(*str, img->height + img->y_offset, def->line_height);
                 image_draw_letter(def->font, letter_id, current_x, y - height, color, scale);
                 width = def->letter_spacing + img->width;
             }
@@ -361,7 +361,7 @@ int text_draw_number_scaled(int value, char prefix, const char *postfix,
                 width = def->space_width;
             } else {
                 const image *img = image_letter(letter_id);
-                int height = def->image_y_offset(*str, img->height, img->y_offset, def->line_height);
+                int height = def->image_y_offset(*str, img->height + img->y_offset, def->line_height);
                 image_draw_letter(def->font, letter_id, current_x, y - height, color, scale);
                 width = def->letter_spacing + img->width;
             }
