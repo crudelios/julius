@@ -250,9 +250,10 @@ static void handle_event(SDL_Event *event)
 
 #if SDL_VERSION_ATLEAST(2, 0, 2)
         case SDL_RENDER_TARGETS_RESET:
+#endif
+        case SDL_APP_DIDENTERFOREGROUND:
             window_invalidate();
             break;
-#endif
 
         case SDL_KEYDOWN:
             platform_handle_key_down(&event->key);

@@ -863,8 +863,9 @@ static void load_unpacked_image(const image *img, const color_t *pixels)
     while (!data.unpacked_assets[index].texture) {
         int oldest_texture_index = -1;
         for (int i = 0; i < MAX_UNPACKED_IMAGES; i++) {
-            if (data.unpacked_assets[oldest_texture_index].texture &&
-                data.unpacked_assets[oldest_texture_index].last_used < data.unpacked_assets[i].last_used) {
+            if (data.unpacked_assets[i].texture &&
+                (oldest_texture_index == -1 ||
+                data.unpacked_assets[oldest_texture_index].last_used < data.unpacked_assets[i].last_used)) {
                 oldest_texture_index = i;
             }
         }
