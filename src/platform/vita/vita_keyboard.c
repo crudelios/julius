@@ -3,6 +3,7 @@
 #include "core/calc.h"
 #include "core/encoding.h"
 #include "core/string.h"
+#include "graphics/window.h"
 #include "platform/renderer.h"
 
 #include <string.h>
@@ -127,5 +128,6 @@ const uint8_t *vita_keyboard_get(const uint8_t *initial_text, int max_length)
         }
         platform_renderer_render();
     }
+    window_invalidate();
     return final_text;
 }

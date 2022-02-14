@@ -38,6 +38,12 @@
 #define ANDROID_MAX_TEXTURE_SIZE 1024
 #endif
 
+#ifdef __vita__
+// On Vita, due to the small amount of VRAM, having textures that are too large will cause the game to eventually crash
+// when changing climates, due to lack of contiguous memory space. Creating smaller atlases mitigates the issue
+#define VITA_MAX_TEXTURE_SIZE 2048
+#endif
+
 typedef struct buffer_texture {
     SDL_Texture *texture;
     int id;
@@ -239,6 +245,7 @@ static const image_atlas_data *prepare_texture_atlas(atlas_type type, int num_im
             SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Unable to create texture. Reason: %s", SDL_GetError());
             free_texture_atlas(type);
             reset_atlas_data(type);
+            continue;
         }
         SDL_Log("Texture created");
         SDL_LockTexture(list[i], NULL, (void **) &atlas_data->buffers[i], &atlas_data->image_widths[i]);
@@ -967,6 +974,15 @@ int platform_renderer_init(SDL_Window *window)
     }
     if (data.max_texture_size.height > ANDROID_MAX_TEXTURE_SIZE) {
         data.max_texture_size.height = ANDROID_MAX_TEXTURE_SIZE;
+    }
+#endif
+
+#ifdef __vita__
+    if (data.max_texture_size.width > VITA_MAX_TEXTURE_SIZE) {
+        data.max_texture_size.width = VITA_MAX_TEXTURE_SIZE;
+    }
+    if (data.max_texture_size.height > VITA_MAX_TEXTURE_SIZE) {
+        data.max_texture_size.height = VITA_MAX_TEXTURE_SIZE;
     }
 #endif
 
