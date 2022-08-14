@@ -10,7 +10,7 @@
 
 typedef struct {
     int size;
-    int items[RESOURCE_MAX];
+    int *items;
 } resource_list;
 
 int city_resource_count_food_on_granaries(resource_type food);

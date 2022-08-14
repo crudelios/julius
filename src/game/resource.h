@@ -28,13 +28,6 @@ typedef enum {
     RESOURCE_POTTERY = 15,
     RESOURCE_DENARII = 16,
     RESOURCE_TROOPS = 17,
-    // helper constants
-    RESOURCE_MIN = 1,
-    RESOURCE_MAX = 16,
-    RESOURCE_MIN_FOOD = 1,
-    RESOURCE_MAX_FOOD = 7,
-    RESOURCE_MIN_RAW = 9,
-    RESOURCE_MAX_RAW = 13
 } resource_type;
 
 typedef enum {
@@ -76,9 +69,20 @@ typedef enum {
     RESOURCE_IMAGE_ICON = 3
 } resource_image_type;
 
+resource_type resource_get_food(int food_id);
+resource_type resource_get_good(int good_id);
+resource_type resource_special(int id);
+resource_type resource_get(int id);
+
+int resource_max_foods(void);
+int resource_max_goods(void);
+int resource_max_special(void);
+int resource_max(void);
+
 int resource_image_offset(resource_type resource, resource_image_type type);
 
 int resource_is_food(resource_type resource);
+
 
 workshop_type resource_to_workshop_type(resource_type resource);
 

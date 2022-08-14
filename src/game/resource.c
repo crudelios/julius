@@ -3,6 +3,75 @@
 #include "building/type.h"
 #include "scenario/building.h"
 
+#include <assert.h>
+
+static const resource_type FOOD_RESOURCES[] = {
+    RESOURCE_WHEAT, RESOURCE_VEGETABLES, RESOURCE_FRUIT, RESOURCE_MEAT
+};
+
+#define NUM_FOOD_RESOURCES (sizeof(FOOD_RESOURCES) / sizeof(resource_type))
+
+static const resource_type GOOD_RESOURCES[] = {
+    RESOURCE_OLIVES, RESOURCE_VINES, RESOURCE_WINE, RESOURCE_OIL, RESOURCE_IRON, RESOURCE_TIMBER,
+    RESOURCE_CLAY, RESOURCE_MARBLE, RESOURCE_WEAPONS, RESOURCE_FURNITURE, RESOURCE_POTTERY
+};
+
+#define NUM_GOOD_RESOURCES (sizeof(GOOD_RESOURCES) / sizeof(resource_type))
+
+static const resource_type SPECIAL_RESOURCES[] = {
+    RESOURCE_DENARII, RESOURCE_TROOPS
+};
+
+#define NUM_SPECIAL_RESOURCES (sizeof(SPECIAL_RESOURCES) / sizeof(resource_type))
+
+resource_type resource_get_food(int food_id)
+{
+    assert(food_id >= 0 && food_id < NUM_FOOD_RESOURCES);
+    return FOOD_RESOURCES[food_id];
+}
+
+int resource_max_foods(void)
+{
+    return NUM_FOOD_RESOURCES;
+}
+
+resource_type resource_get_good(int good_id)
+{
+    return GOOD_RESOURCES[good_id];
+}
+
+int resource_max_goods(void)
+{
+    return NUM_GOOD_RESOURCES;
+}
+
+resource_type resource_special(int id)
+{
+    return SPECIAL_RESOURCES[id];
+}
+
+int resource_max_special(void)
+{
+    return NUM_SPECIAL_RESOURCES;
+}
+
+
+resource_type resource_get(int id)
+{
+    if (id < NUM_FOOD_RESOURCES) {
+        return FOOD_RESOURCES[id];
+    } else if (id < NUM_FOOD_RESOURCES + NUM_GOOD_RESOURCES) {
+        return GOOD_RESOURCES[id - NUM_FOOD_RESOURCES];
+    } else {
+        return SPECIAL_RESOURCES[id - NUM_FOOD_RESOURCES - NUM_GOOD_RESOURCES];
+    }
+}
+
+int resource_max(void)
+{
+    return NUM_FOOD_RESOURCES + NUM_GOOD_RESOURCES + NUM_SPECIAL_RESOURCES;
+}
+
 int resource_image_offset(resource_type resource, resource_image_type type)
 {
     if (resource == RESOURCE_MEAT && scenario_building_allowed(BUILDING_WHARF)) {
@@ -20,8 +89,12 @@ int resource_image_offset(resource_type resource, resource_image_type type)
 
 int resource_is_food(resource_type resource)
 {
-    return resource == RESOURCE_WHEAT || resource == RESOURCE_VEGETABLES ||
-        resource == RESOURCE_FRUIT || resource == RESOURCE_MEAT;
+    for (int i = 0; i < NUM_FOOD_RESOURCES; i++) {
+        if (resource == FOOD_RESOURCES[i]) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 workshop_type resource_to_workshop_type(resource_type resource)
