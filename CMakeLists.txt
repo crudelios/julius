@@ -7,7 +7,12 @@ set_property(CACHE TARGET_PLATFORM PROPERTY STRINGS default vita switch android 
 string(TOLOWER ${TARGET_PLATFORM} TARGET_PLATFORM)
 
 option(DRAW_FPS "Draw FPS on the top left corner of the window." OFF)
+option(STATIC_SDL_LIBS "Use static SDL libraries" ON)
 option(SYSTEM_LIBS "Use system libraries when available." ON)
+
+if(MINGW AND STATIC_SDL_LIBS)
+    message(FATAL_ERROR "Static SDL linking is only compatible with the MinGW compiler on Windows.")
+endif()
 
 if(${TARGET_PLATFORM} STREQUAL "vita" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(DEFINED ENV{VITASDK})
@@ -641,8 +646,27 @@ else()
         endforeach()
     endfunction()
 
+
+    if(STATIC_SDL_LIBS)
+        set(ORIGINAL_LIBRARY_SUFFIXES "${CMAKE_FIND_LIBRARY_SUFFIXES}")
+        set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+    endif()
+
+    GET_SDL_EXT_DIR(SDL2_DIR "")
+    set(SDL2_DIR "${SDL2_DIR}/x86_64-w64-mingw32/lib/cmake/SDL2")
+
+    GET_SDL_EXT_DIR(SDL2_mixer_DIR "mixer")
+    set(SDL2_mixer_DIR "${SDL2_mixer_DIR}/x86_64-w64-mingw32/lib/cmake/SDL2_mixer")
+
     find_package(SDL2 REQUIRED)
     find_package(SDL2_mixer REQUIRED)
+
+    get_target_property(SDL2_MIXER_INCLUDE_DIR "SDL2_mixer::SDL2_mixer-static" INTERFACE_INCLUDE_DIRECTORIES)
+
+    if(STATIC_SDL_LIBS)
+        set(CMAKE_FIND_LIBRARY_SUFFIXES "${ORIGINAL_LIBRARY_SUFFIXES}")
+        unset(ORIGINAL_LIBRARY_SUFFIXES)
+    endif()
 endif()
 
 if(${TARGET_PLATFORM} STREQUAL "android")
@@ -840,6 +864,8 @@ elseif(${TARGET_PLATFORM} STREQUAL "switch")
     endforeach(flag ${FLAGS})
 
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${FLAGS_GENERAL}")
+    set(CMAKE_EXE_LINKER_FLAGS, "${CMAKE_EXE_LINKER_FLAGS} -Wl,--dynamicbase -Wl,--nxcompat -Wl,--high-entropy-va")
+
 
     target_compile_options(${SHORT_NAME} PRIVATE ${FLAGS})
     add_custom_command(TARGET ${SHORT_NAME}
@@ -855,7 +881,25 @@ else()
         find_library(LOG_LIB log)
         target_link_libraries(${SHORT_NAME} ${LOG_LIB})
     endif()
-    target_link_libraries(${SHORT_NAME} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
+
+    target_link_libraries(${SHORT_NAME} ${SDL2_STATIC_LIBRARIES} SDL2_mixer::SDL2_mixer-static)
+
+   # if(STATIC_SDL_LIBS)
+   #     target_link_libraries(${SHORT_NAME}
+      #      user32
+      #      gdi32
+   #         winmm
+   #         imm32
+      #      ole32
+      #      oleaut32
+    #        version
+       #     uuid
+       #     advapi32
+     #       setupapi
+       #     shell32
+        #    dinput8
+    #    )
+    # endif()
     if(NOT APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "android")
         install(TARGETS ${SHORT_NAME} RUNTIME DESTINATION bin)
     endif()
