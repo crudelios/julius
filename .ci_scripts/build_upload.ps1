@@ -18,9 +18,6 @@ if ("$env:GITHUB_REF" -match "^refs/tags/v") {
 } elseif ("$env:GITHUB_REF" -match "^refs/pull/(.*)/merge") {
     $pr_id = $matches[1];
     $version = "pr-$pr_id-$version"
-} else {
-    echo "Unknown branch type: ${env:GITHUB_REF} - skipping deploy"
-    exit
 }
 
 # Create deploy file
@@ -38,14 +35,12 @@ if ("${env:COMPILER}" -eq "msvc") {
 } elseif ("${env:COMPILER}" -eq "mingw-64") {
     $suffix = "windows-64bit"
     CopyFile build/julius.exe .
-    CopyFile ext\SDL2\SDL2-${env:SDL_VERSION}\x86_64-w64-mingw32\bin\SDL2.dll .
-    CopyFile ext\SDL2\SDL2_mixer-${env:SDL_MIXER_VERSION}\x86_64-w64-mingw32\bin\SDL2_mixer.dll .
 } else {
     throw "Unknown compiler: ${env:COMPILER}"
 }
 
 $deploy_file = "julius-$version-$suffix.zip"
-7z a "deploy\$deploy_file" julius.exe SDL2.dll SDL2_mixer.dll
+7z a "deploy\$deploy_file" julius.exe
 if (!$?) {
     throw "Unable to create $deploy_file"
 }
@@ -56,7 +51,7 @@ if ($env:SKIP_UPLOAD) {
 }
 
 if (!$repo) {
-    echo "No repo found - skipping deploy"
+    echo "No repo found - skipping upload"
     exit
 }
 
