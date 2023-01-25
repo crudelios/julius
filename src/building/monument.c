@@ -97,6 +97,11 @@ static int caravanserai_resources[2][RESOURCE_MAX] = {
     { NOTHING }
 };
 
+static int city_mint_resources[2][RESOURCE_MAX] = {
+    { [ARCHITECTS] = 1, [RESOURCE_IRON] = 2 },
+    { NOTHING }
+};
+
 static const building_type MONUMENT_BUILDING_TYPES[] = {
     BUILDING_ORACLE,
     BUILDING_LARGE_TEMPLE_CERES,
@@ -116,7 +121,8 @@ static const building_type MONUMENT_BUILDING_TYPES[] = {
     BUILDING_NYMPHAEUM,
     BUILDING_LARGE_MAUSOLEUM,
     BUILDING_SMALL_MAUSOLEUM,
-    BUILDING_CARAVANSERAI
+    BUILDING_CARAVANSERAI,
+    BUILDING_CITY_MINT
 };
 
 #define MAX_MONUMENT_TYPES (sizeof(MONUMENT_BUILDING_TYPES) / sizeof(building_type))
@@ -165,6 +171,7 @@ int building_monument_access_point(building *b, map_point *dst)
         case BUILDING_LIGHTHOUSE:
         case BUILDING_NYMPHAEUM:
         case BUILDING_LARGE_MAUSOLEUM:
+        case BUILDING_CITY_MINT:
             if (dx == -1 && dy == -3) {
                 dst->x = b->x + 1;
                 dst->y = b->y + 2;
@@ -358,6 +365,8 @@ int building_monument_resources_needed_for_monument_type(building_type type, int
             return small_mausoleum_resources[phase - 1][resource];
         case BUILDING_CARAVANSERAI:
             return caravanserai_resources[phase - 1][resource];
+        case BUILDING_CITY_MINT:
+            return city_mint_resources[phase - 1][resource];
         default:
             return 0;
     }
@@ -410,6 +419,7 @@ int building_monument_type_is_mini_monument(building_type type)
         case BUILDING_LARGE_MAUSOLEUM:
         case BUILDING_NYMPHAEUM:
         case BUILDING_CARAVANSERAI:
+        case BUILDING_CITY_MINT:
             return 1;
         default:
             return 0;
@@ -484,6 +494,7 @@ int building_monument_phases(building_type type)
         case BUILDING_SMALL_MAUSOLEUM:
         case BUILDING_NYMPHAEUM:
         case BUILDING_CARAVANSERAI:
+        case BUILDING_CITY_MINT:
             return 2;
         default:
             return 0;

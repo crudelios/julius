@@ -334,7 +334,7 @@ void building_maintenance_check_rome_access(void)
                 b->road_access_y = y_road;
             }
         } else if (b->type == BUILDING_LIGHTHOUSE || b->type == BUILDING_LARGE_MAUSOLEUM ||
-            b->type == BUILDING_NYMPHAEUM ||
+            b->type == BUILDING_NYMPHAEUM || b->type == BUILDING_CITY_MINT ||
             (b->type >= BUILDING_LARGE_TEMPLE_CERES && b->type <= BUILDING_LARGE_TEMPLE_VENUS)) {
             b->distance_from_entry = 0;
             int x_road, y_road;
