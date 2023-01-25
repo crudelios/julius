@@ -29,6 +29,12 @@ static const resource_type resource_mappings[][RESOURCE_ALL] = {
         RESOURCE_CLAY, RESOURCE_TIMBER, RESOURCE_OLIVES, RESOURCE_VINES, RESOURCE_IRON, RESOURCE_MARBLE,
         RESOURCE_POTTERY, RESOURCE_FURNITURE, RESOURCE_OIL, RESOURCE_WINE, RESOURCE_WEAPONS,
         RESOURCE_DENARII, RESOURCE_TROOPS
+    },
+    {
+        RESOURCE_NONE, RESOURCE_WHEAT, RESOURCE_VEGETABLES, RESOURCE_FRUIT, RESOURCE_MEAT, RESOURCE_FISH,
+        RESOURCE_CLAY, RESOURCE_TIMBER, RESOURCE_OLIVES, RESOURCE_VINES, RESOURCE_IRON, RESOURCE_MARBLE, RESOURCE_GOLD,
+        RESOURCE_POTTERY, RESOURCE_FURNITURE, RESOURCE_OIL, RESOURCE_WINE, RESOURCE_WEAPONS,
+        RESOURCE_DENARII, RESOURCE_TROOPS
     }
 };
 
@@ -192,6 +198,13 @@ void resource_set_mapping(int version)
             mapping.joined_meat_and_fish = 1;
             break;
         case RESOURCE_SEPARATE_FISH_AND_MEAT_VERSION:
+            mapping.resources = resource_mappings[2];
+            mapping.inventory = 0;
+            mapping.total_resources = 17;
+            mapping.total_food_resources = RESOURCE_MAX_FOOD;
+            mapping.joined_meat_and_fish = 0;
+            break;
+        case RESOURCE_HAS_GOLD_VERSION:
         default:
             mapping.resources = 0;
             mapping.inventory = 0;
