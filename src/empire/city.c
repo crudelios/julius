@@ -457,11 +457,13 @@ void empire_city_load_state(buffer *buf)
         }
         buffer_skip(buf, 10);
         // Update resource production and trading
-        if (resource_total_mapped() == RESOURCE_MAX_LEGACY) {
-            if (city->type == EMPIRE_CITY_OURS && scenario_building_allowed(BUILDING_WHARF)) {
-                city->sells_resource[RESOURCE_FISH] = 1;
-            }
+        if (resource_mapping_get_version() < RESOURCE_HAS_GOLD_VERSION) {
             set_gold_production(city);
+            if (resource_mapping_get_version() < RESOURCE_SEPARATE_FISH_AND_MEAT_VERSION) {
+                if (city->type == EMPIRE_CITY_OURS && city->sells_resource[RESOURCE_FISH]) {
+                    city->sells_resource[RESOURCE_MEAT] = 1;
+                }
+            }
         }
     }
 }

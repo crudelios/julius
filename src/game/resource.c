@@ -44,6 +44,7 @@ static const resource_type legacy_inventory_mapping[LEGACY_INVENTORY_MAX] = {
 };
 
 static struct {
+    resource_version version;
     const resource_type *resources;
     const resource_type *inventory;
     int total_resources;
@@ -174,6 +175,7 @@ const resource_data *resource_get_data(resource_type resource)
 
 void resource_set_mapping(int version)
 {
+    mapping.version = version;
     mapping.joined_meat_and_fish = version < RESOURCE_SEPARATE_FISH_AND_MEAT_VERSION;
     switch (version) {
         case RESOURCE_ORIGINAL_VERSION:
@@ -194,14 +196,14 @@ void resource_set_mapping(int version)
             mapping.resources = resource_mappings[1];
             mapping.inventory = 0;
             mapping.total_resources = RESOURCE_MAX_LEGACY;
-            mapping.total_food_resources = 5;
+            mapping.total_food_resources = RESOURCE_MAX_FOOD_REORDERED;
             mapping.joined_meat_and_fish = 1;
             break;
         case RESOURCE_SEPARATE_FISH_AND_MEAT_VERSION:
             mapping.resources = resource_mappings[2];
             mapping.inventory = 0;
-            mapping.total_resources = 17;
-            mapping.total_food_resources = RESOURCE_MAX_FOOD;
+            mapping.total_resources = RESOURCE_MAX_WITH_FISH;
+            mapping.total_food_resources = RESOURCE_MAX_FOOD_WITH_FISH;
             mapping.joined_meat_and_fish = 0;
             break;
         case RESOURCE_HAS_GOLD_VERSION:
@@ -222,6 +224,11 @@ resource_type resource_map_legacy_inventory(int id)
         return RESOURCE_FISH;
     }
     return resource;
+}
+
+int resource_mapping_get_version(void)
+{
+    return mapping.version;
 }
 
 resource_type resource_produced_by_building_type(int building_type)
