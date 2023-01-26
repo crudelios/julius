@@ -426,6 +426,10 @@ int building_construction_place_building(building_type type, int x, int y)
             return 0;
         }
     }
+    if (type == BUILDING_LIGHTHOUSE && city_buildings_has_lighthouse()) {
+        city_warning_show(WARNING_ONE_BUILDING_OF_TYPE, NEW_WARNING_SLOT);
+        return 0;
+    }
     if (type == BUILDING_CARAVANSERAI && city_buildings_has_caravanserai()) {
         city_warning_show(WARNING_ONE_BUILDING_OF_TYPE, NEW_WARNING_SLOT);
         return 0;

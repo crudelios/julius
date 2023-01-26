@@ -65,6 +65,11 @@ int city_buildings_has_hippodrome(void)
     return get_first_working_building(BUILDING_HIPPODROME)->id != 0;
 }
 
+int city_buildings_has_lighthouse(void)
+{
+    return get_first_working_building(BUILDING_LIGHTHOUSE)->id != 0;
+}
+
 int city_buildings_has_caravanserai(void)
 {
     return city_buildings_get_caravanserai() != 0;

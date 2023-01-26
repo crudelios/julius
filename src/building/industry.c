@@ -17,7 +17,7 @@
 #include "scenario/property.h"
 
 #define MAX_PROGRESS_VENUS_GT 400
-#define DENARII_PER_PRODUCTION 100
+#define DENARII_MINTED_PER_PRODUCTION 100
 #define MAX_STORAGE 16
 #define INFINITE 10000
 
@@ -172,9 +172,9 @@ static void update_city_mint_production(void)
     if (b->data.industry.progress > max) {
         b->data.industry.production_current_month += 100;
         b->data.industry.progress = 0;
-        city_finance_treasury_add_miscellaneous(DENARII_PER_PRODUCTION);
+        city_finance_treasury_add_miscellaneous(DENARII_MINTED_PER_PRODUCTION);
         if (city_buildings_has_governor_house()) {
-            city_data.emperor.personal_savings += DENARII_PER_PRODUCTION / 10;
+            city_data.emperor.personal_savings += DENARII_MINTED_PER_PRODUCTION / 10;
         }
         if (b->loads_stored >= BUILDING_INDUSTRY_CITY_MINT_GOLD_PER_COIN) {
             b->loads_stored -= BUILDING_INDUSTRY_CITY_MINT_GOLD_PER_COIN;
@@ -312,8 +312,8 @@ void building_bless_industry(void)
     }
     building *city_mint = building_first_of_type(BUILDING_CITY_MINT);
     if (city_mint && city_mint->state == BUILDING_STATE_IN_USE && city_mint->loads_stored > 0) {
-        if (city_mint->loads_stored < MERCURY_BLESSING_LOADS * RESOURCE_GRANARY_ONE_LOAD) {
-            city_mint->loads_stored = MERCURY_BLESSING_LOADS * RESOURCE_GRANARY_ONE_LOAD;
+        if (city_mint->loads_stored < MERCURY_BLESSING_LOADS * RESOURCE_ONE_LOAD) {
+            city_mint->loads_stored = MERCURY_BLESSING_LOADS * RESOURCE_ONE_LOAD;
         }
         city_mint->data.industry.progress = building_industry_get_max_progress(city_mint);
     }
@@ -348,8 +348,8 @@ void building_workshop_add_raw_material(building *b, int resource)
         return;
     }
     if (b->type == BUILDING_CITY_MINT && resource == RESOURCE_GOLD) {
-        b->loads_stored += RESOURCE_GRANARY_ONE_LOAD;
-    } else if (building_is_workshop(b->type) && resource_get_data(resource)->workshop != b->type) {
+        b->loads_stored += RESOURCE_ONE_LOAD;
+    } else if (building_is_workshop(b->type) && resource_get_data(resource)->workshop == b->type) {
         b->loads_stored++;
     }
 }
@@ -378,7 +378,7 @@ int building_get_workshop_for_raw_material_with_room(int x, int y, int resource,
     if (type == BUILDING_NONE) {
         return 0;
     }
-    int max_loads_stored = type == BUILDING_CITY_MINT ? 2 * RESOURCE_GRANARY_ONE_LOAD : 2;
+    int max_loads_stored = type == BUILDING_CITY_MINT ? 2 * RESOURCE_ONE_LOAD : 2;
     int min_dist = INFINITE;
     building *min_building = 0;
     for (building *b = building_first_of_type(type); b; b = b->next_of_type) {

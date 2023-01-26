@@ -14,6 +14,8 @@ int city_buildings_get_mess_hall(void);
 
 int city_buildings_has_hippodrome(void);
 
+int city_buildings_has_lighthouse(void);
+
 int city_buildings_has_caravanserai(void);
 int city_buildings_get_caravanserai(void);
 
