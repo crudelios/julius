@@ -24,6 +24,10 @@ int trade_route_init(void)
 
 int trade_route_new(void)
 {
+    // Discard route 0
+    if (!routes.size) {
+        array_advance(routes);
+    }
     array_advance(routes);
     return routes.size - 1;
 }
@@ -117,7 +121,7 @@ void trade_routes_load_state(buffer *limit, buffer *traded, int version)
     int routes_to_load = version <= SAVE_GAME_LAST_STATIC_SCENARIO_OBJECTS ? LEGACY_MAX_ROUTES : buffer_read_i32(limit);
     if (!array_init(routes, LEGACY_MAX_ROUTES, 0, 0) || !array_expand(routes, routes_to_load)) {
         log_error("Unable to create memory for trade routes. The game will now crash.", 0, 0);
-        return 0;
+        return;
     }
     for (int i = 0; i < routes_to_load; i++) {
         route_resource *route = array_next(routes);

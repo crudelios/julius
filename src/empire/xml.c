@@ -620,9 +620,6 @@ static void set_trade_coords(const empire_object *our_city)
             continue;
         }
         empire_object *trade_route = empire_object_get(i + 1);
-        if (!trade_route) {
-            continue;
-        }
 
         if (!section_distances) {
             section_distances = malloc(sizeof(int) * (empire_object_count() - 1));
