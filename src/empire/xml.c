@@ -165,9 +165,7 @@ static int xml_start_empire(void)
         return 0;
     }
     if (xml_parser_get_attribute_bool("show_ireland")) {
-        full_empire_object *obj = empire_object_get_full(data.next_empire_obj_id);
-        obj->obj.id = data.next_empire_obj_id;
-        data.next_empire_obj_id++;
+        full_empire_object *obj = empire_object_get_new();
         obj->in_use = 1;
         obj->obj.type = EMPIRE_OBJECT_ORNAMENT;
         obj->obj.image_id = assets_get_image_id("UI", "Ireland_Map");
@@ -185,7 +183,7 @@ static void add_ornament(int ornament_id)
     if (!obj) {
         data.success = 0;
         log_error("Error creating new object - out of memory", 0, 0);
-        return 0;
+        return;
     }
     obj->in_use = 1;
     obj->obj.type = EMPIRE_OBJECT_ORNAMENT;
