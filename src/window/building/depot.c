@@ -174,10 +174,10 @@ static void calculate_available_storages(int building_id)
         if (store_building && building_is_active(store_building)
             && building_storage_resource_max_storable(store_building, data.target_resource_id) > 0) {
             data.available_storages++;
-            if (b->data.depot.current_order.src_storage_id == store_building->storage_id) {
+            if (b->data.depot.current_order.src_storage_id == store_building->id) {
                 has_valid_src = 1;
             }
-            if (b->data.depot.current_order.dst_storage_id == store_building->storage_id) {
+            if (b->data.depot.current_order.dst_storage_id == store_building->id) {
                 has_valid_dst = 1;
             }
         }
