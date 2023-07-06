@@ -26,6 +26,7 @@ if ("$env:GITHUB_REF" -match "^refs/tags/v") {
 mkdir deploy
 if ("${env:COMPILER}" -eq "msvc") {
     $suffix = "windows-msvc-debug"
+    Get-Childitem build *.pdb -Recurse
     CopyFile build/Debug/augustus.exe .
     CopyFile build/Debug/augustus.pdb .
     CopyFile ext\SDL2\SDL2-${env:SDL_VERSION}\lib\x64\SDL2.dll .
