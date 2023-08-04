@@ -88,6 +88,8 @@ static void write_log(void *userdata, int category, SDL_LogPriority priority, co
 
 static void backup_log(void)
 {
+    // On some platforms (vita, android), not removing the file will not empty it when reopening for writing
+    file_remove("augustus-log-backup.txt");
     platform_file_manager_copy_file("augustus-log.txt", "augustus-log-backup.txt");
 }
 
@@ -356,8 +358,8 @@ static void handle_event(SDL_Event *event)
 
         default:
             break;
-            }
     }
+}
 
 static void teardown(void)
 {
@@ -415,7 +417,7 @@ static int init_sdl(void)
         } else {
             SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Could not enable joystick support");
         }
-} else {
+    } else {
         platform_joystick_init();
     }
     SDL_SetEventFilter(handle_event_immediate, 0);
@@ -450,13 +452,13 @@ static const char *ask_for_data_dir(int again)
             "or the SD card, otherwise the path may not be recognised.\n\n"
             "Press OK to select another folder or Cancel to exit.",
             SDL_arraysize(buttons), buttons, NULL
-    };
+        };
         int result;
         SDL_ShowMessageBox(&messageboxdata, &result);
         if (!result) {
             return NULL;
         }
-}
+    }
     return android_show_c3_path_dialog(again);
 #else
     if (again) {
@@ -561,7 +563,7 @@ static void setup(const augustus_args *args)
     if (!pre_init(args->data_directory)) {
         SDL_Log("Exiting: game pre-init failed");
         exit_with_status(1);
-}
+    }
 
     if (args->force_windowed && setting_fullscreen()) {
         int w, h;
