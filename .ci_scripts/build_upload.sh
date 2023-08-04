@@ -45,8 +45,8 @@ case "$DEPLOY" in
   ;;
 "mac")
   PACKAGE=mac
-  DEPLOY_FILE=augustus-$VERSION-mac.app
-  cp "${build_dir}/augustus.app" "deploy/$DEPLOY_FILE"
+  DEPLOY_FILE=augustus-$VERSION-mac.zip
+  cp "${build_dir}/augustus.zip" "deploy/$DEPLOY_FILE"
   ;;
 "android")
   PACKAGE=android
