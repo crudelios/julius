@@ -21,7 +21,7 @@ case "$BUILD_TARGET" in
 	then
 		zip -r augustus.zip augustus.dmg maps manual
 	else
-		zip -r augustus.zip augustus.dmg augustus.app
+		zip -r augustus.zip augustus.dmg
 	fi
 	;;
 "appimage")
