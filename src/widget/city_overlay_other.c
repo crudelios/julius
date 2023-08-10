@@ -5,9 +5,11 @@
 #include "city/finance.h"
 #include "core/calc.h"
 #include "core/config.h"
+#include "core/string.h"
 #include "game/resource.h"
 #include "game/state.h"
 #include "graphics/image.h"
+#include "graphics/text.h"
 #include "map/building.h"
 #include "map/desirability.h"
 #include "map/image.h"
@@ -454,6 +456,10 @@ static void draw_top_desirability(int x, int y, int grid_offset)
         }
         int offset = get_desirability_image_offset(map_desirability_get(grid_offset));
         image_draw_isometric_top_from_draw_tile(image_group(GROUP_TERRAIN_DESIRABILITY) + offset, x, y, color_mask);
+        uint8_t number_string[10];
+        string_from_int(number_string, map_desirability_get(grid_offset), 0);
+        text_draw_centered(number_string, x + 1, y + 6, 58, FONT_SMALL_PLAIN, COLOR_BLACK);
+        text_draw_centered(number_string, x, y + 5, 58, FONT_SMALL_PLAIN, COLOR_WHITE);
     } else {
         image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask);
     }
