@@ -20,7 +20,6 @@ if ("$env:GITHUB_REF" -match "^refs/tags/v") {
     $version = "pr-$pr_id-$version"
 } else {
     echo "Unknown branch type: ${env:GITHUB_REF} - skipping deploy"
-    exit
 }
 
 # Create deploy file
