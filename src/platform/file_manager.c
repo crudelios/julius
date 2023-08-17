@@ -559,6 +559,7 @@ FILE *platform_file_manager_open_asset(const char *asset, const char *mode)
 {
     set_assets_directory();
     const char *cased_asset_path = dir_get_asset(assets_directory, asset);
+    SDL_Log("%s", cased_asset_path);
     return fopen(cased_asset_path, mode);
 }
 #endif
