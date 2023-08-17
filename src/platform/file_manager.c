@@ -282,7 +282,7 @@ int platform_file_manager_list_directory_contents(
             snprintf(full_asset_path, FILE_NAME_MAX, "%s%s", assets_directory, dir + assets_directory_length);
             current_dir = set_dir_name(full_asset_path);
             #ifndef BUILDING_ASSET_PACKER
-            SDL_Log("Current asset dir: %s\n", current_dir);
+            SDL_Log("Asset dir: %s\n Internal dir: %s\nCurrent asset dir: %s\n", assets_directory, dir + assets_directory_length, current_dir);
             #endif
         }
     } else {
