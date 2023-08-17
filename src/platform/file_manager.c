@@ -276,14 +276,14 @@ int platform_file_manager_list_directory_contents(
             current_dir = set_dir_name(assets_directory);
         } else {
             char full_asset_path[FILE_NAME_MAX];
-            if (assets_directory[assets_directory_length - 1] == '/' && dir[assets_directory_length] == '/') {
-             //   assets_directory_length++;
+            if (assets_directory[strlen(assets_directory) - 1] == '/' && dir[assets_directory_length] == '/') {
+                assets_directory_length++;
             }
             snprintf(full_asset_path, FILE_NAME_MAX, "%s%s", assets_directory, dir + assets_directory_length);
             current_dir = set_dir_name(full_asset_path);
             #ifndef BUILDING_ASSET_PACKER
             SDL_Log("Last asset dir char: %c\n, First dir char: %c\nAsset dir: %s\n Internal dir: %s\nCurrent asset dir: %s\n",
-                assets_directory[assets_directory_length - 1], dir[assets_directory_length], assets_directory, dir + assets_directory_length, current_dir);
+                assets_directory[strlen(assets_directory) - 1], dir[assets_directory_length], assets_directory, dir + assets_directory_length, current_dir);
             #endif
         }
     } else {
