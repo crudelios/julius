@@ -346,7 +346,7 @@ void window_building_draw_highway(building_info_context *c)
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_HIGHWAY, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
     window_building_draw_figure_list(c);
     window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 150, CUSTOM_TRANSLATION, TR_BUILDING_HIGHWAY_DESC);
-    window_building_draw_levy(HIGHWAY_LEVY_MONTHLY, c->x_offset - 270, c->y_offset + BLOCK_SIZE * c->height_blocks - 110);
+    window_building_draw_levy(HIGHWAY_LEVY_MONTHLY, c->x_offset + 30, c->y_offset + BLOCK_SIZE * c->height_blocks - 110);
 }
 
 static void toggle_figure_state(int index, int param2)

@@ -34,6 +34,6 @@ void window_building_draw_wharf(building_info_context *c);
 void window_building_draw_city_mint_foreground(building_info_context *c);
 int window_building_handle_mouse_city_mint(const mouse *m, building_info_context *c);
 
-void window_building_industry_get_tooltip(building_info_context *c, int *translation);
+void window_building_industry_get_tooltip(building_info_context *c, int *group_id, int *text_id);
 
 #endif // WINDOW_BUILDING_INDUSTRY_H

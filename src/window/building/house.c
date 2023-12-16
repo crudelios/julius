@@ -141,6 +141,7 @@ void window_building_draw_house(building_info_context *c)
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(29, level, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
     inner_panel_draw(c->x_offset + 16, c->y_offset + 148, c->width_blocks - 2, 13);
+    window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 156);
 
     draw_population_info(c, c->y_offset + 154);
     draw_tax_info(c, c->y_offset + 194);
@@ -239,6 +240,13 @@ void window_building_draw_house(building_info_context *c)
 const uint8_t *window_building_house_get_tooltip(const building_info_context *c)
 {
     const mouse *m = mouse_get();
+
+    int group_id, text_id;
+
+    if (window_building_get_risks_tooltip(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76,
+            c->y_offset + 156, &group_id, &text_id)) {
+        return lang_get_string(group_id, text_id);
+    }
 
     if (m->x <  c->x_offset + 16 || m->x > c->x_offset + (c->width_blocks - 2) * BLOCK_SIZE ||
         m->y < c->y_offset + 270 || m->y > c->y_offset + 295) {
