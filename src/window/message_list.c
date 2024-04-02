@@ -1,5 +1,6 @@
 #include "message_list.h"
 
+#include "campaign/campaign.h"
 #include "city/message.h"
 #include "core/calc.h"
 #include "core/image_group.h"
@@ -81,10 +82,16 @@ static int review_briefing_button_should_be_active(void)
 {
     if (!scenario_is_custom()) {
         return 1;
-    } else if (scenario_intro_message()) {
-        return 1;
     }
-    return 0;
+    if (!campaign_is_active() || !scenario_intro_message()) {
+        return 0;
+    }
+    custom_message_t *custom_message = custom_messages_get(scenario_intro_message());
+    if (!custom_message) {
+        return 0;
+    }
+    return custom_messages_get_text(custom_message) ||
+        custom_messages_get_title(custom_message) || custom_messages_get_subtitle(custom_message);
 }
 
 static void init(void)

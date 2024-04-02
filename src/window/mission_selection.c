@@ -1,6 +1,7 @@
 #include "mission_selection.h"
 
 #include "assets/assets.h"
+#include "campaign/campaign.h"
 #include "core/image_group.h"
 #include "game/mission.h"
 #include "graphics/graphics.h"
@@ -18,18 +19,14 @@
 
 static void button_start(int param1, int param2);
 
-static const int BACKGROUND_IMAGE_OFFSET[] = {
-    0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 0
-};
+static campaign_scenario DEFAULT_SCENARIOS[2];
 
 static const struct {
     int x_peaceful;
     int y_peaceful;
     int x_military;
     int y_military;
-} CAMPAIGN_SELECTION[12] = {
-    {0, 0, 0, 0},
-    {0, 0, 0, 0},
+} CAMPAIGN_SELECTION[10] = {
     {292, 182, 353, 232},
     {118, 202, 324, 286},
     {549, 285, 224, 121},
@@ -42,6 +39,8 @@ static const struct {
     {200, 300, 400, 300},
 };
 
+
+
 static image_button image_button_start_mission = {
     0, 0, 27, 27, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 56, button_start, button_none, 1, 0, 1
 };
@@ -49,6 +48,11 @@ static image_button image_button_start_mission = {
 static struct {
     int choice;
     int focus_button;
+    struct {
+        int total_scenarios;
+        int background_image_id;
+        campaign_scenario **scenarios;
+    } mission;
 } data;
 
 static void draw_background_images(void)
@@ -76,7 +80,10 @@ static void draw_background(void)
 
     draw_background_images();
     graphics_in_dialog();
-    image_draw(image_group(GROUP_SELECT_MISSION) + BACKGROUND_IMAGE_OFFSET[rank], 0, 0, COLOR_MASK_NONE, SCALE_NONE);
+    graphics_set_clip_rectangle(0, 0, 640, 400);
+    //  image_draw(image_group(GROUP_SELECT_MISSION) + rank - 2, 0, 0, COLOR_MASK_NONE, SCALE_NONE);
+    image_draw(image_group(GROUP_EMPIRE_MAP), 0, 0, COLOR_MASK_NONE, 2.5f);
+    graphics_reset_clip_rectangle();
     lang_text_draw(144, 1 + 3 * rank, 20, 410, FONT_LARGE_BLACK);
     if (data.choice) {
         lang_text_draw_multiline(144, 1 + 3 * rank + data.choice, 20, 440, 560, FONT_NORMAL_BLACK);
@@ -99,7 +106,7 @@ static void draw_foreground(void)
         image_buttons_draw(580, 410, &image_button_start_mission, 1);
     }
 
-    int rank = scenario_campaign_rank();
+    int rank = scenario_campaign_rank() - 2;
     int x_peaceful = CAMPAIGN_SELECTION[rank].x_peaceful - 4;
     int y_peaceful = CAMPAIGN_SELECTION[rank].y_peaceful - 4;
     int x_military = CAMPAIGN_SELECTION[rank].x_military - 4;
@@ -128,7 +135,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
 
-    int rank = scenario_campaign_rank();
+    int rank = scenario_campaign_rank() - 2;
     int x_peaceful = CAMPAIGN_SELECTION[rank].x_peaceful - 4;
     int y_peaceful = CAMPAIGN_SELECTION[rank].y_peaceful - 4;
     int x_military = CAMPAIGN_SELECTION[rank].x_military - 4;

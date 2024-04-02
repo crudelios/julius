@@ -1400,7 +1400,8 @@ static translation_string all_strings[] = {
     {TR_WINDOW_ORIGINAL_CAMPAIGN_DESC, "The original Caesar 3 campaign, in all its 25 year old glory."},
     {TR_WINDOW_CUSTOM_CAMPAIGNS_NOT_IMPLEMENTED_TITLE, "Not yet implemented" },
     {TR_WINDOW_CUSTOM_CAMPAIGNS_NOT_IMPLEMENTED_TEXT, "The custom campaign support has not been implemented yet.\nPlease check a later build."},
-    
+    {TR_WINDOW_CAMPAIGN_MISSION_FAILED_TO_LOAD_TITLE, "Unable to open mission"},
+    {TR_WINDOW_CAMPAIGN_MISSION_FAILED_TO_LOAD_TEXT, "The requested mission could not be opened.\nPlease check augustus-log.txt in your Augustus directory for details."},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

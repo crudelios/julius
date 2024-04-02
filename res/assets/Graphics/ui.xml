@@ -420,4 +420,7 @@
 	</image>
 	<!-- Note: Pantheon portrait for Epithet Advisor descriptions. Draw image borders and vignette in the same way as the Colosseum game selection buttons -->
 	<image id="Pantheon_Epithet_Button_01" src="Pantheon_Epithet_Button_01"/>
+	<image id="Empty_Map_Selection" width="640" height="400">
+		<layer group="8954" image="0" src_y="300" width="300" />
+	</image>
 </assetlist>
