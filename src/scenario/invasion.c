@@ -545,7 +545,7 @@ void scenario_invasion_start_from_console(invasion_type_enum invasion_type, int 
     scenario_invasion_start_from_action(invasion_type, size, invasion_point, attack_type, enemy_id);
 }
 
-void scenario_invasion_save_state(buffer *invasion_id, buffer *warnings)
+void scenario_invasion_warning_save_state(buffer *invasion_id, buffer *warnings)
 {
     buffer_write_u16(invasion_id, data.last_internal_invasion_id);
 
@@ -569,7 +569,7 @@ void scenario_invasion_save_state(buffer *invasion_id, buffer *warnings)
     }
 }
 
-void scenario_invasion_load_state(buffer *invasion_id, buffer *warnings)
+void scenario_invasion_warning_load_state(buffer *invasion_id, buffer *warnings, int has_dynamic_warnings)
 {
     data.last_internal_invasion_id = buffer_read_u16(invasion_id);
 

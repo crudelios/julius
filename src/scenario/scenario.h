@@ -16,7 +16,7 @@ void scenario_unlock_all_buildings(void);
 int scenario_get_state_buffer_size_by_savegame_version(int savegame_version_t);
 int scenario_get_state_buffer_size_by_scenario_version(int scenario_version_t);
 void scenario_save_state(buffer *buf);
-void scenario_load_state(buffer *buf, buffer *buf_requests, int version);
+void scenario_load_state(buffer *buf, int version);
 
 void scenario_description_from_buffer(buffer *buf, uint8_t *description, int version);
 int scenario_climate_from_buffer(buffer *buf, int version);
@@ -33,8 +33,6 @@ void scenario_settings_save_state(
 
 void scenario_settings_load_state(
     buffer *part1, buffer *part2, buffer *part3, buffer *player_name, buffer *scenario_name, buffer *campaign_name);
-
-void scenario_requests_save_state(buffer *buf);
 
 custom_variable_t *scenario_custom_variable_create(const uint8_t *uid, int initial_value);
 void scenario_custom_variable_rename(int id, const uint8_t *name);

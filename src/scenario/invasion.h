@@ -27,8 +27,8 @@ void scenario_invasion_start_from_console(invasion_type_enum invasion_type, int 
 
 void scenario_invasion_process(void);
 
-void scenario_invasion_save_state(buffer *invasion_id, buffer *warnings);
+void scenario_invasion_warning_save_state(buffer *invasion_id, buffer *warnings);
 
-void scenario_invasion_load_state(buffer *invasion_id, buffer *warnings);
+void scenario_invasion_warning_load_state(buffer *invasion_id, buffer *warnings, int has_dynamic_warnings);
 
 #endif // SCENARIO_INVASION_H
