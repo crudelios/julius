@@ -90,13 +90,8 @@ void scenario_editor_create(int map_size)
         init_point(&scenario.herd_points[i]);
     }
 
-    for (int i = 0; i < MAX_REQUESTS; i++) {
-        scenario.requests[i].deadline_years = REQUESTS_DEFAULT_DEADLINE_YEARS;
-        scenario.requests[i].favor = REQUESTS_DEFAULT_FAVOUR;
-        scenario.requests[i].extension_months_to_comply = REQUESTS_DEFAULT_MONTHS_TO_COMPLY;
-        scenario.requests[i].extension_disfavor = REQUESTS_DEFAULT_EXTENSION_DISFAVOUR;
-        scenario.requests[i].ignored_disfavor = REQUESTS_DEFAULT_IGNORED_DISFAVOUR;
-    }
+    scenario_request_init();
+
     for (int i = 0; i < MAX_INVASIONS; i++) {
         scenario.invasions[i].from = 8;
     }

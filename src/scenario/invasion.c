@@ -590,3 +590,13 @@ void scenario_invasion_warning_load_state(buffer *invasion_id, buffer *warnings,
         buffer_skip(warnings, 11);
     }
 }
+
+void scenario_invasion_save_state(buffer *buf)
+{
+
+}
+
+void scenario_invasion_load_state(buffer *buf)
+{
+    
+}

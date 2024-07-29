@@ -31,4 +31,8 @@ void scenario_invasion_warning_save_state(buffer *invasion_id, buffer *warnings)
 
 void scenario_invasion_warning_load_state(buffer *invasion_id, buffer *warnings, int has_dynamic_warnings);
 
+void scenario_invasion_save_state(buffer *buf);
+
+void scenario_invasion_load_state(buffer *buf);
+
 #endif // SCENARIO_INVASION_H

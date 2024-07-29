@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-#define MAX_REQUESTS 20
+//#define MAX_REQUESTS 20
 #define MAX_INVASIONS 20
 #define MAX_DEMAND_CHANGES 20
 #define MAX_PRICE_CHANGES 20
@@ -90,6 +90,7 @@ struct win_criteria_t {
 };
 
 typedef struct {
+    int id;
     int year;
     int resource;
     int amount;
@@ -193,7 +194,7 @@ extern struct scenario_t {
 
     custom_variable_t custom_variables[MAX_CUSTOM_VARIABLES];
 
-    request_t requests[MAX_REQUESTS];
+    //request_t requests[MAX_REQUESTS];
 
     demand_change_t demand_changes[MAX_DEMAND_CHANGES];
 

@@ -33,6 +33,8 @@ typedef enum {
     REQUESTS_OLD_STATE_SECTIONS_ONGOING_INFO = 4
 } requests_old_state_sections;
 
+void scenario_request_clear_all(void);
+
 void scenario_request_init(void);
 
 void scenario_request_process(void);
