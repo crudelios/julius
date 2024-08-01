@@ -29,25 +29,25 @@ static void button_ignored_disfavor(int param1, int param2);
 static void button_delete(int param1, int param2);
 static void button_save(int param1, int param2);
 
-static generic_button buttons[] = {
-    {30, 152, 60, 25, button_year, button_none},
-    {330, 152, 80, 25, button_amount, button_none},
-    {430, 152, 100, 25, button_resource, button_none},
-    {70, 190, 140, 25, button_deadline_years, button_none},
-    {400, 190, 80, 25, button_favor, button_none},
-    {400, 230, 80, 25, button_extension_months, button_none},
-    {400, 270, 80, 25, button_extension_disfavor, button_none},
-    {400, 310, 80, 25, button_ignored_disfavor, button_none},
-    {10, 350, 250, 25, button_delete, button_none},
-    {300, 350, 100, 25, button_save, button_none}
-};
-
 static struct {
     int id;
     scenario_request request;
     unsigned int focus_button_id;
     resource_type avaialble_resources[RESOURCE_MAX];
 } data;
+
+static generic_button buttons[] = {
+    {30, 186, 60, 25, button_year, button_none},
+    {330, 186, 80, 25, button_amount, button_none},
+    {430, 186, 100, 25, button_resource, button_none},
+    {70, 224, 140, 25, button_deadline_years, button_none},
+    {400, 224, 80, 25, button_favor, button_none},
+    {400, 264, 80, 25, button_extension_months, button_none},
+    {400, 304, 80, 25, button_extension_disfavor, button_none},
+    {400, 344, 80, 25, button_ignored_disfavor, button_none},
+    {110, 384, 250, 25, button_delete, button_none},
+    {400, 384, 100, 25, button_save, button_none}
+};
 
 static void init(int id)
 {
@@ -66,44 +66,51 @@ static void draw_foreground(void)
     graphics_in_dialog();
 
     outer_panel_draw(0, 100, 38, 20);
-    lang_text_draw(44, 21, 14, 114, FONT_LARGE_BLACK);
+    lang_text_draw_centered(44, 21, 14, 114, 580, FONT_LARGE_BLACK);
 
-    button_border_draw(30, 152, 60, 25, data.focus_button_id == 1);
-    text_draw_number_centered_prefix(data.request.year, '+', 30, 158, 60, FONT_NORMAL_BLACK);
-    lang_text_draw_year(scenario_property_start_year() + data.request.year, 110, 158, FONT_NORMAL_BLACK);
+    int width = text_get_number_width(data.request.id, 0, "", FONT_NORMAL_BLACK);
+    width += lang_text_get_width(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENT_ID, FONT_NORMAL_BLACK);
+    int base_x = (580 - width) / 2 + 14;
 
-    lang_text_draw(44, 72, 250, 158, FONT_NORMAL_BLACK);
-    button_border_draw(330, 152, 80, 25, data.focus_button_id == 2);
-    text_draw_number_centered(data.request.amount, 330, 158, 80, FONT_NORMAL_BLACK);
+    width = lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENT_ID, base_x, 154, FONT_NORMAL_BLACK);
+    text_draw_number(data.request.id, 0, "", base_x + width, 154, FONT_NORMAL_BLACK, 0);
 
-    button_border_draw(430, 152, 100, 25, data.focus_button_id == 3);
-    text_draw_centered(resource_get_data(data.request.resource)->text, 430, 158, 100, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    button_border_draw(30, 186, 60, 25, data.focus_button_id == 1);
+    text_draw_number_centered_prefix(data.request.year, '+', 30, 192, 60, FONT_NORMAL_BLACK);
+    lang_text_draw_year(scenario_property_start_year() + data.request.year, 110, 192, FONT_NORMAL_BLACK);
 
-    lang_text_draw(44, 24, 40, 196, FONT_NORMAL_BLACK);
-    button_border_draw(70, 190, 140, 25, data.focus_button_id == 4);
-    lang_text_draw_amount(8, 8, data.request.deadline_years, 80, 196, FONT_NORMAL_BLACK);
+    lang_text_draw(44, 72, 250, 192, FONT_NORMAL_BLACK);
+    button_border_draw(330, 186, 80, 25, data.focus_button_id == 2);
+    text_draw_number_centered(data.request.amount, 330, 192, 80, FONT_NORMAL_BLACK);
 
-    lang_text_draw(44, 73, 300, 196, FONT_NORMAL_BLACK);
-    button_border_draw(400, 190, 80, 25, data.focus_button_id == 5);
-    text_draw_number_centered_prefix(data.request.favor, '+', 400, 196, 80, FONT_NORMAL_BLACK);
+    button_border_draw(430, 186, 100, 25, data.focus_button_id == 3);
+    text_draw_centered(resource_get_data(data.request.resource)->text, 430, 192, 100, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
 
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_FAVOUR_EXTENSION_MONTHS, 70, 236, FONT_NORMAL_BLACK);
-    button_border_draw(400, 230, 80, 25, data.focus_button_id == 6);
-    text_draw_number_centered_prefix(data.request.extension_months_to_comply, '+', 400, 236, 80, FONT_NORMAL_BLACK);
+    lang_text_draw(44, 24, 40, 230, FONT_NORMAL_BLACK);
+    button_border_draw(70, 224, 140, 25, data.focus_button_id == 4);
+    lang_text_draw_amount(8, 8, data.request.deadline_years, 80, 230, FONT_NORMAL_BLACK);
 
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_FAVOUR_DISFAVOR, 70, 276, FONT_NORMAL_BLACK);
-    button_border_draw(400, 270, 80, 25, data.focus_button_id == 7);
-    text_draw_number_centered_prefix(data.request.extension_disfavor, '-', 400, 276, 80, FONT_NORMAL_BLACK);
+    lang_text_draw(44, 73, 300, 230, FONT_NORMAL_BLACK);
+    button_border_draw(400, 224, 80, 25, data.focus_button_id == 5);
+    text_draw_number_centered_prefix(data.request.favor, '+', 400, 230, 80, FONT_NORMAL_BLACK);
 
-    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_FAVOUR_IGNORED, 70, 316, FONT_NORMAL_BLACK);
-    button_border_draw(400, 310, 80, 25, data.focus_button_id == 8);
-    text_draw_number_centered_prefix(data.request.ignored_disfavor, '-', 400, 316, 80, FONT_NORMAL_BLACK);
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_FAVOUR_EXTENSION_MONTHS, 70, 270, FONT_NORMAL_BLACK);
+    button_border_draw(400, 264, 80, 25, data.focus_button_id == 6);
+    text_draw_number_centered_prefix(data.request.extension_months_to_comply, '+', 400, 270, 80, FONT_NORMAL_BLACK);
 
-    button_border_draw(300, 350, 100, 25, data.focus_button_id == 10);
-    lang_text_draw_centered(18, 3, 300, 356, 100, FONT_NORMAL_BLACK);
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_FAVOUR_DISFAVOR, 70, 310, FONT_NORMAL_BLACK);
+    button_border_draw(400, 304, 80, 25, data.focus_button_id == 7);
+    text_draw_number_centered_prefix(data.request.extension_disfavor, '-', 400, 310, 80, FONT_NORMAL_BLACK);
 
-    button_border_draw(10, 350, 250, 25, data.focus_button_id == 9);
-    lang_text_draw_centered(44, 25, 10, 356, 250, FONT_NORMAL_BLACK);
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_FAVOUR_IGNORED, 70, 350, FONT_NORMAL_BLACK);
+    button_border_draw(400, 344, 80, 25, data.focus_button_id == 8);
+    text_draw_number_centered_prefix(data.request.ignored_disfavor, '-', 400, 350, 80, FONT_NORMAL_BLACK);
+
+    button_border_draw(400, 384, 100, 25, data.focus_button_id == 10);
+    lang_text_draw_centered(18, 3, 400, 390, 100, FONT_NORMAL_BLACK);
+
+    button_border_draw(110, 384, 250, 25, data.focus_button_id == 9);
+    lang_text_draw_centered(44, 25, 110, 390, 250, FONT_NORMAL_BLACK);
 
     graphics_reset_dialog();
 }

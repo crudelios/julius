@@ -90,7 +90,7 @@ void scenario_editor_create(int map_size)
         init_point(&scenario.herd_points[i]);
     }
 
-    scenario_request_init();
+    scenario_request_clear_all();
 
     for (int i = 0; i < MAX_INVASIONS; i++) {
         scenario.invasions[i].from = 8;

@@ -19,8 +19,7 @@
 #define REQUESTS_ARRAY_SIZE_STEP 16
 #define MAX_ORIGINAL_REQUESTS 20
 
-#define REQUESTS_STRUCT_SIZE_ORIGINAL ((7 * sizeof(int16_t)) + (6 * sizeof(uint8_t)))
-#define REQUESTS_STRUCT_SIZE_CURRENT (REQUESTS_STRUCT_SIZE_ORIGINAL + REQUESTS_DESCRIPTION_SIZE)
+#define REQUESTS_STRUCT_SIZE_CURRENT ((7 * sizeof(int16_t)) + (6 * sizeof(uint8_t)))
 
 static array(scenario_request) requests;
 
@@ -67,9 +66,15 @@ void scenario_request_init(void)
         if (request->resource != RESOURCE_NONE) {
             request->month = (random_byte() & 7) + 2;
             request->months_to_comply = 12 * request->deadline_years;
-
         }
     }
+}
+
+int scenario_request_new(void)
+{
+    scenario_request *request;
+    array_new_item(requests, 0, request);
+    return request ? request->id : -1;
 }
 
 static void process_request(scenario_request *request)
@@ -318,8 +323,6 @@ static void request_save(buffer *list, const scenario_request *request)
     buffer_write_i16(list, request->extension_months_to_comply);
     buffer_write_i16(list, request->extension_disfavor);
     buffer_write_i16(list, request->ignored_disfavor);
-
-    buffer_write_raw(list, request->description, REQUESTS_DESCRIPTION_SIZE);
 }
 
 void scenario_request_save_state(buffer *list)
@@ -336,7 +339,7 @@ void scenario_request_save_state(buffer *list)
     }
 }
 
-static void request_load(buffer *list, scenario_request *request, int has_description)
+static void request_load(buffer *list, scenario_request *request)
 {
     request->year = buffer_read_i16(list);
     request->resource = resource_remap(buffer_read_i16(list));
@@ -351,9 +354,6 @@ static void request_load(buffer *list, scenario_request *request, int has_descri
     request->extension_months_to_comply = buffer_read_i16(list);
     request->extension_disfavor = buffer_read_i16(list);
     request->ignored_disfavor = buffer_read_i16(list);
-    if (has_description) {
-        buffer_read_raw(list, request->description, REQUESTS_DESCRIPTION_SIZE);
-    }
 }
 
 void scenario_request_load_state(buffer *list)
@@ -366,8 +366,6 @@ void scenario_request_load_state(buffer *list)
         &array_size,
         &struct_size);
 
-    int has_description = struct_size != REQUESTS_STRUCT_SIZE_ORIGINAL;
-
     if (!array_init(requests, REQUESTS_ARRAY_SIZE_STEP, new_request, request_in_use) ||
         !array_expand(requests, array_size)) {
         log_error("Error creating requests array. The game will probably crash.", 0, 0);
@@ -375,7 +373,7 @@ void scenario_request_load_state(buffer *list)
 
     for (int i = 0; i < array_size; i++) {
         scenario_request *request = array_advance(requests);
-        request_load(list, request, has_description);
+        request_load(list, request);
     }
 
     array_trim(requests);

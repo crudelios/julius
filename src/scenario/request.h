@@ -3,8 +3,6 @@
 
 #include "core/buffer.h"
 
-#define REQUESTS_DESCRIPTION_SIZE 25
-
 #define REQUESTS_DEFAULT_DEADLINE_YEARS 5
 #define REQUESTS_DEFAULT_FAVOUR 8
 #define REQUESTS_DEFAULT_MONTHS_TO_COMPLY 24
@@ -35,7 +33,6 @@ typedef struct {
     int extension_months_to_comply;
     int extension_disfavor;
     int ignored_disfavor;
-    uint8_t description[REQUESTS_DESCRIPTION_SIZE];
 } scenario_request;
 
 typedef enum {
@@ -48,6 +45,8 @@ typedef enum {
 void scenario_request_clear_all(void);
 
 void scenario_request_init(void);
+
+int scenario_request_new(void);
 
 void scenario_request_process(void);
 

@@ -143,7 +143,7 @@ static void draw_foreground(void)
 
     lang_text_draw(44, 40, 32, 165, FONT_NORMAL_BLACK);
     button_border_draw(212, 156, 250, 30, data.focus_button_id == 3);
-    lang_text_draw_centered(44, 19, 212, 165, 250, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(44, 14, 212, 165, 250, FONT_NORMAL_BLACK);
 
     lang_text_draw(44, 41, 32, 205, FONT_NORMAL_BLACK);
     button_border_draw(212, 196, 250, 30, data.focus_button_id == 4);
