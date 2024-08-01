@@ -3,6 +3,14 @@
 
 #include "core/buffer.h"
 
+#define REQUESTS_DESCRIPTION_SIZE 25
+
+#define REQUESTS_DEFAULT_DEADLINE_YEARS 5
+#define REQUESTS_DEFAULT_FAVOUR 8
+#define REQUESTS_DEFAULT_MONTHS_TO_COMPLY 24
+#define REQUESTS_DEFAULT_EXTENSION_DISFAVOUR 3
+#define REQUESTS_DEFAULT_IGNORED_DISFAVOUR 5
+
 typedef enum {
     REQUEST_STATE_NORMAL= 0,
     REQUEST_STATE_OVERDUE = 1,
@@ -14,17 +22,21 @@ typedef enum {
 
 typedef struct {
     int id;
-    scenario_request_state state;
+    int year;
     int resource;
     int amount;
+    int deadline_years;
+    int can_comply_dialog_shown;
+    int favor;
+    int month;
+    scenario_request_state state;
+    int visible;
     int months_to_comply;
+    int extension_months_to_comply;
+    int extension_disfavor;
+    int ignored_disfavor;
+    uint8_t description[REQUESTS_DESCRIPTION_SIZE];
 } scenario_request;
-
-#define REQUESTS_DEFAULT_DEADLINE_YEARS 5
-#define REQUESTS_DEFAULT_FAVOUR 8
-#define REQUESTS_DEFAULT_MONTHS_TO_COMPLY 24
-#define REQUESTS_DEFAULT_EXTENSION_DISFAVOUR 3
-#define REQUESTS_DEFAULT_IGNORED_DISFAVOUR 5
 
 typedef enum {
     REQUESTS_OLD_STATE_SECTIONS_TARGET = 1,
@@ -41,9 +53,17 @@ void scenario_request_process(void);
 
 void scenario_request_dispatch(int id);
 
+int scenario_request_count_total(void);
+
 int scenario_request_count_visible(void);
 
 const scenario_request *scenario_request_get(int id);
+
+void scenario_request_update(int id, const scenario_request *request);
+
+void scenario_request_delete(int id);
+
+void scenario_request_remap_resource(void);
 
 int scenario_request_foreach_visible(int start_index, void (*callback)(int index, const scenario_request *request));
 

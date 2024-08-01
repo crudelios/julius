@@ -631,7 +631,7 @@ void scenario_load_state(buffer *buf, int version)
             }
         }
     } else {
-        scenario_custom_variable_clear();
+        scenario_delete_all_custom_variables();
     }
 
     buffer_set(buf, buffer_offsets.custom_name);
@@ -643,9 +643,7 @@ void scenario_load_state(buffer *buf, int version)
     // We can only remap resources at the end of the scenario load as the remapping relies on the allowed building list
     // being loaded, otherwise on some edge cases changes to meat may affect fish instead
     if (resource_mapping_get_version() < RESOURCE_CURRENT_VERSION) {
-        for (int i = 0; i < MAX_REQUESTS; i++) {
-            scenario.requests[i].resource = resource_remap(scenario.requests[i].resource);
-        }
+        scenario_request_remap_resource();
         for (int i = 0; i < MAX_DEMAND_CHANGES; i++) {
             scenario.demand_changes[i].resource = resource_remap(scenario.demand_changes[i].resource);
         }

@@ -5,17 +5,6 @@
 
 typedef struct {
     int year;
-    int resource;
-    int amount;
-    int deadline_years;
-    int favor;
-    int extension_months_to_comply;
-    int extension_disfavor;
-    int ignored_disfavor;
-} editor_request;
-
-typedef struct {
-    int year;
     int type;
     int amount;
     int from;
@@ -39,10 +28,6 @@ typedef struct {
 void scenario_editor_create(int map_size);
 
 void scenario_editor_set_native_images(int image_hut, int image_meeting, int image_crops);
-
-void scenario_editor_request_get(int index, editor_request *request);
-void scenario_editor_request_delete(int index);
-void scenario_editor_request_save(int index, editor_request *request);
 
 void scenario_editor_invasion_get(int index, editor_invasion *invasion);
 void scenario_editor_invasion_delete(int index);

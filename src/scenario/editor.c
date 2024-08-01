@@ -110,61 +110,6 @@ void scenario_editor_set_native_images(int image_hut, int image_meeting, int ima
     scenario.native_images.crops = image_crops;
 }
 
-void scenario_editor_request_get(int index, editor_request *request)
-{
-    request->year = scenario.requests[index].year;
-    request->amount = scenario.requests[index].amount;
-    request->resource = scenario.requests[index].resource;
-    request->deadline_years = scenario.requests[index].deadline_years;
-    request->favor = scenario.requests[index].favor;
-    request->extension_months_to_comply = scenario.requests[index].extension_months_to_comply;
-    request->extension_disfavor = scenario.requests[index].extension_disfavor;
-    request->ignored_disfavor = scenario.requests[index].ignored_disfavor;
-}
-
-static void sort_requests(void)
-{
-    for (int i = 0; i < MAX_REQUESTS; i++) {
-        for (int j = MAX_REQUESTS - 1; j > 0; j--) {
-            request_t *current = &scenario.requests[j];
-            request_t *prev = &scenario.requests[j-1];
-            if (current->resource && (!prev->resource || prev->year > current->year)) {
-                request_t tmp = *current;
-                *current = *prev;
-                *prev = tmp;
-            }
-        }
-    }
-}
-
-void scenario_editor_request_delete(int index)
-{
-    scenario.requests[index].year = 0;
-    scenario.requests[index].amount = 0;
-    scenario.requests[index].resource = 0;
-    scenario.requests[index].deadline_years = REQUESTS_DEFAULT_DEADLINE_YEARS;
-    scenario.requests[index].favor = REQUESTS_DEFAULT_FAVOUR;
-    scenario.requests[index].extension_months_to_comply = REQUESTS_DEFAULT_MONTHS_TO_COMPLY;
-    scenario.requests[index].extension_disfavor = REQUESTS_DEFAULT_EXTENSION_DISFAVOUR;
-    scenario.requests[index].ignored_disfavor = REQUESTS_DEFAULT_IGNORED_DISFAVOUR;
-    sort_requests();
-    scenario.is_saved = 0;
-}
-
-void scenario_editor_request_save(int index, editor_request *request)
-{
-    scenario.requests[index].year = request->year;
-    scenario.requests[index].amount = request->amount;
-    scenario.requests[index].resource = request->resource;
-    scenario.requests[index].deadline_years = request->deadline_years;
-    scenario.requests[index].favor = request->favor;
-    scenario.requests[index].extension_months_to_comply = request->extension_months_to_comply;
-    scenario.requests[index].extension_disfavor = request->extension_disfavor;
-    scenario.requests[index].ignored_disfavor = request->ignored_disfavor;
-    sort_requests();
-    scenario.is_saved = 0;
-}
-
 void scenario_editor_invasion_get(int index, editor_invasion *invasion)
 {
     invasion->year = scenario.invasions[index].year;

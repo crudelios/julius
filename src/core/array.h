@@ -155,6 +155,17 @@ struct { \
     for(int array_index = 0; array_index < (a).size && ((item) = array_item(a, array_index)) != 0; array_index++)
 
 /**
+ * Iterates through an array, calling the callback function for each item
+ * @param a The array structure
+ * @param callback The function callback to call for each item, in the format "callback(T *item)"
+ * @note You can use the array_index parameter to retrieve the index of the current item
+ */
+#define array_foreach_callback(a, callback) \
+    for(int array_index = 0; array_index < (a).size && array_item(a, array_index) != 0; array_index++) { \
+        callback(array_item(a, array_index)); \
+    }
+
+/**
  * Trims an array, removing its latest items that aren't being used until the first one is used.
  * The first item of the array is always kept.
  * @param a The array structure

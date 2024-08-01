@@ -239,7 +239,7 @@ int scenario_action_type_request_immediately_start_execute(scenario_action_t *ac
     }
 
     int request_id = action->parameter1;
-    if (request_id < 0 || request_id >= MAX_REQUESTS) {
+    if (request_id < 0 || request_id >= scenario_request_count_total()) {
         return 0;
     }
 

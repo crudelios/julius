@@ -14,12 +14,18 @@
 #include "scenario/data.h"
 #include "scenario/editor.h"
 #include "scenario/property.h"
+#include "scenario/request.h"
 #include "window/editor/attributes.h"
 #include "window/editor/edit_request.h"
 #include "window/editor/map.h"
 
 static void button_request(unsigned int id, unsigned int mouse_x, unsigned int mouse_y);
 static void draw_request_button(const grid_box_item *item);
+
+static struct {
+    const scenario_request **requests;
+    unsigned int total_requests;
+} data;
 
 static grid_box_type request_buttons = {
     .x = 20,
@@ -35,6 +41,43 @@ static grid_box_type request_buttons = {
     .draw_item = draw_request_button
 };
 
+static void sort_list(void)
+{
+    for (unsigned int i = 0; i < data.total_requests; i++) {
+        for (unsigned int j = data.total_requests - 1; j > 0; j--) {
+            const scenario_request *current = data.requests[j];
+            const scenario_request *prev = data.requests[j - 1];
+            if (current->resource && (!prev->resource || prev->year > current->year)) {
+                const scenario_request *tmp = data.requests[j];
+                data.requests[j] = data.requests[j - 1];
+                data.requests[j - 1] = tmp;
+            }
+        }
+    }
+}
+
+static void update_request_list(void)
+{
+    int current_requests = scenario_request_count_total();
+    if (current_requests != data.total_requests) {
+        free(data.requests);
+        data.requests = 0;
+        grid_box_update_total_items(&request_buttons, data.total_requests);
+        if (current_requests) {
+            data.requests = malloc(current_requests * sizeof(scenario_request *));
+            if (!data.requests) {
+                data.total_requests = 0;
+                return;
+            }
+            for (unsigned int i = 0; i < current_requests; i++) {
+                data.requests[i] = scenario_request_get(i);
+            }
+            data.total_requests = current_requests;
+        }
+    }
+    sort_list();
+}
+
 static void draw_background(void)
 {
     window_editor_map_draw_all();
@@ -48,21 +91,26 @@ static void draw_background(void)
 
     graphics_reset_dialog();
 
+    update_request_list();
+
     grid_box_request_refresh(&request_buttons);
 }
 
 static void draw_request_button(const grid_box_item *item)
 {
     button_border_draw(item->x, item->y, item->width, item->height, item->is_focused);
-    editor_request request;
-    scenario_editor_request_get(item->index, &request);
-    if (request.resource) {
-        text_draw_number(request.year, '+', " ", item->x + 10, item->y + 7, FONT_NORMAL_BLACK, 0);
-        lang_text_draw_year(scenario_property_start_year() + request.year, item->x + 65, item->y + 7,
-            FONT_NORMAL_BLACK);
-        int width = text_draw_number(request.amount, '@', " ", item->x + 165, item->y + 7, FONT_NORMAL_BLACK, 0);
-        image_draw(resource_get_data(request.resource)->image.editor.icon, item->x + 165 + width, item->y + 2,
-            COLOR_MASK_NONE, SCALE_NONE);
+    const scenario_request *request = data.requests[item->index];
+    if (request->resource) {
+        if (*request->description) {
+            text_draw_centered(request->description, item->x, item->y + 7, item->width, FONT_NORMAL_BLACK, 0);
+        } else {
+            text_draw_number(request->year, '+', " ", item->x + 10, item->y + 7, FONT_NORMAL_BLACK, 0);
+            lang_text_draw_year(scenario_property_start_year() + request->year, item->x + 65, item->y + 7,
+                FONT_NORMAL_BLACK);
+            int width = text_draw_number(request->amount, '@', " ", item->x + 165, item->y + 7, FONT_NORMAL_BLACK, 0);
+            image_draw(resource_get_data(request->resource)->image.editor.icon, item->x + 165 + width, item->y + 2,
+                COLOR_MASK_NONE, SCALE_NONE);
+        }
     } else {
         lang_text_draw_centered(44, 23, item->x, item->y + 7, item->width, FONT_NORMAL_BLACK);
     }
@@ -72,7 +120,11 @@ static void draw_foreground(void)
 {
     graphics_in_dialog();
 
-    grid_box_draw(&request_buttons);
+    if (data.total_requests) {
+        grid_box_draw(&request_buttons);
+    } else {
+        text_draw("No requests", 20, 40, FONT_NORMAL_BLACK, 0);
+    }
 
     graphics_reset_dialog();
 }
@@ -89,7 +141,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
 
 static void button_request(unsigned int id, unsigned int mouse_x, unsigned int mouse_y)
 {
-    window_editor_edit_request_show(id);
+    window_editor_edit_request_show(data.requests[id]->id);
 }
 
 void window_editor_requests_show(void)
@@ -100,6 +152,6 @@ void window_editor_requests_show(void)
         draw_foreground,
         handle_input
     };
-    grid_box_init(&request_buttons, MAX_REQUESTS);
+    grid_box_init(&request_buttons, scenario_request_count_total());
     window_show(&window);
 }

@@ -90,23 +90,6 @@ struct win_criteria_t {
 };
 
 typedef struct {
-    int id;
-    int year;
-    int resource;
-    int amount;
-    int deadline_years;
-    int can_comply_dialog_shown;
-    int favor;
-    int month;
-    int state;
-    int visible;
-    int months_to_comply;
-    int extension_months_to_comply;
-    int extension_disfavor;
-    int ignored_disfavor;
-} request_t;
-
-typedef struct {
     int year;
     int type;
     int amount;

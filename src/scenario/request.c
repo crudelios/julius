@@ -19,9 +19,12 @@
 #define REQUESTS_ARRAY_SIZE_STEP 16
 #define MAX_ORIGINAL_REQUESTS 20
 
-static array(request_t) requests;
+#define REQUESTS_STRUCT_SIZE_ORIGINAL ((7 * sizeof(int16_t)) + (6 * sizeof(uint8_t)))
+#define REQUESTS_STRUCT_SIZE_CURRENT (REQUESTS_STRUCT_SIZE_ORIGINAL + REQUESTS_DESCRIPTION_SIZE)
 
-static void new_request(request_t *request, int index)
+static array(scenario_request) requests;
+
+static void new_request(scenario_request *request, int index)
 {
     request->id = index;
     request->deadline_years = REQUESTS_DEFAULT_DEADLINE_YEARS;
@@ -31,12 +34,12 @@ static void new_request(request_t *request, int index)
     request->ignored_disfavor = REQUESTS_DEFAULT_IGNORED_DISFAVOUR;
 }
 
-static int request_in_use(const request_t *request)
+static int request_in_use(const scenario_request *request)
 {
     return request->resource != RESOURCE_NONE;
 }
 
-static void make_request_visible_and_send_message(request_t *request)
+static void make_request_visible_and_send_message(scenario_request *request)
 {
     request->visible = 1;
     if (city_resource_count(request->resource) >= request->amount) {
@@ -58,7 +61,7 @@ void scenario_request_clear_all(void)
 
 void scenario_request_init(void)
 {
-    request_t *request;
+    scenario_request *request;
     array_foreach(requests, request) {
         random_generate_next();
         if (request->resource != RESOURCE_NONE) {
@@ -69,78 +72,82 @@ void scenario_request_init(void)
     }
 }
 
+static void process_request(scenario_request *request)
+{
+    if (!request->resource || request->state > REQUEST_STATE_DISPATCHED_LATE) {
+        return;
+    }
+    int state = request->state;
+    if (state == REQUEST_STATE_DISPATCHED || state == REQUEST_STATE_DISPATCHED_LATE) {
+        --request->months_to_comply;
+        if (request->months_to_comply <= 0) {
+            if (state == REQUEST_STATE_DISPATCHED) {
+                city_message_post(1, MESSAGE_REQUEST_RECEIVED, request->id, 0);
+                city_ratings_change_favor(request->favor);
+            } else {
+                city_message_post(1, MESSAGE_REQUEST_RECEIVED_LATE, request->id, 0);
+                city_ratings_change_favor(request->favor / 2);
+            }
+            request->state = REQUEST_STATE_RECEIVED;
+            request->visible = 0;
+        }
+        return;
+    }
+
+    // normal or overdue
+    if (request->visible) {
+        --request->months_to_comply;
+        if (state == REQUEST_STATE_NORMAL) {
+            if (request->months_to_comply == 12) {
+                // reminder
+                city_message_post(1, MESSAGE_REQUEST_REMINDER, request->id, 0);
+            } else if (request->months_to_comply <= 0) {
+                city_message_post(1, MESSAGE_REQUEST_REFUSED, request->id, 0);
+                request->state = REQUEST_STATE_OVERDUE;
+                request->months_to_comply = request->extension_months_to_comply;
+                city_ratings_reduce_favor_missed_request(request->extension_disfavor);
+            }
+        } else if (state == REQUEST_STATE_OVERDUE) {
+            if (request->months_to_comply <= 0) {
+                city_message_post(1, MESSAGE_REQUEST_REFUSED_OVERDUE, request->id, 0);
+                request->state = REQUEST_STATE_IGNORED;
+                request->visible = 0;
+                city_ratings_reduce_favor_missed_request(request->ignored_disfavor);
+            }
+        }
+        if (!request->can_comply_dialog_shown) {
+            resource_type resource = request->resource;
+            int resource_amount = city_resource_count(resource);
+            if (resource_is_food(resource)) {
+                resource_amount += city_resource_count_food_on_granaries(resource) / RESOURCE_ONE_LOAD;
+            }
+            if (resource_amount >= request->amount) {
+                request->can_comply_dialog_shown = 1;
+                city_message_post(1, MESSAGE_REQUEST_CAN_COMPLY, request->id, 0);
+            }
+        }
+        return;
+    }
+
+    // request is not visible
+    int year = scenario.start_year;
+    if (!tutorial_adjust_request_year(&year)) {
+        return;
+    }
+    if (game_time_year() == year + request->year &&
+        game_time_month() == request->month) {
+        make_request_visible_and_send_message(request);
+    }
+}
+
 void scenario_request_process(void)
 {
-    request_t *request;
-    array_foreach(requests, request) {
-        if (!request->resource || request->state > REQUEST_STATE_DISPATCHED_LATE) {
-            continue;
-        }
-        int state = request->state;
-        if (state == REQUEST_STATE_DISPATCHED || state == REQUEST_STATE_DISPATCHED_LATE) {
-            --request->months_to_comply;
-            if (request->months_to_comply <= 0) {
-                if (state == REQUEST_STATE_DISPATCHED) {
-                    city_message_post(1, MESSAGE_REQUEST_RECEIVED, request->id, 0);
-                    city_ratings_change_favor(request->favor);
-                } else {
-                    city_message_post(1, MESSAGE_REQUEST_RECEIVED_LATE, request->id, 0);
-                    city_ratings_change_favor(request->favor / 2);
-                }
-                request->state = REQUEST_STATE_RECEIVED;
-                request->visible = 0;
-            }
-        } else {
-            // normal or overdue
-            if (request->visible) {
-                --request->months_to_comply;
-                if (state == REQUEST_STATE_NORMAL) {
-                    if (request->months_to_comply == 12) {
-                        // reminder
-                        city_message_post(1, MESSAGE_REQUEST_REMINDER, request->id, 0);
-                    } else if (request->months_to_comply <= 0) {
-                        city_message_post(1, MESSAGE_REQUEST_REFUSED, request->id, 0);
-                        request->state = REQUEST_STATE_OVERDUE;
-                        request->months_to_comply = request->extension_months_to_comply;
-                        city_ratings_reduce_favor_missed_request(request->extension_disfavor);
-                    }
-                } else if (state == REQUEST_STATE_OVERDUE) {
-                    if (request->months_to_comply <= 0) {
-                        city_message_post(1, MESSAGE_REQUEST_REFUSED_OVERDUE, request->id, 0);
-                        request->state = REQUEST_STATE_IGNORED;
-                        request->visible = 0;
-                        city_ratings_reduce_favor_missed_request(request->ignored_disfavor);
-                    }
-                }
-                if (!request->can_comply_dialog_shown) {
-                    resource_type resource = request->resource;
-                    int resource_amount = city_resource_count(resource);
-                    if (resource_is_food(resource)) {
-                        resource_amount += city_resource_count_food_on_granaries(resource) / RESOURCE_ONE_LOAD;
-                    }
-                    if (resource_amount >= request->amount) {
-                        request->can_comply_dialog_shown = 1;
-                        city_message_post(1, MESSAGE_REQUEST_CAN_COMPLY, request->id, 0);
-                    }
-                }
-            } else {
-                // request is not visible
-                int year = scenario.start_year;
-                if (!tutorial_adjust_request_year(&year)) {
-                    return;
-                }
-                if (game_time_year() == year + request->year &&
-                    game_time_month() == request->month) {
-                    make_request_visible_and_send_message(request);
-                }
-            }
-        }
-    }
+    array_foreach_callback(requests, process_request);
 }
 
 void scenario_request_dispatch(int id)
 {
-    request_t *request = array_item(requests, id);
+    scenario_request *request = array_item(requests, id);
     if (request->state == REQUEST_STATE_NORMAL) {
         request->state = REQUEST_STATE_DISPATCHED;
     } else {
@@ -164,20 +171,43 @@ void scenario_request_dispatch(int id)
 
 const scenario_request *scenario_request_get(int id)
 {
-    static scenario_request request;
-    const request_t *base_request = array_item(requests, id);
-    request.id = base_request->id;
-    request.amount = base_request->amount;
-    request.resource = base_request->resource;
-    request.state = base_request->state;
-    request.months_to_comply = base_request->months_to_comply;
-    return &request;
+    return array_item(requests, id);
+}
+
+void scenario_request_update(int id, const scenario_request *request)
+{
+    scenario_request *base_request = array_item(requests, id);
+    *base_request = *request;
+    base_request->id = id;
+    array_trim(requests);
+    scenario.is_saved = 0;
+}
+
+void scenario_request_delete(int id)
+{
+    scenario_request *request = array_item(requests, id);
+    request->resource = RESOURCE_NONE;
+    array_trim(requests);
+    scenario.is_saved = 0;
+}
+
+void scenario_request_remap_resource(void)
+{
+    scenario_request *request;
+    array_foreach(requests, request) {
+        request->resource = resource_remap(request->resource);
+    }
+}
+
+int scenario_request_count_total(void)
+{
+    return requests.size;
 }
 
 int scenario_request_count_visible(void)
 {
     int count = 0;
-    const request_t *request;
+    const scenario_request *request;
     array_foreach(requests, request) {
         if (request->resource && request->visible) {
             count++;
@@ -189,7 +219,7 @@ int scenario_request_count_visible(void)
 int scenario_request_foreach_visible(int start_index, void (*callback)(int index, const scenario_request *request))
 {
     int index = start_index;
-    const request_t *request;
+    const scenario_request *request;
     array_foreach(requests, request) {
         if (request->resource && request->visible) {
             callback(index, scenario_request_get(request->id));
@@ -201,7 +231,7 @@ int scenario_request_foreach_visible(int start_index, void (*callback)(int index
 
 const scenario_request *scenario_request_get_visible(int index)
 {
-    const request_t *request;
+    const scenario_request *request;
     array_foreach(requests, request)
     {
         if (request->resource && request->visible && request->state <= 1) {
@@ -220,7 +250,7 @@ int scenario_request_is_ongoing(int id)
         return 0;
     }
 
-    const request_t *request = array_item(requests, id);
+    const scenario_request *request = array_item(requests, id);
 
     if (!request->resource) {
         return 0;
@@ -249,7 +279,7 @@ int scenario_request_force_start(int id)
         return 0;
     }
     
-    request_t *request = array_item(requests, id);
+    scenario_request *request = array_item(requests, id);
 
     if (!request->resource) {
         return 0;
@@ -270,7 +300,7 @@ int scenario_request_force_start(int id)
     return 1;
 }
 
-static void request_save(buffer *list, const request_t *request)
+static void request_save(buffer *list, const scenario_request *request)
 {
     buffer_write_i16(list, request->year);
     buffer_write_i16(list, request->resource);
@@ -288,23 +318,25 @@ static void request_save(buffer *list, const request_t *request)
     buffer_write_i16(list, request->extension_months_to_comply);
     buffer_write_i16(list, request->extension_disfavor);
     buffer_write_i16(list, request->ignored_disfavor);
+
+    buffer_write_raw(list, request->description, REQUESTS_DESCRIPTION_SIZE);
 }
 
 void scenario_request_save_state(buffer *list)
 {
-    int32_t struct_size = (7 * sizeof(int16_t)) + (6 * sizeof(uint8_t));
+    int32_t struct_size = REQUESTS_STRUCT_SIZE_CURRENT;
     buffer_init_dynamic_piece(list,
         SCENARIO_CURRENT_VERSION,
         requests.size,
         struct_size);
 
-    const request_t *request;
+    const scenario_request *request;
     array_foreach(requests, request) {
         request_save(list, request);
     }
 }
 
-static void request_load(buffer *list, request_t *request)
+static void request_load(buffer *list, scenario_request *request, int has_description)
 {
     request->year = buffer_read_i16(list);
     request->resource = resource_remap(buffer_read_i16(list));
@@ -319,6 +351,9 @@ static void request_load(buffer *list, request_t *request)
     request->extension_months_to_comply = buffer_read_i16(list);
     request->extension_disfavor = buffer_read_i16(list);
     request->ignored_disfavor = buffer_read_i16(list);
+    if (has_description) {
+        buffer_read_raw(list, request->description, REQUESTS_DESCRIPTION_SIZE);
+    }
 }
 
 void scenario_request_load_state(buffer *list)
@@ -331,15 +366,19 @@ void scenario_request_load_state(buffer *list)
         &array_size,
         &struct_size);
 
+    int has_description = struct_size != REQUESTS_STRUCT_SIZE_ORIGINAL;
+
     if (!array_init(requests, REQUESTS_ARRAY_SIZE_STEP, new_request, request_in_use) ||
         !array_expand(requests, array_size)) {
         log_error("Error creating requests array. The game will probably crash.", 0, 0);
     }
 
     for (int i = 0; i < array_size; i++) {
-        request_t *request = array_advance(requests);
-        request_load(list, request);
+        scenario_request *request = array_advance(requests);
+        request_load(list, request, has_description);
     }
+
+    array_trim(requests);
 }
 
 void scenario_request_load_state_old_version(buffer *list, int state_version, requests_old_state_sections section)
@@ -348,7 +387,7 @@ void scenario_request_load_state_old_version(buffer *list, int state_version, re
     // and saved as multiple arrays of variables, rather than an array of struct approach.
     // So here we need to load in a similar section / varaible array manner when dealing with old versions.
     if (state_version <= SCENARIO_LAST_NO_EXTENDED_REQUESTS) {
-        request_t *request;
+        scenario_request *request;
         if (section == REQUESTS_OLD_STATE_SECTIONS_TARGET) {
             if (!array_init(requests, REQUESTS_ARRAY_SIZE_STEP, new_request, request_in_use) ||
                 !array_expand(requests, MAX_ORIGINAL_REQUESTS)) {
@@ -366,6 +405,7 @@ void scenario_request_load_state_old_version(buffer *list, int state_version, re
             array_foreach(requests, request) {
                 request->deadline_years = buffer_read_i16(list);
             }
+            array_trim(requests);
         } else if (section == REQUESTS_OLD_STATE_SECTIONS_CAN_COMPLY) {
             array_foreach(requests, request) {
                 request->can_comply_dialog_shown = buffer_read_u8(list);

@@ -12,6 +12,7 @@
 #include "input/input.h"
 #include "scenario/editor.h"
 #include "scenario/property.h"
+#include "scenario/request.h"
 #include "window/editor/map.h"
 #include "window/editor/requests.h"
 #include "window/numeric_input.h"
@@ -43,7 +44,7 @@ static generic_button buttons[] = {
 
 static struct {
     int id;
-    editor_request request;
+    scenario_request request;
     unsigned int focus_button_id;
     resource_type avaialble_resources[RESOURCE_MAX];
 } data;
@@ -51,7 +52,8 @@ static struct {
 static void init(int id)
 {
     data.id = id;
-    scenario_editor_request_get(id, &data.request);
+    const scenario_request *request = scenario_request_get(id);
+    data.request = *request;
 }
 
 static void draw_background(void)
@@ -224,13 +226,13 @@ static void button_ignored_disfavor(int param1, int param2)
 
 static void button_delete(int param1, int param2)
 {
-    scenario_editor_request_delete(data.id);
+    scenario_request_delete(data.id);
     window_editor_requests_show();
 }
 
 static void button_save(int param1, int param2)
 {
-    scenario_editor_request_save(data.id, &data.request);
+    scenario_request_update(data.id, &data.request);
     window_editor_requests_show();
 }
 
