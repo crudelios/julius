@@ -391,6 +391,9 @@ void scenario_request_load_state_old_version(buffer *list, int state_version, re
                 !array_expand(requests, MAX_ORIGINAL_REQUESTS)) {
                 log_error("Error creating requests array. The game will probably crash.", 0, 0);
             }
+            for (size_t i = 0; i < MAX_ORIGINAL_REQUESTS; i++) {
+                request = array_advance(requests);
+            }
             array_foreach(requests, request) {
                 request->year = buffer_read_i16(list);
             }
@@ -403,7 +406,6 @@ void scenario_request_load_state_old_version(buffer *list, int state_version, re
             array_foreach(requests, request) {
                 request->deadline_years = buffer_read_i16(list);
             }
-            array_trim(requests);
         } else if (section == REQUESTS_OLD_STATE_SECTIONS_CAN_COMPLY) {
             array_foreach(requests, request) {
                 request->can_comply_dialog_shown = buffer_read_u8(list);
@@ -431,6 +433,7 @@ void scenario_request_load_state_old_version(buffer *list, int state_version, re
                 request->extension_disfavor = REQUESTS_DEFAULT_EXTENSION_DISFAVOUR;
                 request->ignored_disfavor = REQUESTS_DEFAULT_IGNORED_DISFAVOUR;
             }
+            array_trim(requests);
         }
     }
 }
