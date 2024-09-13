@@ -1134,6 +1134,7 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TYPE_ENEMY_TYPE, "Enemy type"},
     {TR_PARAMETER_TYPE_GOD, "God" },
     {TR_PARAMETER_TYPE_CLIMATE, "Climate" },
+    {TR_PARAMETER_TYPE_REQUEST, "Request" },
     {TR_CONDITION_TYPE_TIME_PASSED, "Time passed"},
     {TR_CONDITION_TYPE_DIFFICULTY, "Difficulty"},
     {TR_CONDITION_TYPE_MONEY, "City money"},

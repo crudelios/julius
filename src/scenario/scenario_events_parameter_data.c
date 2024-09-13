@@ -10,6 +10,7 @@
 #include "game/resource.h"
 #include "scenario/custom_messages.h"
 #include "scenario/invasion.h"
+#include "scenario/request.h"
 #include "scenario/scenario.h"
 
 #define UNLIMITED 1000000000
@@ -84,7 +85,7 @@ static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
                                         .xml_parm3 =    { .name = "in_city_only",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,         .max_limit = 1,             .key = TR_PARAMETER_IN_CITY_ONLY }, },
     [CONDITION_TYPE_REQUEST_IS_ONGOING]     = { .type = CONDITION_TYPE_REQUEST_IS_ONGOING,
                                         .xml_attr =     { .name = "request_is_ongoing",     .type = PARAMETER_TYPE_TEXT,     .key = TR_CONDITION_TYPE_REQUEST_IS_ONGOING },
-                                        .xml_parm1 =    { .name = "request_id",     .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,         .max_limit = 19,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                        .xml_parm1 =    { .name = "request_id",          .type = PARAMETER_TYPE_REQUEST,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_REQUEST },
                                         .xml_parm2 =    { .name = "check_for_ongoing",   .type = PARAMETER_TYPE_BOOLEAN,     .min_limit = 0,         .max_limit = 1,      .key = TR_PARAMETER_CHECK_FOR_ONGOING }, },
     [CONDITION_TYPE_TAX_RATE]           = { .type = CONDITION_TYPE_TAX_RATE,
                                         .xml_attr =     { .name = "tax_rate",       .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_TAX_RATE },
@@ -200,7 +201,7 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm2 =    { .name = "show_message",   .type = PARAMETER_TYPE_BOOLEAN,          .min_limit = 0,           .max_limit = 1,      .key = TR_PARAMETER_SHOW_MESSAGE }, },
     [ACTION_TYPE_REQUEST_IMMEDIATELY_START]     = { .type = ACTION_TYPE_REQUEST_IMMEDIATELY_START,
                                         .xml_attr =     { .name = "request_immediately_start",     .type = PARAMETER_TYPE_TEXT,     .key = TR_ACTION_TYPE_REQUEST_IMMEDIATELY_START },
-                                        .xml_parm1 =    { .name = "request_id",     .type = PARAMETER_TYPE_NUMBER,           .min_limit = 0,           .max_limit = 19,     .key = TR_PARAMETER_TYPE_NUMBER }, },
+                                        .xml_parm1 =    { .name = "request_id",     .type = PARAMETER_TYPE_REQUEST,           .min_limit = 0,           .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_REQUEST }, },
     [ACTION_TYPE_SHOW_CUSTOM_MESSAGE]     = { .type = ACTION_TYPE_SHOW_CUSTOM_MESSAGE,
                                         .xml_attr =     { .name = "show_custom_message",           .type = PARAMETER_TYPE_TEXT,     .key = TR_ACTION_TYPE_SHOW_CUSTOM_MESSAGE },
                                         .xml_parm1 =    { .name = "message_uid",    .type = PARAMETER_TYPE_CUSTOM_MESSAGE,   .key = TR_PARAMETER_TYPE_CUSTOM_MESSAGE }, },
@@ -948,7 +949,58 @@ const uint8_t *scenario_events_parameter_data_get_display_string(special_attribu
     }
 }
 
-void scenario_events_parameter_data_get_display_string_for_value(parameter_type type, int value, uint8_t *result_text, int maxlength)
+static uint8_t *string_from_year(uint8_t *dst, int year, int *maxlength)
+{
+    uint8_t *cursor = dst;
+    if (year >= 0) {
+        int use_year_ad = locale_year_before_ad();
+        if (use_year_ad) {
+            cursor += string_from_int(cursor, year, 0);
+            *cursor = ' ';
+            cursor++;
+            cursor = string_copy(lang_get_string(20, 1), cursor, *maxlength - 10);
+        } else {
+            string_copy(lang_get_string(20, 1), cursor, *maxlength - 10);
+            *cursor = ' ';
+            cursor++;
+            cursor += string_from_int(cursor, year, 0);
+        }
+    } else {
+        cursor += string_from_int(cursor, -year, 0);
+        *cursor = ' ';
+        cursor++;
+        cursor = string_copy(lang_get_string(20, 0), cursor, *maxlength - 10);
+    }
+    int total_chars = (int) (cursor - dst);
+    *maxlength -= total_chars;
+    return cursor;
+}
+
+static uint8_t *translation_for_request_value(int value, uint8_t *result_text, int *maxlength)
+{
+    if (value < 0 || value >= scenario_request_count_total()) {
+        return string_copy(translation_for(TR_PARAMETER_VALUE_NONE), result_text, *maxlength);
+    }
+    const scenario_request *request = scenario_request_get(value);
+    if (!request || request->resource == RESOURCE_NONE) {
+        return string_copy(translation_for(TR_PARAMETER_VALUE_NONE), result_text, *maxlength);
+    }
+    uint8_t *cursor = result_text;
+    cursor = string_from_year(cursor, scenario_property_start_year() + request->year, maxlength);
+    cursor = string_copy(string_from_ascii(", "), cursor, *maxlength);
+    *maxlength -= 2;
+    int numbers = string_from_int(cursor, request->amount, 0);
+    *maxlength -= numbers;
+    cursor += numbers;
+    cursor = string_copy(string_from_ascii(" "), cursor, *maxlength);
+    *maxlength -= 1;
+    cursor = string_copy(resource_get_data(request->resource)->text, cursor, *maxlength);
+
+    return cursor;
+}
+
+void scenario_events_parameter_data_get_display_string_for_value(parameter_type type, int value,
+    uint8_t *result_text, int maxlength)
 {
     switch (type) {
         case PARAMETER_TYPE_NUMBER:
@@ -964,6 +1016,11 @@ void scenario_events_parameter_data_get_display_string_for_value(parameter_type 
                         result_text = string_copy(text, result_text, maxlength);
                     }
                 }
+                return;
+            }
+        case PARAMETER_TYPE_REQUEST:
+            {
+                translation_for_request_value(value, result_text, &maxlength);
                 return;
             }
         case PARAMETER_TYPE_CUSTOM_MESSAGE:
@@ -1202,7 +1259,8 @@ void scenario_events_parameter_data_get_display_string_for_action(scenario_actio
         case ACTION_TYPE_REQUEST_IMMEDIATELY_START:
         case ACTION_TYPE_TAX_RATE_SET:
             {
-                result_text = translation_for_number_value(action->parameter1, result_text, &maxlength);
+                result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+                result_text = translation_for_request_value(action->parameter1, result_text, &maxlength);
                 return;
             }
         case ACTION_TYPE_TRADE_PROBLEM_LAND:
@@ -1369,7 +1427,8 @@ void scenario_events_parameter_data_get_display_string_for_condition(scenario_co
             }
         case CONDITION_TYPE_REQUEST_IS_ONGOING:
             {
-                result_text = translation_for_number_value(condition->parameter1, result_text, &maxlength);
+                result_text = append_text(string_from_ascii(" "), result_text, &maxlength);
+                result_text = translation_for_request_value(condition->parameter1, result_text, &maxlength);
                 result_text = translation_for_boolean_text(condition->parameter2, TR_PARAMETER_DISPLAY_ONGOING, TR_PARAMETER_DISPLAY_NOT_ONGOING, result_text, &maxlength);
                 return;
             }

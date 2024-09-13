@@ -124,7 +124,7 @@ static void sort_invasions(void)
     for (int i = 0; i < MAX_INVASIONS; i++) {
         for (int j = MAX_INVASIONS - 1; j > 0; j--) {
             invasion_t *current = &scenario.invasions[j];
-            invasion_t *prev = &scenario.invasions[j-1];
+            invasion_t *prev = &scenario.invasions[j - 1];
             if (current->type && (!prev->type || prev->year > current->year)) {
                 invasion_t tmp = *current;
                 *current = *prev;
