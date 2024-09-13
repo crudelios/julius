@@ -29,6 +29,7 @@ static struct {
     unsigned int total_requests;
     unsigned int requests_in_use;
     unsigned int new_request_button_focused;
+    void (*on_select)(int);
 } data;
 
 static generic_button new_request_button = {
@@ -103,10 +104,13 @@ static void draw_background(void)
 
     outer_panel_draw(0, 0, 40, 30);
     lang_text_draw(44, 14, 20, 12, FONT_LARGE_BLACK);
-    lang_text_draw_centered(13, 3, 0, 456, 640, FONT_NORMAL_BLACK);
-    lang_text_draw_multiline(152, 1, 32, 376, 576, FONT_NORMAL_BLACK);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_NEW_REQUEST, new_request_button.x + 8,
-        new_request_button.y + 8, new_request_button.width - 16, FONT_NORMAL_BLACK);
+
+    if (!data.on_select) {
+        lang_text_draw_centered(13, 3, 0, 456, 640, FONT_NORMAL_BLACK);
+        lang_text_draw_multiline(152, 1, 32, 376, 576, FONT_NORMAL_BLACK);
+        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_NEW_REQUEST, new_request_button.x + 8,
+            new_request_button.y + 8, new_request_button.width - 16, FONT_NORMAL_BLACK);
+    }
 
     graphics_reset_dialog();
 
@@ -138,8 +142,10 @@ static void draw_foreground(void)
         lang_text_draw_centered(44, 19, 0, 165, 640, FONT_LARGE_BLACK);
     }
 
-    button_border_draw(new_request_button.x, new_request_button.y, new_request_button.width, new_request_button.height,
-        data.new_request_button_focused);
+    if (!data.on_select) {
+        button_border_draw(new_request_button.x, new_request_button.y, new_request_button.width, new_request_button.height,
+            data.new_request_button_focused);
+    }
 
     graphics_reset_dialog();
 }
@@ -147,29 +153,43 @@ static void draw_foreground(void)
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
-    if (grid_box_handle_input(&request_buttons, m_dialog, 1) ||
+    if (grid_box_handle_input(&request_buttons, m_dialog, 1)) {
+        return;
+    }
+    if (!data.on_select &&
         generic_buttons_handle_mouse(m_dialog, 0, 0, &new_request_button, 1, &data.new_request_button_focused)) {
         return;
     }
     if (input_go_back_requested(m, h)) {
-        window_editor_attributes_show();
+        window_go_back();
     }
 }
 
 static void button_edit_request(unsigned int id, unsigned int mouse_x, unsigned int mouse_y)
 {
-    window_editor_edit_request_show(data.requests[id]->id);
+    if (!data.on_select) {
+        window_editor_edit_request_show(data.requests[id]->id);
+        return;
+    }
+    if (data.requests[id]->resource == RESOURCE_NONE) {
+        return;
+    }
+    data.on_select(data.requests[id]->id);
+    window_go_back();
 }
 
 static void button_new_request(int param0, int param1)
 {
+    if (data.on_select) {
+        return;
+    }
     int new_request_id = scenario_request_new();
     if (new_request_id >= 0) {
         window_editor_edit_request_show(new_request_id);
     }
 }
 
-void window_editor_requests_show(void)
+static void show_window(void (*on_select)(int))
 {
     window_type window = {
         WINDOW_EDITOR_REQUESTS,
@@ -177,6 +197,17 @@ void window_editor_requests_show(void)
         draw_foreground,
         handle_input
     };
+    data.on_select = on_select;
     grid_box_init(&request_buttons, scenario_request_count_total());
     window_show(&window);
+}
+
+void window_editor_requests_show(void)
+{
+    show_window(0);
+}
+
+void window_editor_requests_show_with_callback(void (*on_select_callback)(int))
+{
+    show_window(on_select_callback);
 }

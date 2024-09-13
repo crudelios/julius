@@ -234,13 +234,13 @@ static void button_ignored_disfavor(int param1, int param2)
 static void button_delete(int param1, int param2)
 {
     scenario_request_delete(data.id);
-    window_editor_requests_show();
+    window_go_back();
 }
 
 static void button_save(int param1, int param2)
 {
     scenario_request_update(data.id, &data.request);
-    window_editor_requests_show();
+    window_go_back();
 }
 
 void window_editor_edit_request_show(int id)

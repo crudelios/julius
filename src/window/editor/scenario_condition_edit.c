@@ -15,6 +15,7 @@
 #include "scenario/condition_types/condition_handler.h"
 #include "window/editor/custom_variables.h"
 #include "window/editor/map.h"
+#include "window/editor/requests.h"
 #include "window/editor/select_scenario_condition_type.h"
 #include "window/editor/select_city_by_type.h"
 #include "window/editor/select_city_trade_route.h"
@@ -333,6 +334,9 @@ static void change_parameter(xml_data_attribute_t *parameter, int param1)
         case PARAMETER_TYPE_STORAGE_TYPE:
         case PARAMETER_TYPE_TARGET_TYPE:
             window_editor_select_special_attribute_mapping_show(parameter->type, set_param_value, data.parameter_being_edited_current_value);
+            return;
+        case PARAMETER_TYPE_REQUEST:
+            window_editor_requests_show_with_callback(set_param_value);
             return;
         case PARAMETER_TYPE_ROUTE:
             window_editor_select_city_trade_route_show(set_param_value);
