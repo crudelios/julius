@@ -392,7 +392,7 @@ void scenario_request_load_state_old_version(buffer *list, int state_version, re
                 log_error("Error creating requests array. The game will probably crash.", 0, 0);
             }
             for (size_t i = 0; i < MAX_ORIGINAL_REQUESTS; i++) {
-                request = array_advance(requests);
+                array_advance(requests);
             }
             array_foreach(requests, request) {
                 request->year = buffer_read_i16(list);

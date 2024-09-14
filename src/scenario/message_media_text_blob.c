@@ -177,7 +177,9 @@ void message_media_text_blob_save_state(buffer *blob_buffer, buffer *meta_buffer
         array_size,
         struct_size);
 
-    buffer_write_raw(blob_buffer, message_media_text_blob.text_blob, array_size);
+    if (array_size) {
+        buffer_write_raw(blob_buffer, message_media_text_blob.text_blob, array_size);
+    }
 
     array_size = message_media_text_blob.entry_count;
     struct_size = (3 * sizeof(int32_t));
