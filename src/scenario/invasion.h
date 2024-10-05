@@ -35,8 +35,9 @@ int scenario_invasion_exists_upcoming(void);
 
 void scenario_invasion_foreach_warning(void (*callback)(int x, int y, int image_id));
 
-int scenario_invasion_count(void);
-int scenario_invasion_count_from_buffer(buffer *buf);
+int scenario_invasion_count_total(void);
+int scenario_invasion_count_active(void);
+int scenario_invasion_count_active_from_buffer(buffer *buf);
 
 int scenario_invasion_get_years_remaining(void);
 

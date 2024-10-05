@@ -54,6 +54,8 @@ void scenario_request_dispatch(int id);
 
 int scenario_request_count_total(void);
 
+int scenario_request_count_active(void);
+
 int scenario_request_count_visible(void);
 
 const scenario_request *scenario_request_get(int id);

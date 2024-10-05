@@ -67,7 +67,7 @@ static void sort_list(void)
 
 static void update_invasion_list(void)
 {
-    int current_invasions = scenario_invasion_count();
+    int current_invasions = scenario_invasion_count_total();
     if (current_invasions != data.total_invasions) {
         free(data.invasions);
         data.invasions = 0;
@@ -82,8 +82,8 @@ static void update_invasion_list(void)
             for (unsigned int i = 0; i < current_invasions; i++) {
                 data.invasions[i] = scenario_invasion_get(i);
             }
-            data.total_invasions = current_invasions;
         }
+        data.total_invasions = current_invasions;
     }
     sort_list();
     grid_box_update_total_items(&invasion_buttons, data.invasions_in_use);
@@ -103,8 +103,9 @@ static void draw_background(void)
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_NEW_INVASION, new_invasion_button.x + 8,
         new_invasion_button.y + 8, new_invasion_button.width - 16, FONT_NORMAL_BLACK);
 
-
     graphics_reset_dialog();
+
+    update_invasion_list();
 
     grid_box_request_refresh(&invasion_buttons);
 }
@@ -114,7 +115,7 @@ static void draw_invasion_button(const grid_box_item *item)
     button_border_draw(item->x, item->y, item->width, item->height, item->is_focused);
     const invasion_t *invasion = data.invasions[item->index];
     text_draw_number(invasion->year, '+', " ", item->x + 10, item->y + 7, FONT_NORMAL_BLACK, 0);
-    lang_text_draw_year(scenario_property_start_year() + invasion->year, item->x + 65, item->y + 7, FONT_NORMAL_BLACK);
+    lang_text_draw_year(scenario_property_start_year() + invasion->year, item->x + 45, item->y + 7, FONT_NORMAL_BLACK);
     int width = text_draw_number(invasion->amount, '@', " ", item->x + 120, item->y + 7, FONT_NORMAL_BLACK, 0);
     lang_text_draw(34, invasion->type, item->x + 115 + width, item->y + 7, FONT_NORMAL_BLACK);
 }
@@ -126,7 +127,7 @@ static void draw_foreground(void)
     if (data.invasions_in_use) {
         grid_box_draw(&invasion_buttons);
     } else {
-        lang_text_draw_centered(44, 19, 0, 165, 640, FONT_LARGE_BLACK);
+        lang_text_draw_centered(44, 20, 0, 165, 640, FONT_LARGE_BLACK);
     }
     button_border_draw(new_invasion_button.x, new_invasion_button.y,
         new_invasion_button.width, new_invasion_button.height, data.new_invasion_button_focused);
@@ -167,6 +168,6 @@ void window_editor_invasions_show(void)
         draw_foreground,
         handle_input
     };
-    grid_box_init(&invasion_buttons, MAX_INVASIONS);
+    grid_box_init(&invasion_buttons, scenario_invasion_count_active());
     window_show(&window);
 }

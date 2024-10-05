@@ -39,8 +39,8 @@ void scenario_distant_battle_set_enemy_travel_months(void)
 
 void scenario_distant_battle_process(void)
 {
-    int total_invasions = scenario_invasion_count();
-    for (int i = 0; i < scenario_invasion_count(); i++) {
+    int total_invasions = scenario_invasion_count_total();
+    for (int i = 0; i < total_invasions; i++) {
         const invasion_t *invasion = scenario_invasion_get(i);
         if (invasion->type == INVASION_TYPE_DISTANT_BATTLE &&
             game_time_year() == invasion->year + scenario.start_year &&

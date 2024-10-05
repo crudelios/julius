@@ -221,23 +221,6 @@ void scenario_save_state(buffer *buf)
     buffer_write_i16(buf, 0);
     buffer_write_i16(buf, scenario.empire.id);
     buffer_skip(buf, 8);
-/***
-    for (int i = 0; i < MAX_INVASIONS; i++) {
-        buffer_write_i16(buf, scenario.invasions[i].year);
-    }
-    for (int i = 0; i < MAX_INVASIONS; i++) {
-        buffer_write_i16(buf, scenario.invasions[i].type);
-    }
-    for (int i = 0; i < MAX_INVASIONS; i++) {
-        buffer_write_i16(buf, scenario.invasions[i].amount);
-    }
-    for (int i = 0; i < MAX_INVASIONS; i++) {
-        buffer_write_i16(buf, scenario.invasions[i].from);
-    }
-    for (int i = 0; i < MAX_INVASIONS; i++) {
-        buffer_write_i16(buf, scenario.invasions[i].attack_type);
-    }
-***/
     buffer_write_i16(buf, 0);
     buffer_write_i32(buf, scenario.initial_funds);
     buffer_write_i16(buf, scenario.enemy_id);
@@ -316,11 +299,7 @@ void scenario_save_state(buffer *buf)
     for (int i = 0; i < MAX_FISH_POINTS; i++) {
         buffer_write_i16(buf, scenario.fishing_points[i].y);
     }
-/***
-    for (int i = 0; i < MAX_INVASIONS; i++) {
-        buffer_write_u8(buf, scenario.invasions[i].month);
-    }
-***/
+
     buffer_write_i32(buf, scenario.rome_supplies_wheat);
 /***
     for (int i = 0; i < MAX_ALLOWED_BUILDINGS; i++) {
@@ -663,7 +642,7 @@ int scenario_invasions_from_buffer(buffer *buf, int version)
     int num_invasions = 0;
 
     if (version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
-        return scenario_invasion_count_from_buffer(buf);
+        return scenario_invasion_count_active_from_buffer(buf);
     } else {
         calculate_buffer_offsets(version);
         buffer_set(buf, buffer_offsets.invasions_part1 + (MAX_ORIGINAL_INVASIONS * 2));

@@ -86,8 +86,8 @@ static void update_request_list(void)
             for (unsigned int i = 0; i < current_requests; i++) {
                 data.requests[i] = scenario_request_get(i);
             }
-            data.total_requests = current_requests;
         }
+        data.total_requests = current_requests;
     }
     sort_list();
     grid_box_update_total_items(&request_buttons, data.requests_in_use);
@@ -195,7 +195,7 @@ static void show_window(void (*on_select)(int))
         handle_input
     };
     data.on_select = on_select;
-    grid_box_init(&request_buttons, scenario_request_count_total());
+    grid_box_init(&request_buttons, scenario_request_count_active());
     window_show(&window);
 }
 

@@ -9,8 +9,6 @@
 
 #include <stdint.h>
 
-//#define MAX_REQUESTS 20
-#define MAX_INVASIONS 20
 #define MAX_DEMAND_CHANGES 20
 #define MAX_PRICE_CHANGES 20
 #define MAX_CUSTOM_VARIABLES 100
@@ -168,13 +166,9 @@ extern struct scenario_t {
 
     custom_variable_t custom_variables[MAX_CUSTOM_VARIABLES];
 
-    //request_t requests[MAX_REQUESTS];
-
     demand_change_t demand_changes[MAX_DEMAND_CHANGES];
 
     price_change_t price_changes[MAX_DEMAND_CHANGES];
-
-    //invasion_t invasions[MAX_INVASIONS];
 
     struct {
         int severity;

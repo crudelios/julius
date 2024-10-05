@@ -1523,7 +1523,11 @@ static translation_string all_strings[] = {
     {TR_FIGURE_TYPE_ARMORY_CARTPUSHER, "Armory deliveryman"},
     {TR_TOOLTIP_BUTTON_CAN_GO_TO_ADVISORS, "Display the relevant advisor for this building." },
     {TR_FIGURE_ENEMY_CATAPULT, "Catapult"},
+    {TR_EDITOR_REQUEST, "request"},
+    {TR_EDITOR_REQUESTS, "requests"},
     {TR_EDITOR_NEW_REQUEST, "New request"},
+    {TR_EDITOR_INVASION, "invasion"},
+    {TR_EDITOR_INVASIONS, "invasions"},
     {TR_EDITOR_NEW_INVASION, "New invasion"},
     {TR_TOOLTIP_BUTTON_DELETE_COMMON_MESSAGES, "Delete common messages"}
 };

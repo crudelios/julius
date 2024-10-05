@@ -17,7 +17,9 @@
 #include "graphics/window.h"
 #include "input/input.h"
 #include "scenario/editor.h"
+#include "scenario/invasion.h"
 #include "scenario/property.h"
+#include "scenario/request.h"
 #include "widget/input_box.h"
 #include "widget/minimap.h"
 #include "widget/sidebar/editor.h"
@@ -143,7 +145,13 @@ static void draw_foreground(void)
 
     lang_text_draw(44, 40, 32, 165, FONT_NORMAL_BLACK);
     button_border_draw(212, 156, 250, 30, data.focus_button_id == 3);
-    lang_text_draw_centered(44, 14, 212, 165, 250, FONT_NORMAL_BLACK);
+    int requests = scenario_request_count_active();
+    if (requests == 0) {
+        lang_text_draw_centered(44, 19, 212, 165, 250, FONT_NORMAL_BLACK);
+    } else {
+        lang_text_draw_amount_centered(CUSTOM_TRANSLATION, TR_EDITOR_REQUEST, requests, 212, 165, 250,
+            FONT_NORMAL_BLACK);
+    }
 
     lang_text_draw(44, 41, 32, 205, FONT_NORMAL_BLACK);
     button_border_draw(212, 196, 250, 30, data.focus_button_id == 4);
@@ -152,7 +160,13 @@ static void draw_foreground(void)
     lang_text_draw(44, 42, 32, 245, FONT_NORMAL_BLACK);
     button_border_draw(212, 236, 250, 30, data.focus_button_id == 5);
 
-    lang_text_draw_centered(44, 20, 212, 245, 250, FONT_NORMAL_BLACK);
+    int invasions = scenario_invasion_count_active();
+    if (invasions == 0) {
+        lang_text_draw_centered(44, 20, 212, 245, 250, FONT_NORMAL_BLACK);
+    } else {
+        lang_text_draw_amount_centered(CUSTOM_TRANSLATION, TR_EDITOR_INVASION, invasions, 212, 245, 250,
+            FONT_NORMAL_BLACK);
+    }
 
     button_border_draw(212, 276, 250, 30, data.focus_button_id == 6);
     lang_text_draw_centered(44, 44, 212, 285, 250, FONT_NORMAL_BLACK);

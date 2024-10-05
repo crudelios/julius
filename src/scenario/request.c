@@ -209,6 +209,18 @@ int scenario_request_count_total(void)
     return requests.size;
 }
 
+int scenario_request_count_active(void)
+{
+    int num_requests = 0;
+    const scenario_request *request;
+    array_foreach(requests, request) {
+        if (request->resource) {
+            num_requests++;
+        }
+    }
+    return num_requests;
+}
+
 int scenario_request_count_visible(void)
 {
     int count = 0;
@@ -391,7 +403,7 @@ void scenario_request_load_state_old_version(buffer *list, requests_old_state_se
             log_error("Error creating requests array. The game will probably crash.", 0, 0);
         }
         for (size_t i = 0; i < MAX_ORIGINAL_REQUESTS; i++) {
-            array_next(requests);
+            array_advance(requests);
         }
         array_foreach(requests, request) {
             request->year = buffer_read_i16(list);

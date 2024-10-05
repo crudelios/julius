@@ -268,7 +268,12 @@ void scenario_invasion_foreach_warning(void (*callback)(int x, int y, int image_
     }
 }
 
-int scenario_invasion_count(void)
+int scenario_invasion_count_total(void)
+{
+    return data.invasions.size;
+}
+
+int scenario_invasion_count_active(void)
 {
     int num_invasions = 0;
     const invasion_t *invasion;
@@ -715,7 +720,7 @@ void scenario_invasion_load_state(buffer *buf)
     array_trim(data.invasions);
 }
 
-int scenario_invasion_count_from_buffer(buffer *buf)
+int scenario_invasion_count_active_from_buffer(buffer *buf)
 {
     int size;
     buffer_load_dynamic_piece_header_data(buf, 0, 0, &size, 0);
@@ -742,7 +747,7 @@ void scenario_invasion_load_state_old_version(buffer *buf, invasion_old_state_se
             log_error("Error creating invasions array - not enough memory. The game will now crash.", 0, 0);
         }
         for (size_t i = 0; i < MAX_ORIGINAL_INVASIONS; i++) {
-            array_next(data.invasions);
+            array_advance(data.invasions);
         }
         array_foreach(data.invasions, invasion) {
             invasion->year = buffer_read_i16(buf);

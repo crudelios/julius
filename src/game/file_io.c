@@ -1614,7 +1614,11 @@ static savegame_load_status savegame_read_file_info(saved_game_info *info, saveg
     scenario_description_from_buffer(state->scenario, info->description, version);
     info->image_id = scenario_image_id_from_buffer(state->scenario, version);
     info->climate = scenario_climate_from_buffer(state->scenario, version);
-    info->total_invasions = scenario_invasions_from_buffer(state->scenario, version);
+    if (scenario_version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
+        info->total_invasions = scenario_invasions_from_buffer(state->scenario, scenario_version);
+    } else {
+        info->total_invasions = scenario_invasions_from_buffer(state->invasions, scenario_version);
+    }
     info->player_rank = scenario_rank_from_buffer(state->scenario, version);
     info->start_year = scenario_start_year_from_buffer(state->scenario, version);
     scenario_open_play_info_from_buffer(state->scenario, version, &info->is_open_play, &info->open_play_id);
