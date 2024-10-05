@@ -9,6 +9,7 @@
 #include "game/save_version.h"
 #include "game/settings.h"
 #include "scenario/data.h"
+#include "scenario/invasion.h"
 #include "scenario/request.h"
 
 #include <string.h>
@@ -78,7 +79,7 @@ static void calculate_buffer_offsets(int scenario_version)
 
     if (scenario_version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         buffer_offsets.invasions_part1 = next_start_offset;
-        next_start_offset = buffer_offsets.invasions_part1 + (MAX_INVASIONS * 10);
+        next_start_offset = buffer_offsets.invasions_part1 + (MAX_ORIGINAL_INVASIONS * 10);
     }
 
     buffer_offsets.start_funds_and_enemy_id = next_start_offset;
@@ -128,7 +129,7 @@ static void calculate_buffer_offsets(int scenario_version)
 
     if (scenario_version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         buffer_offsets.invasions_part2 = next_start_offset;
-        next_start_offset = buffer_offsets.invasions_part2 + (MAX_INVASIONS * 1);
+        next_start_offset = buffer_offsets.invasions_part2 + (MAX_ORIGINAL_INVASIONS * 1);
     }
 
     if (scenario_version <= SCENARIO_LAST_NO_EXTENDED_REQUESTS) {
@@ -414,24 +415,9 @@ void scenario_load_state(buffer *buf, int version)
     scenario.empire.id = buffer_read_i16(buf);
     buffer_skip(buf, 8);
 
-    scenario_request_load_state_old_version(buf, version, REQUESTS_OLD_STATE_SECTIONS_TARGET);
-
     if (version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
-        for (int i = 0; i < MAX_INVASIONS; i++) {
-            scenario.invasions[i].year = buffer_read_i16(buf);
-        }
-        for (int i = 0; i < MAX_INVASIONS; i++) {
-            scenario.invasions[i].type = buffer_read_i16(buf);
-        }
-        for (int i = 0; i < MAX_INVASIONS; i++) {
-            scenario.invasions[i].amount = buffer_read_i16(buf);
-        }
-        for (int i = 0; i < MAX_INVASIONS; i++) {
-            scenario.invasions[i].from = buffer_read_i16(buf);
-        }
-        for (int i = 0; i < MAX_INVASIONS; i++) {
-            scenario.invasions[i].attack_type = buffer_read_i16(buf);
-        }
+        scenario_request_load_state_old_version(buf, REQUESTS_OLD_STATE_SECTIONS_TARGET);
+        scenario_invasion_load_state_old_version(buf, INVASION_OLD_STATE_FIRST_SECTION);
     }
 
     buffer_skip(buf, 2);
@@ -448,7 +434,9 @@ void scenario_load_state(buffer *buf, int version)
     buffer_read_raw(buf, scenario.brief_description, MAX_BRIEF_DESCRIPTION);
     buffer_read_raw(buf, scenario.briefing, MAX_BRIEFING);
 
-    scenario_request_load_state_old_version(buf, version, REQUESTS_OLD_STATE_SECTIONS_CAN_COMPLY);
+    if (version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
+        scenario_request_load_state_old_version(buf, REQUESTS_OLD_STATE_SECTIONS_CAN_COMPLY);
+    }
 
     scenario.image_id = buffer_read_i16(buf);
     scenario.is_open_play = buffer_read_i16(buf);
@@ -535,15 +523,11 @@ void scenario_load_state(buffer *buf, int version)
         scenario.fishing_points[i].y = buffer_read_i16(buf);
     }
 
-    scenario_request_load_state_old_version(buf, version, REQUESTS_OLD_STATE_SECTIONS_FAVOR_REWARD);
-
     if (version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
-        for (int i = 0; i < MAX_INVASIONS; i++) {
-            scenario.invasions[i].month = buffer_read_u8(buf);
-        }
+        scenario_request_load_state_old_version(buf, REQUESTS_OLD_STATE_SECTIONS_FAVOR_REWARD);
+        scenario_invasion_load_state_old_version(buf, INVASION_OLD_STATE_LAST_SECTION);
+        scenario_request_load_state_old_version(buf, REQUESTS_OLD_STATE_SECTIONS_ONGOING_INFO);
     }
-
-    scenario_request_load_state_old_version(buf, version, REQUESTS_OLD_STATE_SECTIONS_ONGOING_INFO);
 
     scenario.rome_supplies_wheat = buffer_read_i32(buf);
 
@@ -679,11 +663,11 @@ int scenario_invasions_from_buffer(buffer *buf, int version)
     int num_invasions = 0;
 
     if (version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
-
+        return scenario_invasion_count_from_buffer(buf);
     } else {
         calculate_buffer_offsets(version);
-        buffer_set(buf, buffer_offsets.invasions_part1 + (MAX_INVASIONS * 2));
-        for (int i = 0; i < MAX_INVASIONS; i++) {
+        buffer_set(buf, buffer_offsets.invasions_part1 + (MAX_ORIGINAL_INVASIONS * 2));
+        for (int i = 0; i < MAX_ORIGINAL_INVASIONS; i++) {
             if (buffer_read_i16(buf)) {
                 num_invasions++;
             }

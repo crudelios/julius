@@ -1245,7 +1245,7 @@ static int read_scenario_info(saved_game_info *info)
     scenario_description_from_buffer(state->scenario, info->description, scenario_data.version);
     info->image_id = scenario_image_id_from_buffer(state->scenario, scenario_data.version);
     info->climate = scenario_climate_from_buffer(state->scenario, scenario_data.version);
-    if (scenario_data.version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
+    if (scenario_data.version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         info->total_invasions = scenario_invasions_from_buffer(state->scenario, scenario_data.version);
     } else {
         info->total_invasions = scenario_invasions_from_buffer(state->invasions, scenario_data.version);

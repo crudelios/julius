@@ -5,14 +5,38 @@
 #include "figure/formation.h"
 #include "scenario/types.h"
 
+#define MAX_ORIGINAL_INVASIONS 20
+
+typedef enum {
+    INVASION_OLD_STATE_FIRST_SECTION = 0,
+    INVASION_OLD_STATE_LAST_SECTION = 1
+} invasion_old_state_sections;
+
+typedef struct {
+    int id;
+    int year;
+    int type;
+    int amount;
+    int from;
+    int attack_type;
+    int month;
+} invasion_t;
+
 void scenario_invasion_clear(void);
 void scenario_invasion_init(void);
+
+int scenario_invasion_new(void);
+
+const invasion_t *scenario_invasion_get(int id);
+void scenario_invasion_update(int id, const invasion_t *invasion);
+void scenario_invasion_delete(int id);
 
 int scenario_invasion_exists_upcoming(void);
 
 void scenario_invasion_foreach_warning(void (*callback)(int x, int y, int image_id));
 
 int scenario_invasion_count(void);
+int scenario_invasion_count_from_buffer(buffer *buf);
 
 int scenario_invasion_get_years_remaining(void);
 
@@ -34,5 +58,6 @@ void scenario_invasion_warning_load_state(buffer *invasion_id, buffer *warnings,
 void scenario_invasion_save_state(buffer *buf);
 
 void scenario_invasion_load_state(buffer *buf);
+void scenario_invasion_load_state_old_version(buffer *buf, invasion_old_state_sections section);
 
 #endif // SCENARIO_INVASION_H

@@ -372,68 +372,66 @@ void scenario_request_load_state(buffer *list)
     }
 
     for (int i = 0; i < array_size; i++) {
-        scenario_request *request = array_advance(requests);
+        scenario_request *request = array_next(requests);
         request_load(list, request);
     }
 
     array_trim(requests);
 }
 
-void scenario_request_load_state_old_version(buffer *list, int state_version, requests_old_state_sections section)
+void scenario_request_load_state_old_version(buffer *list, requests_old_state_sections section)
 {
     // Old savegames had request data split out into multiple chunks,
     // and saved as multiple arrays of variables, rather than an array of struct approach.
     // So here we need to load in a similar section / varaible array manner when dealing with old versions.
-    if (state_version <= SCENARIO_LAST_NO_EXTENDED_REQUESTS) {
-        scenario_request *request;
-        if (section == REQUESTS_OLD_STATE_SECTIONS_TARGET) {
-            if (!array_init(requests, REQUESTS_ARRAY_SIZE_STEP, new_request, request_in_use) ||
-                !array_expand(requests, MAX_ORIGINAL_REQUESTS)) {
-                log_error("Error creating requests array. The game will probably crash.", 0, 0);
-            }
-            for (size_t i = 0; i < MAX_ORIGINAL_REQUESTS; i++) {
-                array_advance(requests);
-            }
-            array_foreach(requests, request) {
-                request->year = buffer_read_i16(list);
-            }
-            array_foreach(requests, request) {
-                request->resource = buffer_read_i16(list);
-            }
-            array_foreach(requests, request) {
-                request->amount = buffer_read_i16(list);
-            }
-            array_foreach(requests, request) {
-                request->deadline_years = buffer_read_i16(list);
-            }
-        } else if (section == REQUESTS_OLD_STATE_SECTIONS_CAN_COMPLY) {
-            array_foreach(requests, request) {
-                request->can_comply_dialog_shown = buffer_read_u8(list);
-            }
-        } else if (section == REQUESTS_OLD_STATE_SECTIONS_FAVOR_REWARD) {
-            array_foreach(requests, request) {
-                request->favor = buffer_read_u8(list);
-            }
-        } else if (section == REQUESTS_OLD_STATE_SECTIONS_ONGOING_INFO) {
-            array_foreach(requests, request) {
-                request->month = buffer_read_u8(list);
-            }
-            array_foreach(requests, request) {
-                request->state = buffer_read_u8(list);
-            }
-            array_foreach(requests, request) {
-                request->visible = buffer_read_u8(list);
-            }
-            array_foreach(requests, request) {
-                request->months_to_comply = buffer_read_u8(list);
-            }
-            // Setup any default values we need for values that didn't exist in old versions.
-            array_foreach(requests, request) {
-                request->extension_months_to_comply = REQUESTS_DEFAULT_MONTHS_TO_COMPLY;
-                request->extension_disfavor = REQUESTS_DEFAULT_EXTENSION_DISFAVOUR;
-                request->ignored_disfavor = REQUESTS_DEFAULT_IGNORED_DISFAVOUR;
-            }
-            array_trim(requests);
+    scenario_request *request;
+    if (section == REQUESTS_OLD_STATE_SECTIONS_TARGET) {
+        if (!array_init(requests, REQUESTS_ARRAY_SIZE_STEP, new_request, request_in_use) ||
+            !array_expand(requests, MAX_ORIGINAL_REQUESTS)) {
+            log_error("Error creating requests array. The game will probably crash.", 0, 0);
         }
+        for (size_t i = 0; i < MAX_ORIGINAL_REQUESTS; i++) {
+            array_next(requests);
+        }
+        array_foreach(requests, request) {
+            request->year = buffer_read_i16(list);
+        }
+        array_foreach(requests, request) {
+            request->resource = buffer_read_i16(list);
+        }
+        array_foreach(requests, request) {
+            request->amount = buffer_read_i16(list);
+        }
+        array_foreach(requests, request) {
+            request->deadline_years = buffer_read_i16(list);
+        }
+    } else if (section == REQUESTS_OLD_STATE_SECTIONS_CAN_COMPLY) {
+        array_foreach(requests, request) {
+            request->can_comply_dialog_shown = buffer_read_u8(list);
+        }
+    } else if (section == REQUESTS_OLD_STATE_SECTIONS_FAVOR_REWARD) {
+        array_foreach(requests, request) {
+            request->favor = buffer_read_u8(list);
+        }
+    } else if (section == REQUESTS_OLD_STATE_SECTIONS_ONGOING_INFO) {
+        array_foreach(requests, request) {
+            request->month = buffer_read_u8(list);
+        }
+        array_foreach(requests, request) {
+            request->state = buffer_read_u8(list);
+        }
+        array_foreach(requests, request) {
+            request->visible = buffer_read_u8(list);
+        }
+        array_foreach(requests, request) {
+            request->months_to_comply = buffer_read_u8(list);
+        }
+        // Setup any default values we need for values that didn't exist in old versions.
+        array_foreach(requests, request) {
+            request->extension_months_to_comply = REQUESTS_DEFAULT_MONTHS_TO_COMPLY;
+            request->extension_disfavor = REQUESTS_DEFAULT_EXTENSION_DISFAVOUR;
+            request->ignored_disfavor = REQUESTS_DEFAULT_IGNORED_DISFAVOUR;
+        }
+        array_trim(requests);
     }
 }

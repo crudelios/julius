@@ -8,6 +8,7 @@
 #include "scenario/empire.h"
 #include "scenario/property.h"
 #include "scenario/request.h"
+#include "scenario/invasion.h"
 #include "scenario/scenario.h"
 
 #include <string.h>
@@ -91,10 +92,7 @@ void scenario_editor_create(int map_size)
     }
 
     scenario_request_clear_all();
-
-    for (int i = 0; i < MAX_INVASIONS; i++) {
-        scenario.invasions[i].from = 8;
-    }
+    scenario_invasion_clear();
     scenario_delete_all_custom_variables();
 
     scenario.random_events.max_wages = 45;
@@ -108,52 +106,6 @@ void scenario_editor_set_native_images(int image_hut, int image_meeting, int ima
     scenario.native_images.hut = image_hut;
     scenario.native_images.meeting = image_meeting;
     scenario.native_images.crops = image_crops;
-}
-
-void scenario_editor_invasion_get(int index, editor_invasion *invasion)
-{
-    invasion->year = scenario.invasions[index].year;
-    invasion->type = scenario.invasions[index].type;
-    invasion->amount = scenario.invasions[index].amount;
-    invasion->from = scenario.invasions[index].from;
-    invasion->attack_type = scenario.invasions[index].attack_type;
-}
-
-static void sort_invasions(void)
-{
-    for (int i = 0; i < MAX_INVASIONS; i++) {
-        for (int j = MAX_INVASIONS - 1; j > 0; j--) {
-            invasion_t *current = &scenario.invasions[j];
-            invasion_t *prev = &scenario.invasions[j - 1];
-            if (current->type && (!prev->type || prev->year > current->year)) {
-                invasion_t tmp = *current;
-                *current = *prev;
-                *prev = tmp;
-            }
-        }
-    }
-}
-
-void scenario_editor_invasion_delete(int index)
-{
-    scenario.invasions[index].year = 0;
-    scenario.invasions[index].amount = 0;
-    scenario.invasions[index].type = 0;
-    scenario.invasions[index].from = 8;
-    scenario.invasions[index].attack_type = 0;
-    sort_invasions();
-    scenario.is_saved = 0;
-}
-
-void scenario_editor_invasion_save(int index, editor_invasion *invasion)
-{
-    scenario.invasions[index].year = invasion->type ? invasion->year : 0;
-    scenario.invasions[index].amount = invasion->type ? invasion->amount : 0;
-    scenario.invasions[index].type = invasion->type;
-    scenario.invasions[index].from = invasion->from;
-    scenario.invasions[index].attack_type = invasion->attack_type;
-    sort_invasions();
-    scenario.is_saved = 0;
 }
 
 void scenario_editor_price_change_get(int index, editor_price_change *price_change)

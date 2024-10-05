@@ -152,15 +152,7 @@ static void draw_foreground(void)
     lang_text_draw(44, 42, 32, 245, FONT_NORMAL_BLACK);
     button_border_draw(212, 236, 250, 30, data.focus_button_id == 5);
 
-    editor_invasion invasion;
-    scenario_editor_invasion_get(0, &invasion);
-    if (invasion.type) {
-        lang_text_draw_year(scenario_property_start_year() + invasion.year, 222, 245, FONT_NORMAL_BLACK);
-        int width = text_draw_number(invasion.amount, '@', " ", 302, 245, FONT_NORMAL_BLACK, 0);
-        lang_text_draw(34, invasion.type, 302 + width, 245, FONT_NORMAL_BLACK);
-    } else {
-        lang_text_draw_centered(44, 20, 212, 245, 250, FONT_NORMAL_BLACK);
-    }
+    lang_text_draw_centered(44, 20, 212, 245, 250, FONT_NORMAL_BLACK);
 
     button_border_draw(212, 276, 250, 30, data.focus_button_id == 6);
     lang_text_draw_centered(44, 44, 212, 285, 250, FONT_NORMAL_BLACK);

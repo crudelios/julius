@@ -62,9 +62,6 @@ static void sort_list(void)
                 data.requests[j - 1] = tmp;
             }
         }
-        if (!data.requests_in_use && data.requests[i]->resource == RESOURCE_NONE) {
-            data.requests_in_use = i;
-        }
     }
     data.requests_in_use = 0;
     for (unsigned int i = 0; i < data.total_requests && data.requests[i]->resource != RESOURCE_NONE; i++) {

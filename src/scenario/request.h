@@ -75,6 +75,6 @@ int scenario_request_force_start(int id);
 void scenario_request_save_state(buffer *list);
 void scenario_request_load_state(buffer *list);
 
-void scenario_request_load_state_old_version(buffer *list, int state_version, requests_old_state_sections section);
+void scenario_request_load_state_old_version(buffer *list, requests_old_state_sections section);
 
 #endif // SCENARIO_REQUEST_H

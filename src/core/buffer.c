@@ -191,8 +191,20 @@ void buffer_init_dynamic_piece(buffer *buf, int32_t version, int32_t array_size,
 void buffer_load_dynamic_piece_header_data(buffer *buf, int32_t *size, int32_t *version, int32_t *array_size, int32_t *struct_size)
 {
     buffer_set(buf, 0);
-    *size = buffer_read_i32(buf);
-    *version = buffer_read_i32(buf);
-    *array_size = buffer_read_i32(buf);
-    *struct_size = buffer_read_i32(buf);
+    int32_t value = buffer_read_i32(buf);
+    if (size) {
+        *size = value;
+    }
+    value = buffer_read_i32(buf);
+    if (version) {
+        *version = value;
+    }
+    value = buffer_read_i32(buf);
+    if (array_size) {
+        *array_size = value;
+    }
+    value = buffer_read_i32(buf);
+    if (struct_size) {
+        *struct_size = value;
+    }
 }

@@ -157,7 +157,7 @@ struct { \
 /**
  * Iterates through an array, calling the callback function for each item
  * @param a The array structure
- * @param callback The function callback to call for each item, in the format "callback(T *item)"
+ * @param callback The function callback to call for each item, in the format "callback(T *item, int array_index)"
  * @note You can use the array_index parameter to retrieve the index of the current item
  */
 #define array_foreach_callback(a, callback) \

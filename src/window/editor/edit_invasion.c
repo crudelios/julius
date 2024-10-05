@@ -10,6 +10,7 @@
 #include "graphics/window.h"
 #include "input/input.h"
 #include "scenario/editor.h"
+#include "scenario/invasion.h"
 #include "scenario/property.h"
 #include "scenario/types.h"
 #include "window/editor/invasions.h"
@@ -37,14 +38,15 @@ static generic_button buttons[] = {
 
 static struct {
     int id;
-    editor_invasion invasion;
+    invasion_t invasion;
     unsigned int focus_button_id;
 } data;
 
 static void init(int id)
 {
     data.id = id;
-    scenario_editor_invasion_get(id, &data.invasion);
+    const invasion_t *invasion = scenario_invasion_get(id);
+    data.invasion = *invasion;
 }
 
 static void draw_background(void)
@@ -153,13 +155,13 @@ static void button_attack(int param1, int param2)
 
 static void button_delete(int param1, int param2)
 {
-    scenario_editor_invasion_delete(data.id);
+    scenario_invasion_delete(data.id);
     window_editor_invasions_show();
 }
 
 static void button_save(int param1, int param2)
 {
-    scenario_editor_invasion_save(data.id, &data.invasion);
+    scenario_invasion_update(data.id, &data.invasion);
     window_editor_invasions_show();
 }
 

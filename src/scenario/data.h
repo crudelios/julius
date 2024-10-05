@@ -91,15 +91,6 @@ struct win_criteria_t {
 
 typedef struct {
     int year;
-    int type;
-    int amount;
-    int from;
-    int attack_type;
-    int month;
-} invasion_t;
-
-typedef struct {
-    int year;
     int month;
     int resource;
     int amount;
@@ -183,7 +174,7 @@ extern struct scenario_t {
 
     price_change_t price_changes[MAX_DEMAND_CHANGES];
 
-    invasion_t invasions[MAX_INVASIONS];
+    //invasion_t invasions[MAX_INVASIONS];
 
     struct {
         int severity;
