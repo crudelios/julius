@@ -116,7 +116,7 @@ static void draw_invasion_button(const grid_box_item *item)
     const invasion_t *invasion = data.invasions[item->index];
     text_draw_number(invasion->year, '+', " ", item->x + 10, item->y + 7, FONT_NORMAL_BLACK, 0);
     lang_text_draw_year(scenario_property_start_year() + invasion->year, item->x + 45, item->y + 7, FONT_NORMAL_BLACK);
-    int width = text_draw_number(invasion->amount, '@', " ", item->x + 120, item->y + 7, FONT_NORMAL_BLACK, 0);
+    int width = text_draw_number(invasion->amount.min, '@', " ", item->x + 120, item->y + 7, FONT_NORMAL_BLACK, 0);
     lang_text_draw(34, invasion->type, item->x + 115 + width, item->y + 7, FONT_NORMAL_BLACK);
 }
 

@@ -6,6 +6,7 @@
 #include "scenario/types.h"
 
 #define MAX_ORIGINAL_INVASIONS 20
+#define INVASIONS_REPEAT_INFINITE -1
 
 typedef enum {
     INVASION_OLD_STATE_FIRST_SECTION = 0,
@@ -16,10 +17,20 @@ typedef struct {
     int id;
     int year;
     int type;
-    int amount;
+    struct {
+        int min;
+        int max;
+    } amount;
     int from;
     int attack_type;
     int month;
+    struct {
+        int times;
+        struct {
+            int min;
+            int max;
+        } interval; // in years
+    } repeat;
 } invasion_t;
 
 void scenario_invasion_clear(void);

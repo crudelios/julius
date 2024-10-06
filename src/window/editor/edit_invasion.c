@@ -66,7 +66,7 @@ static void draw_foreground(void)
     lang_text_draw_year(scenario_property_start_year() + data.invasion.year, 100, 158, FONT_NORMAL_BLACK);
 
     button_border_draw(200, 152, 80, 25, data.focus_button_id == 2);
-    text_draw_number_centered(data.invasion.amount, 200, 158, 80, FONT_NORMAL_BLACK);
+    text_draw_number_centered(data.invasion.amount.min, 200, 158, 80, FONT_NORMAL_BLACK);
 
     button_border_draw(320, 152, 200, 25, data.focus_button_id == 3);
     lang_text_draw_centered(34, data.invasion.type, 320, 158, 200, FONT_NORMAL_BLACK);
@@ -111,7 +111,8 @@ static void button_year(int param1, int param2)
 
 static void set_amount(int value)
 {
-    data.invasion.amount = value;
+    data.invasion.amount.min = value;
+    data.invasion.amount.max = value;
 }
 
 static void button_amount(int param1, int param2)

@@ -7,6 +7,7 @@
 #include "city/military.h"
 #include "city/ratings.h"
 #include "core/calc.h"
+#include "core/random.h"
 #include "empire/city.h"
 #include "empire/object.h"
 #include "empire/type.h"
@@ -50,7 +51,7 @@ void scenario_distant_battle_process(void)
             !city_military_has_distant_battle()) {
 
             city_message_post(1, MESSAGE_CAESAR_REQUESTS_ARMY, 0, 0);
-            city_military_init_distant_battle(invasion->amount);
+            city_military_init_distant_battle(random_between_from_stdlib(invasion->amount.min, invasion->amount.max));
             return;
         }
     }

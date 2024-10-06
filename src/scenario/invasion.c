@@ -27,7 +27,7 @@
 #define INVASIONS_ARRAY_SIZE_STEP 16
 #define WARNINGS_ARRAY_SIZE_STEP 32
 
-#define INVASIONS_STRUCT_SIZE_CURRENT (5 * sizeof(int16_t) + 1 * sizeof(uint8_t))
+#define INVASIONS_STRUCT_SIZE_CURRENT (9 * sizeof(int16_t) + 1 * sizeof(uint8_t))
 #define WARNINGS_STRUCT_SIZE_CURRENT (1 * sizeof(int32_t) + 6 * sizeof(int16_t) + 5 * sizeof(uint8_t))
 
 #define BARBARIAN_ENEMY_TYPE_MAX 4
@@ -432,6 +432,46 @@ static int start_invasion(int enemy_type, int amount, int invasion_point, format
     return grid_offset;
 }
 
+static void repeat_invasion_without_warnings(invasion_t *invasion)
+{
+    if (invasion->repeat.times != INVASIONS_REPEAT_INFINITE) {
+        invasion->repeat.times--;
+    }
+    int years = random_between_from_stdlib(invasion->repeat.interval.min, invasion->repeat.interval.max);
+
+    invasion->year += years;
+    invasion->month = 2 + (random_from_stdlib() & 7);
+
+    int grid_offset = start_invasion(ENEMY_ID_TO_ENEMY_TYPE[invasion->from],
+        random_between_from_stdlib(invasion->amount.min, invasion->amount.max),
+        invasion->from, invasion->attack_type, invasion->id);
+    if (grid_offset > 0) {
+        city_message_post(1, MESSAGE_ENEMY_ARMY_ATTACK, data.last_internal_invasion_id, grid_offset);
+    }
+}
+
+static void repeat_invasion_with_warnings(invasion_t *invasion)
+{
+    repeat_invasion_without_warnings(invasion);
+
+    invasion_warning *warning;
+    array_foreach(data.warnings, warning) {
+        if (warning->invasion_id != invasion->id) {
+            continue;
+        }
+        warning->in_use = 1;
+        warning->handled = 0;
+        warning->month_notified = 0;
+        warning->year_notified = 0;
+        warning->months_to_go = 12 * invasion->year;
+        warning->months_to_go += invasion->month;
+        warning->months_to_go -= 12 * warning->warning_years;
+        if (warning->warning_years > 1) {
+            warning->months_to_go++;  // later warnings haven't been handled by scenario_invasion_process, so we need to add a month
+        }
+    }
+}
+
 void scenario_invasion_process(void)
 {
     int enemy_id = scenario.enemy_id;
@@ -456,7 +496,7 @@ void scenario_invasion_process(void)
                 }
             }
         }
-        const invasion_t *invasion = array_item(data.invasions, warning->invasion_id);
+        invasion_t *invasion = array_item(data.invasions, warning->invasion_id);
         if (game_time_year() >= scenario.start_year + invasion->year &&
             game_time_month() >= invasion->month) {
             // invasion attack time has passed
@@ -464,10 +504,11 @@ void scenario_invasion_process(void)
             if (warning->warning_years > 1) {
                 continue;
             }
+            int random_amount = random_between_from_stdlib(invasion->amount.min, invasion->amount.max);
             // enemy invasions
             if (invasion->type == INVASION_TYPE_ENEMY_ARMY) {
                 int grid_offset = start_invasion(ENEMY_ID_TO_ENEMY_TYPE[enemy_id],
-                    invasion->amount, invasion->from, invasion->attack_type, warning->invasion_id);
+                    random_amount, invasion->from, invasion->attack_type, warning->invasion_id);
                 if (grid_offset > 0) {
                     if (ENEMY_ID_TO_ENEMY_TYPE[enemy_id] > BARBARIAN_ENEMY_TYPE_MAX) {
                         city_message_post(1, MESSAGE_ENEMY_ARMY_ATTACK, data.last_internal_invasion_id, grid_offset);
@@ -478,23 +519,30 @@ void scenario_invasion_process(void)
             }
             if (invasion->type == INVASION_TYPE_CAESAR) {
                 int grid_offset = start_invasion(ENEMY_11_CAESAR,
-                    invasion->amount, invasion->from, invasion->attack_type, warning->invasion_id);
+                    random_amount, invasion->from, invasion->attack_type, warning->invasion_id);
                 if (grid_offset > 0) {
                     city_message_post(1, MESSAGE_CAESAR_ARMY_ATTACK, data.last_internal_invasion_id, grid_offset);
                 }
             }
+            if (invasion->repeat.times != 0) {
+                repeat_invasion_with_warnings(invasion);
+            }
         }
     }
     // local uprisings
-    const invasion_t *invasion;
+    invasion_t *invasion;
     array_foreach(data.invasions, invasion){
         if (invasion->type == INVASION_TYPE_LOCAL_UPRISING) {
             if (game_time_year() == scenario.start_year + invasion->year && game_time_month() == invasion->month) {
                 int grid_offset = start_invasion(ENEMY_0_BARBARIAN,
-                    invasion->amount, invasion->from, invasion->attack_type, invasion->id);
+                    random_between_from_stdlib(invasion->amount.min, invasion->amount.max),
+                    invasion->from, invasion->attack_type, invasion->id);
                 if (grid_offset > 0) {
                     city_message_post(1, MESSAGE_LOCAL_UPRISING, data.last_internal_invasion_id, grid_offset);
                 }
+            }
+            if (invasion->repeat.times != 0) {
+                repeat_invasion_without_warnings(invasion);
             }
         }
     }
@@ -689,12 +737,16 @@ void scenario_invasion_save_state(buffer *buf)
 
     const invasion_t *invasion;
     array_foreach(data.invasions, invasion) {
-        buffer_write_i16(buf, invasion->year);
         buffer_write_i16(buf, invasion->type);
-        buffer_write_i16(buf, invasion->amount);
+        buffer_write_i16(buf, invasion->year);
+        buffer_write_i16(buf, invasion->amount.min);
+        buffer_write_i16(buf, invasion->amount.max);
         buffer_write_i16(buf, invasion->from);
         buffer_write_i16(buf, invasion->attack_type);
         buffer_write_u8(buf, invasion->month);
+        buffer_write_i16(buf, invasion->repeat.times);
+        buffer_write_i16(buf, invasion->repeat.interval.min);
+        buffer_write_i16(buf, invasion->repeat.interval.max);
     }
 }
 
@@ -710,12 +762,16 @@ void scenario_invasion_load_state(buffer *buf)
 
     for (size_t i = 0; i < size; i++) {
         invasion_t *invasion = array_next(data.invasions);
-        invasion->year = buffer_read_i16(buf);
         invasion->type = buffer_read_i16(buf);
-        invasion->amount = buffer_read_i16(buf);
+        invasion->year = buffer_read_i16(buf);
+        invasion->amount.min = buffer_read_i16(buf);
+        invasion->amount.max = buffer_read_i16(buf);
         invasion->from = buffer_read_i16(buf);
         invasion->attack_type = buffer_read_i16(buf);
         invasion->month = buffer_read_u8(buf);
+        invasion->repeat.times = buffer_read_i16(buf);
+        invasion->repeat.interval.min = buffer_read_i16(buf);
+        invasion->repeat.interval.max = buffer_read_i16(buf);
     }
     array_trim(data.invasions);
 }
@@ -726,7 +782,6 @@ int scenario_invasion_count_active_from_buffer(buffer *buf)
     buffer_load_dynamic_piece_header_data(buf, 0, 0, &size, 0);
 
     int num_invasions = 0;
-    buffer_skip(buf, sizeof(int16_t));
 
     for (int i = 0; i < size; i++) {
         if (buffer_read_i16(buf) != INVASION_TYPE_NONE) {
@@ -756,7 +811,8 @@ void scenario_invasion_load_state_old_version(buffer *buf, invasion_old_state_se
             invasion->type = buffer_read_i16(buf);
         }
         array_foreach(data.invasions, invasion) {
-            invasion->amount = buffer_read_i16(buf);
+            invasion->amount.min = buffer_read_i16(buf);
+            invasion->amount.max = invasion->amount.min;
         }
         array_foreach(data.invasions, invasion) {
             invasion->from = buffer_read_i16(buf);
