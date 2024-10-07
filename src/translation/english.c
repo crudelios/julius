@@ -1529,6 +1529,23 @@ static translation_string all_strings[] = {
     {TR_EDITOR_INVASION, "invasion"},
     {TR_EDITOR_INVASIONS, "invasions"},
     {TR_EDITOR_NEW_INVASION, "New invasion"},
+    {TR_EDITOR_INVASION_DATE, "Invasion date:"},
+    {TR_EDITOR_INVASION_SIZE, "Invasion size:"},
+    {TR_EDITOR_INVASION_BETWEEN, "Between"},
+    {TR_EDITOR_INVASION_AND, "and"},
+    {TR_EDITOR_INVASION_SIZE_UNITS, "units"},
+    {TR_EDITOR_INVASION_ENEMY_TYPE, "Enemy type:"},
+    {TR_EDITOR_INVASION_FROM, "From:"},
+    {TR_EDITOR_INVASION_ATTACK_PRIORITY, "Attack priority:"},
+    {TR_EDITOR_INVASION_REPEAT, "Repeat invasion:"},
+    {TR_EDITOR_INVASION_DO_NOT_REPEAT, "Do not repeat"},
+    {TR_EDITOR_INVASION_REPEAT_FOREVER, "Repeat forever"},
+    {TR_EDITOR_INVASION_REPEAT_ONCE, "Repeat once"},
+    {TR_EDITOR_INVASION_REPEAT_TWICE, "Repeat twice"},
+    {TR_EDITOR_INVASION_REPEAT_TEXT, "Repeat "},
+    {TR_EDITOR_INVASION_REPEAT_TIMES, " times"},
+    {TR_EDITOR_INVASION_REPEAT_FREQUENCY, "Repeat frequency:"},
+    {TR_EDITOR_INVASION_REPEAT_FREQUENCY_YEARS, "years"},
     {TR_TOOLTIP_BUTTON_DELETE_COMMON_MESSAGES, "Delete common messages"}
 };
 

@@ -230,7 +230,7 @@ void scenario_invasion_update(int id, const invasion_t *invasion)
 void scenario_invasion_delete(int id)
 {
     invasion_t *invasion = array_item(data.invasions, id);
-    invasion->type = INVASION_TYPE_NONE;
+    memset(invasion, 0, sizeof(invasion_t));
     array_trim(data.invasions);
     scenario.is_saved = 0;
 }
