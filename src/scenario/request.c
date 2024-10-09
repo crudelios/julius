@@ -14,12 +14,11 @@
 #include "game/save_version.h"
 #include "game/time.h"
 #include "game/tutorial.h"
-#include "scenario/data.h"
+#include "scenario/property.h"
 
 #define REQUESTS_ARRAY_SIZE_STEP 16
-#define MAX_ORIGINAL_REQUESTS 20
 
-#define REQUESTS_STRUCT_SIZE_CURRENT ((7 * sizeof(int16_t)) + (6 * sizeof(uint8_t)))
+#define REQUESTS_STRUCT_SIZE_CURRENT (7 * sizeof(int16_t) + 6 * sizeof(uint8_t))
 
 static array(scenario_request) requests;
 
@@ -55,7 +54,9 @@ static void make_request_visible_and_send_message(scenario_request *request)
 
 void scenario_request_clear_all(void)
 {
-    array_init(requests, REQUESTS_ARRAY_SIZE_STEP, new_request, request_in_use);
+    if (!array_init(requests, REQUESTS_ARRAY_SIZE_STEP, new_request, request_in_use)) {
+        log_error("Problema creating requests array - memory full. The gane will now crash.", 0, 0);
+    }
 }
 
 void scenario_request_init(void)
@@ -135,7 +136,7 @@ static void process_request(scenario_request *request)
     }
 
     // request is not visible
-    int year = scenario.start_year;
+    int year = scenario_property_start_year();
     if (!tutorial_adjust_request_year(&year)) {
         return;
     }
@@ -185,7 +186,6 @@ void scenario_request_update(int id, const scenario_request *request)
     *base_request = *request;
     base_request->id = id;
     array_trim(requests);
-    scenario.is_saved = 0;
 }
 
 void scenario_request_delete(int id)
@@ -193,7 +193,6 @@ void scenario_request_delete(int id)
     scenario_request *request = array_item(requests, id);
     request->resource = RESOURCE_NONE;
     array_trim(requests);
-    scenario.is_saved = 0;
 }
 
 void scenario_request_remap_resource(void)
@@ -249,8 +248,7 @@ int scenario_request_foreach_visible(int start_index, void (*callback)(int index
 const scenario_request *scenario_request_get_visible(int index)
 {
     const scenario_request *request;
-    array_foreach(requests, request)
-    {
+    array_foreach(requests, request) {
         if (request->resource && request->visible && request->state <= 1) {
             if (index == 0) {
                 return scenario_request_get(request->id);

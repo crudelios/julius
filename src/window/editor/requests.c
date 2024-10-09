@@ -50,10 +50,19 @@ static grid_box_type request_buttons = {
     .draw_item = draw_request_button
 };
 
-static void sort_list(void)
+static void limit_and_sort_list(void)
 {
+    data.requests_in_use = 0;
     for (unsigned int i = 0; i < data.total_requests; i++) {
-        for (unsigned int j = data.total_requests - 1; j > 0; j--) {
+        const scenario_request *request = scenario_request_get(i);
+        if (request->resource == RESOURCE_NONE) {
+            continue;
+        }
+        data.requests[data.requests_in_use] = request;
+        data.requests_in_use++;
+    }
+    for (unsigned int i = 0; i < data.requests_in_use; i++) {
+        for (unsigned int j = data.requests_in_use - 1; j > 0; j--) {
             const scenario_request *current = data.requests[j];
             const scenario_request *prev = data.requests[j - 1];
             if (current->resource && (!prev->resource || prev->year > current->year)) {
@@ -62,10 +71,6 @@ static void sort_list(void)
                 data.requests[j - 1] = tmp;
             }
         }
-    }
-    data.requests_in_use = 0;
-    for (unsigned int i = 0; i < data.total_requests && data.requests[i]->resource != RESOURCE_NONE; i++) {
-        data.requests_in_use++;
     }
 }
 
@@ -83,13 +88,10 @@ static void update_request_list(void)
                 data.requests_in_use = 0;
                 return;
             }
-            for (unsigned int i = 0; i < current_requests; i++) {
-                data.requests[i] = scenario_request_get(i);
-            }
         }
         data.total_requests = current_requests;
     }
-    sort_list();
+    limit_and_sort_list();
     grid_box_update_total_items(&request_buttons, data.requests_in_use);
 }
 

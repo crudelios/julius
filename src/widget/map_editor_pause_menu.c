@@ -11,6 +11,7 @@
 #include "graphics/panel.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "scenario/editor.h"
 #include "scenario/property.h"
 #include "scenario/scenario.h"
 #include "translation/translation.h"
@@ -88,7 +89,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
 static void main_menu_confirmed(int confirmed, int checked)
 {
     if (confirmed) {
-        if (scenario_is_saved()) {
+        if (scenario_editor_is_saved()) {
             game_exit_editor();
         } else {
             window_popup_dialog_show(POPUP_DIALOG_EDITOR_QUIT_WITHOUT_SAVING, menu_file_confirm_exit, 1);

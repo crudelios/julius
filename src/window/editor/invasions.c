@@ -33,7 +33,7 @@ static generic_button new_invasion_button = {
 };
 
 static grid_box_type invasion_buttons = {
-    .x = 20,
+    .x = 10,
     .y = 40,
     .width = 38 * BLOCK_SIZE,
     .height = 19 * BLOCK_SIZE,
@@ -46,10 +46,19 @@ static grid_box_type invasion_buttons = {
     .draw_item = draw_invasion_button
 };
 
-static void sort_list(void)
+static void limit_and_sort_list(void)
 {
+    data.invasions_in_use = 0;
     for (unsigned int i = 0; i < data.total_invasions; i++) {
-        for (unsigned int j = data.total_invasions - 1; j > 0; j--) {
+        const invasion_t *invasion = scenario_invasion_get(i);
+        if (!invasion->year) {
+            continue;
+        }
+        data.invasions[data.invasions_in_use] = invasion;
+        data.invasions_in_use++;
+    }
+    for (unsigned int i = 0; i < data.invasions_in_use; i++) {
+        for (unsigned int j = data.invasions_in_use - 1; j > 0; j--) {
             const invasion_t *current = data.invasions[j];
             const invasion_t *prev = data.invasions[j - 1];
             if (current->type && (!prev->type || prev->year > current->year)) {
@@ -58,10 +67,6 @@ static void sort_list(void)
                 data.invasions[j - 1] = tmp;
             }
         }
-    }
-    data.invasions_in_use = 0;
-    for (unsigned int i = 0; i < data.total_invasions && data.invasions[i]->type != INVASION_TYPE_NONE; i++) {
-        data.invasions_in_use++;
     }
 }
 
@@ -79,13 +84,10 @@ static void update_invasion_list(void)
                 data.invasions_in_use = 0;
                 return;
             }
-            for (unsigned int i = 0; i < current_invasions; i++) {
-                data.invasions[i] = scenario_invasion_get(i);
-            }
         }
         data.total_invasions = current_invasions;
     }
-    sort_list();
+    limit_and_sort_list();
     grid_box_update_total_items(&invasion_buttons, data.invasions_in_use);
 }
 

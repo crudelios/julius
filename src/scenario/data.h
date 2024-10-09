@@ -9,7 +9,6 @@
 
 #include <stdint.h>
 
-#define MAX_DEMAND_CHANGES 20
 #define MAX_PRICE_CHANGES 20
 #define MAX_CUSTOM_VARIABLES 100
 
@@ -96,17 +95,6 @@ typedef struct {
 } price_change_t;
 
 typedef struct {
-    int year;
-    int month;
-    int resource;
-    int route_id;
-    int amount;
-} demand_change_t;
-
-#define DEMAND_CHANGE_LEGACY_IS_RISE 9999
-#define DEMAND_CHANGE_LEGACY_IS_FALL -9999
-
-typedef struct {
     struct win_criteria_t population;
     struct win_criteria_t culture;
     struct win_criteria_t prosperity;
@@ -166,9 +154,7 @@ extern struct scenario_t {
 
     custom_variable_t custom_variables[MAX_CUSTOM_VARIABLES];
 
-    demand_change_t demand_changes[MAX_DEMAND_CHANGES];
-
-    price_change_t price_changes[MAX_DEMAND_CHANGES];
+    price_change_t price_changes[MAX_PRICE_CHANGES];
 
     struct {
         int severity;
@@ -234,8 +220,6 @@ extern struct scenario_t {
         /** Temp storage for carrying over player name to next campaign mission */
         uint8_t player_name[MAX_PLAYER_NAME];
     } campaign;
-
-    int is_saved;
 } scenario;
 
 #endif // SCENARIO_DATA_H

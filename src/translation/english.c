@@ -1546,6 +1546,11 @@ static translation_string all_strings[] = {
     {TR_EDITOR_INVASION_REPEAT_TIMES, " times"},
     {TR_EDITOR_INVASION_REPEAT_FREQUENCY, "Repeat frequency:"},
     {TR_EDITOR_INVASION_REPEAT_FREQUENCY_YEARS, "years"},
+    {TR_EDITOR_NEW_DEMAND_CHANGE, "New demand change"},
+    {TR_EDITOR_NO_DEMAND_CHANGES, "No demand changes"},
+    {TR_EDITOR_NO_ROUTES, "(No trade routes)"},
+    {TR_EDITOR_UNKNOWN_ROUTE, "(Unknown route)"},
+    {TR_EDITOR_SET_A_ROUTE, "(Set a route)"},
     {TR_TOOLTIP_BUTTON_DELETE_COMMON_MESSAGES, "Delete common messages"}
 };
 

@@ -36,6 +36,8 @@ static struct {
     resource_type avaialble_resources[RESOURCE_MAX];
 } data;
 
+#define NUM_BUTTONS (sizeof(buttons) / sizeof(generic_button))
+
 static generic_button buttons[] = {
     {30, 186, 60, 25, button_year, button_none},
     {330, 186, 80, 25, button_amount, button_none},
@@ -59,10 +61,7 @@ static void init(int id)
 static void draw_background(void)
 {
     window_editor_map_draw_all();
-}
 
-static void draw_foreground(void)
-{
     graphics_in_dialog();
 
     outer_panel_draw(0, 100, 38, 20);
@@ -75,49 +74,51 @@ static void draw_foreground(void)
     width = lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENT_ID, base_x, 154, FONT_NORMAL_BLACK);
     text_draw_number(data.request.id, 0, "", base_x + width, 154, FONT_NORMAL_BLACK, 0);
 
-    button_border_draw(30, 186, 60, 25, data.focus_button_id == 1);
     text_draw_number_centered_prefix(data.request.year, '+', 30, 192, 60, FONT_NORMAL_BLACK);
     lang_text_draw_year(scenario_property_start_year() + data.request.year, 110, 192, FONT_NORMAL_BLACK);
 
     lang_text_draw(44, 72, 250, 192, FONT_NORMAL_BLACK);
-    button_border_draw(330, 186, 80, 25, data.focus_button_id == 2);
     text_draw_number_centered(data.request.amount, 330, 192, 80, FONT_NORMAL_BLACK);
 
-    button_border_draw(430, 186, 100, 25, data.focus_button_id == 3);
     text_draw_centered(resource_get_data(data.request.resource)->text, 430, 192, 100, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
 
     lang_text_draw(44, 24, 40, 230, FONT_NORMAL_BLACK);
-    button_border_draw(70, 224, 140, 25, data.focus_button_id == 4);
+
     lang_text_draw_amount(8, 8, data.request.deadline_years, 80, 230, FONT_NORMAL_BLACK);
 
     lang_text_draw(44, 73, 300, 230, FONT_NORMAL_BLACK);
-    button_border_draw(400, 224, 80, 25, data.focus_button_id == 5);
+
     text_draw_number_centered_prefix(data.request.favor, '+', 400, 230, 80, FONT_NORMAL_BLACK);
 
     lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_FAVOUR_EXTENSION_MONTHS, 70, 270, FONT_NORMAL_BLACK);
-    button_border_draw(400, 264, 80, 25, data.focus_button_id == 6);
     text_draw_number_centered_prefix(data.request.extension_months_to_comply, '+', 400, 270, 80, FONT_NORMAL_BLACK);
 
     lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_FAVOUR_DISFAVOR, 70, 310, FONT_NORMAL_BLACK);
-    button_border_draw(400, 304, 80, 25, data.focus_button_id == 7);
     text_draw_number_centered_prefix(data.request.extension_disfavor, '-', 400, 310, 80, FONT_NORMAL_BLACK);
 
     lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_FAVOUR_IGNORED, 70, 350, FONT_NORMAL_BLACK);
-    button_border_draw(400, 344, 80, 25, data.focus_button_id == 8);
     text_draw_number_centered_prefix(data.request.ignored_disfavor, '-', 400, 350, 80, FONT_NORMAL_BLACK);
-
-    button_border_draw(400, 384, 100, 25, data.focus_button_id == 10);
     lang_text_draw_centered(18, 3, 400, 390, 100, FONT_NORMAL_BLACK);
-
-    button_border_draw(110, 384, 250, 25, data.focus_button_id == 9);
     lang_text_draw_centered(44, 25, 110, 390, 250, FONT_NORMAL_BLACK);
+
+    graphics_reset_dialog();
+}
+
+static void draw_foreground(void)
+{
+    graphics_in_dialog();
+
+    for (size_t i = 0; i < NUM_BUTTONS; i++) {
+        int focus = data.focus_button_id == i + 1;
+        button_border_draw(buttons[i].x, buttons[i].y, buttons[i].width, buttons[i].height, focus);
+    }
 
     graphics_reset_dialog();
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
-    if (generic_buttons_handle_mouse(mouse_in_dialog(m), 0, 0, buttons, 10, &data.focus_button_id)) {
+    if (generic_buttons_handle_mouse(mouse_in_dialog(m), 0, 0, buttons, NUM_BUTTONS, &data.focus_button_id)) {
         return;
     }
     if (input_go_back_requested(m, h)) {
@@ -234,12 +235,14 @@ static void button_ignored_disfavor(int param1, int param2)
 static void button_delete(int param1, int param2)
 {
     scenario_request_delete(data.id);
+    scenario_editor_set_as_unsaved();
     window_go_back();
 }
 
 static void button_save(int param1, int param2)
 {
     scenario_request_update(data.id, &data.request);
+    scenario_editor_set_as_unsaved();
     window_go_back();
 }
 

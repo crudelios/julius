@@ -220,7 +220,7 @@ static void menu_file_exit_to_menu(int param)
 {
     clear_state();
     window_editor_map_show();
-    if (scenario_is_saved()) {
+    if (scenario_editor_is_saved()) {
         game_exit_editor();
     } else {
         window_popup_dialog_show(POPUP_DIALOG_EDITOR_QUIT_WITHOUT_SAVING, menu_file_confirm_exit_to_menu, 1);

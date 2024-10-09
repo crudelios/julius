@@ -446,6 +446,7 @@ static void button_repeat_between(int amount_type, int param2)
 static void button_delete(int param1, int param2)
 {
     scenario_invasion_delete(data.id);
+    scenario_editor_set_as_unsaved();
     window_editor_invasions_show();
 }
 
@@ -457,6 +458,7 @@ static void button_save(int param1, int param2)
         data.invasion.repeat.times = INVASIONS_REPEAT_INFINITE;
     }
     scenario_invasion_update(data.id, &data.invasion);
+    scenario_editor_set_as_unsaved();
     window_editor_invasions_show();
 }
 

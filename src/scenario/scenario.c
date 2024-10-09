@@ -9,7 +9,9 @@
 #include "game/save_version.h"
 #include "game/settings.h"
 #include "scenario/data.h"
+#include "scenario/demand_change.h"
 #include "scenario/invasion.h"
+#include "scenario/price_change.h"
 #include "scenario/request.h"
 
 #include <string.h>
@@ -19,23 +21,23 @@ struct scenario_t scenario;
 static struct {
     size_t size;
     size_t start_info;
-    size_t old_filler_1;
-    size_t invasions_part1;
+    size_t original_requests_part1;
+    size_t original_invasions_part1;
     size_t start_funds_and_enemy_id;
     size_t map_size;
     size_t briefing;
-    size_t old_filler_2;
+    size_t original_requests_part2;
     size_t image;
     size_t herds;
-    size_t demand_changes_part1;
+    size_t original_demand_changes;
     size_t price_changes_part1;
     size_t gladiator_revolt;
     size_t emperor_change;
     size_t random_events;
     size_t fishing;
-    size_t old_filler_3;
-    size_t invasions_part2;
-    size_t old_filler_4;
+    size_t original_requests_part3;
+    size_t original_invasions_part2;
+    size_t original_requests_part4;
     size_t rome_wheat;
     size_t allowed_buildings;
     size_t win_criteria;
@@ -50,11 +52,6 @@ static struct {
     // Cache info
     savegame_version_t version;
 } buffer_offsets;
-
-int scenario_is_saved(void)
-{
-    return scenario.is_saved;
-}
 
 static void calculate_buffer_offsets(int scenario_version)
 {
@@ -73,13 +70,13 @@ static void calculate_buffer_offsets(int scenario_version)
     next_start_offset = buffer_offsets.start_info + 14;
 
     if (scenario_version <= SCENARIO_LAST_NO_EXTENDED_REQUESTS) {
-        buffer_offsets.old_filler_1 = next_start_offset;
-        next_start_offset = buffer_offsets.old_filler_1 + 160;
+        buffer_offsets.original_requests_part1 = next_start_offset;
+        next_start_offset = buffer_offsets.original_requests_part1 + MAX_ORIGINAL_REQUESTS * 8;
     }
 
     if (scenario_version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
-        buffer_offsets.invasions_part1 = next_start_offset;
-        next_start_offset = buffer_offsets.invasions_part1 + (MAX_ORIGINAL_INVASIONS * 10);
+        buffer_offsets.original_invasions_part1 = next_start_offset;
+        next_start_offset = buffer_offsets.original_invasions_part1 + MAX_ORIGINAL_INVASIONS * 10;
     }
 
     buffer_offsets.start_funds_and_enemy_id = next_start_offset;
@@ -92,22 +89,22 @@ static void calculate_buffer_offsets(int scenario_version)
     next_start_offset = buffer_offsets.briefing + MAX_BRIEF_DESCRIPTION + MAX_BRIEFING;
 
     if (scenario_version <= SCENARIO_LAST_NO_EXTENDED_REQUESTS) {
-        buffer_offsets.old_filler_2 = next_start_offset;
-        next_start_offset = buffer_offsets.old_filler_2 + 20;
+        buffer_offsets.original_requests_part2 = next_start_offset;
+        next_start_offset = buffer_offsets.original_requests_part2 + MAX_ORIGINAL_REQUESTS;
     }
 
     buffer_offsets.image = next_start_offset;
     next_start_offset = buffer_offsets.image + 6;
 
     buffer_offsets.herds = next_start_offset;
-    next_start_offset = buffer_offsets.herds + (MAX_HERD_POINTS * 4);
+    next_start_offset = buffer_offsets.herds + MAX_HERD_POINTS * 4;
 
     if (scenario_version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
-        buffer_offsets.demand_changes_part1 = next_start_offset;
-        next_start_offset = buffer_offsets.demand_changes_part1 + (MAX_DEMAND_CHANGES * 9);
+        buffer_offsets.original_demand_changes = next_start_offset;
+        next_start_offset = buffer_offsets.original_demand_changes + MAX_ORIGINAL_DEMAND_CHANGES * 9;
 
         buffer_offsets.price_changes_part1 = next_start_offset;
-        next_start_offset = buffer_offsets.price_changes_part1 + (MAX_PRICE_CHANGES * 6);
+        next_start_offset = buffer_offsets.price_changes_part1 + MAX_PRICE_CHANGES * 6;
     }
 
     buffer_offsets.gladiator_revolt = next_start_offset;
@@ -120,21 +117,21 @@ static void calculate_buffer_offsets(int scenario_version)
     next_start_offset = buffer_offsets.random_events + 36;
 
     buffer_offsets.fishing = next_start_offset;
-    next_start_offset = buffer_offsets.fishing + (MAX_FISH_POINTS * 4);
+    next_start_offset = buffer_offsets.fishing + MAX_FISH_POINTS * 4;
 
     if (scenario_version <= SCENARIO_LAST_NO_EXTENDED_REQUESTS) {
-        buffer_offsets.old_filler_3 = next_start_offset;
-        next_start_offset = buffer_offsets.old_filler_3 + 20;
+        buffer_offsets.original_requests_part3 = next_start_offset;
+        next_start_offset = buffer_offsets.original_requests_part3 + MAX_ORIGINAL_REQUESTS;
     }
 
     if (scenario_version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
-        buffer_offsets.invasions_part2 = next_start_offset;
-        next_start_offset = buffer_offsets.invasions_part2 + (MAX_ORIGINAL_INVASIONS * 1);
+        buffer_offsets.original_invasions_part2 = next_start_offset;
+        next_start_offset = buffer_offsets.original_invasions_part2 + MAX_ORIGINAL_INVASIONS * 1;
     }
 
     if (scenario_version <= SCENARIO_LAST_NO_EXTENDED_REQUESTS) {
-        buffer_offsets.old_filler_4 = next_start_offset;
-        next_start_offset = buffer_offsets.old_filler_4 + 80;
+        buffer_offsets.original_requests_part4 = next_start_offset;
+        next_start_offset = buffer_offsets.original_requests_part4 + MAX_ORIGINAL_REQUESTS * 4;
     }
 
     buffer_offsets.rome_wheat = next_start_offset;
@@ -142,7 +139,7 @@ static void calculate_buffer_offsets(int scenario_version)
 
     if (scenario_version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         buffer_offsets.allowed_buildings = next_start_offset;
-        next_start_offset = buffer_offsets.allowed_buildings + (MAX_ALLOWED_BUILDINGS * 2);
+        next_start_offset = buffer_offsets.allowed_buildings + MAX_ALLOWED_BUILDINGS * 2;
     }
 
     buffer_offsets.win_criteria = next_start_offset;
@@ -152,7 +149,7 @@ static void calculate_buffer_offsets(int scenario_version)
     next_start_offset = buffer_offsets.map_points + 12;
 
     buffer_offsets.invasion_points = next_start_offset;
-    next_start_offset = buffer_offsets.invasion_points + (MAX_INVASION_POINTS * 4);
+    next_start_offset = buffer_offsets.invasion_points + MAX_INVASION_POINTS * 4;
 
     buffer_offsets.misc = next_start_offset;
     next_start_offset = buffer_offsets.misc + 51;
@@ -164,7 +161,7 @@ static void calculate_buffer_offsets(int scenario_version)
 
     if (scenario_version > SCENARIO_LAST_NO_CUSTOM_VARIABLES && scenario_version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         buffer_offsets.custom_variables = next_start_offset;
-        next_start_offset = buffer_offsets.custom_variables + (9 * MAX_CUSTOM_VARIABLES);
+        next_start_offset = buffer_offsets.custom_variables + MAX_CUSTOM_VARIABLES * 9;
     }
 
     buffer_offsets.custom_name = next_start_offset;
@@ -246,21 +243,6 @@ void scenario_save_state(buffer *buf)
         buffer_write_i16(buf, scenario.herd_points[i].y);
     }
 /***
-    for (int i = 0; i < MAX_DEMAND_CHANGES; i++) {
-        buffer_write_i16(buf, scenario.demand_changes[i].year);
-    }
-    for (int i = 0; i < MAX_DEMAND_CHANGES; i++) {
-        buffer_write_u8(buf, scenario.demand_changes[i].month);
-    }
-    for (int i = 0; i < MAX_DEMAND_CHANGES; i++) {
-        buffer_write_u8(buf, scenario.demand_changes[i].resource);
-    }
-    for (int i = 0; i < MAX_DEMAND_CHANGES; i++) {
-        buffer_write_u8(buf, scenario.demand_changes[i].route_id);
-    }
-    for (int i = 0; i < MAX_DEMAND_CHANGES; i++) {
-        buffer_write_i32(buf, scenario.demand_changes[i].amount);
-    }
 
     for (int i = 0; i < MAX_PRICE_CHANGES; i++) {
         buffer_write_i16(buf, scenario.price_changes[i].year);
@@ -429,29 +411,7 @@ void scenario_load_state(buffer *buf, int version)
     }
 
     if (version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
-        for (int i = 0; i < MAX_DEMAND_CHANGES; i++) {
-            scenario.demand_changes[i].year = buffer_read_i16(buf);
-        }
-        for (int i = 0; i < MAX_DEMAND_CHANGES; i++) {
-            scenario.demand_changes[i].month = buffer_read_u8(buf);
-        }
-        for (int i = 0; i < MAX_DEMAND_CHANGES; i++) {
-            scenario.demand_changes[i].resource = buffer_read_u8(buf);
-        }
-        for (int i = 0; i < MAX_DEMAND_CHANGES; i++) {
-            scenario.demand_changes[i].route_id = buffer_read_u8(buf);
-        }
-        if (version <= SCENARIO_LAST_UNVERSIONED) {
-            for (int i = 0; i < MAX_DEMAND_CHANGES; i++) {
-                int is_rise = buffer_read_u8(buf);
-                int amount = is_rise ? DEMAND_CHANGE_LEGACY_IS_RISE : DEMAND_CHANGE_LEGACY_IS_FALL;
-                scenario.demand_changes[i].amount = amount;
-            }
-        } else {
-            for (int i = 0; i < MAX_DEMAND_CHANGES; i++) {
-                scenario.demand_changes[i].amount = buffer_read_i32(buf);
-            }
-        }
+        scenario_demand_change_load_state_old_version(buf, version <= SCENARIO_LAST_UNVERSIONED);
 
         for (int i = 0; i < MAX_PRICE_CHANGES; i++) {
             scenario.price_changes[i].year = buffer_read_i16(buf);
@@ -607,14 +567,12 @@ void scenario_load_state(buffer *buf, int version)
     // being loaded, otherwise on some edge cases changes to meat may affect fish instead
     if (resource_mapping_get_version() < RESOURCE_CURRENT_VERSION) {
         scenario_request_remap_resource();
-        for (int i = 0; i < MAX_DEMAND_CHANGES; i++) {
-            scenario.demand_changes[i].resource = resource_remap(scenario.demand_changes[i].resource);
-        }
+        scenario_demand_change_remap_resource();
+        //scenario_price_change_remap_resource();
         for (int i = 0; i < MAX_PRICE_CHANGES; i++) {
             scenario.price_changes[i].resource = resource_remap(scenario.price_changes[i].resource);
         }
     }
-    scenario.is_saved = 1;
 }
 
 void scenario_description_from_buffer(buffer *buf, uint8_t *description, int version)
@@ -645,7 +603,7 @@ int scenario_invasions_from_buffer(buffer *buf, int version)
         return scenario_invasion_count_active_from_buffer(buf);
     } else {
         calculate_buffer_offsets(version);
-        buffer_set(buf, buffer_offsets.invasions_part1 + (MAX_ORIGINAL_INVASIONS * 2));
+        buffer_set(buf, buffer_offsets.original_invasions_part1 + (MAX_ORIGINAL_INVASIONS * 2));
         for (int i = 0; i < MAX_ORIGINAL_INVASIONS; i++) {
             if (buffer_read_i16(buf)) {
                 num_invasions++;

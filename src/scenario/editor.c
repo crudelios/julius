@@ -5,6 +5,7 @@
 #include "map/grid.h"
 #include "scenario/criteria.h"
 #include "scenario/data.h"
+#include "scenario/demand_change.h"
 #include "scenario/empire.h"
 #include "scenario/property.h"
 #include "scenario/request.h"
@@ -25,10 +26,27 @@ static const struct {
     {160, 160}
 };
 
+static int is_saved;
+
 static void init_point(map_point *point)
 {
     point->x = -1;
     point->y = -1;
+}
+
+int scenario_editor_is_saved(void)
+{
+    return is_saved;
+}
+
+void scenario_editor_set_as_saved(void)
+{
+    is_saved = 1;
+}
+
+void scenario_editor_set_as_unsaved(void)
+{
+    is_saved = 0;
 }
 
 void scenario_editor_create(int map_size)
@@ -93,12 +111,11 @@ void scenario_editor_create(int map_size)
 
     scenario_request_clear_all();
     scenario_invasion_clear();
+    scenario_demand_change_clear_all();
     scenario_delete_all_custom_variables();
 
     scenario.random_events.max_wages = 45;
     scenario.random_events.min_wages = 5;
-
-    scenario.is_saved = 1;
 }
 
 void scenario_editor_set_native_images(int image_hut, int image_meeting, int image_crops)
@@ -143,7 +160,7 @@ void scenario_editor_price_change_delete(int index)
     scenario.price_changes[index].amount = 0;
     scenario.price_changes[index].is_rise = 0;
     sort_price_changes();
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_price_change_save(int index, editor_price_change *price_change)
@@ -153,55 +170,7 @@ void scenario_editor_price_change_save(int index, editor_price_change *price_cha
     scenario.price_changes[index].amount = price_change->amount;
     scenario.price_changes[index].is_rise = price_change->is_rise;
     sort_price_changes();
-    scenario.is_saved = 0;
-}
-
-void scenario_editor_demand_change_get(int index, editor_demand_change *demand_change)
-{
-    demand_change->year = scenario.demand_changes[index].year;
-    demand_change->resource = scenario.demand_changes[index].resource;
-    demand_change->route_id = scenario.demand_changes[index].route_id;
-    demand_change->amount = scenario.demand_changes[index].amount;
-}
-
-static void sort_demand_changes(void)
-{
-    for (int i = 0; i < MAX_DEMAND_CHANGES; i++) {
-        if (!scenario.demand_changes[i].resource) {
-            scenario.demand_changes[i].year = 0;
-        }
-    }
-    for (int i = 0; i < MAX_DEMAND_CHANGES; i++) {
-        for (int j = MAX_DEMAND_CHANGES - 1; j > 0; j--) {
-            demand_change_t *current = &scenario.demand_changes[j];
-            demand_change_t *prev = &scenario.demand_changes[j-1];
-            if (current->year && (!prev->year || prev->year > current->year)) {
-                demand_change_t tmp = *current;
-                *current = *prev;
-                *prev = tmp;
-            }
-        }
-    }
-}
-
-void scenario_editor_demand_change_delete(int index)
-{
-    scenario.demand_changes[index].year = 0;
-    scenario.demand_changes[index].resource = 0;
-    scenario.demand_changes[index].route_id = 0;
-    scenario.demand_changes[index].amount = 0;
-    sort_demand_changes();
-    scenario.is_saved = 0;
-}
-
-void scenario_editor_demand_change_save(int index, editor_demand_change *demand_change)
-{
-    scenario.demand_changes[index].year = demand_change->year;
-    scenario.demand_changes[index].resource = demand_change->resource;
-    scenario.demand_changes[index].route_id = demand_change->route_id;
-    scenario.demand_changes[index].amount = demand_change->amount;
-    sort_demand_changes();
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_cycle_image(int forward)
@@ -217,7 +186,7 @@ void scenario_editor_cycle_image(int forward)
     if (scenario.image_id > 15) {
         scenario.image_id = 0;
     }
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_cycle_climate(void)
@@ -234,21 +203,21 @@ void scenario_editor_cycle_climate(void)
             scenario.climate = CLIMATE_CENTRAL;
             break;
     }
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_update_brief_description(const uint8_t *new_description)
 {
     if (!string_equals(scenario.brief_description, new_description)) {
         string_copy(new_description, scenario.brief_description, MAX_BRIEF_DESCRIPTION);
-        scenario.is_saved = 0;
+        scenario_editor_set_as_unsaved();
     }
 }
 
 void scenario_editor_set_enemy(int enemy_id)
 {
     scenario.enemy_id = enemy_id;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_change_empire(int change)
@@ -259,7 +228,7 @@ void scenario_editor_change_empire(int change)
     } else if (scenario.empire.id >= 40) {
         scenario.empire.id = 0;
     }
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_set_custom_empire(const char *filename)
@@ -285,13 +254,13 @@ int scenario_editor_is_building_allowed(int id)
 void scenario_editor_toggle_building_allowed(int id)
 {
     scenario.allowed_buildings[id] = scenario.allowed_buildings[id] ? 0 : 1;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_set_player_rank(int rank)
 {
     scenario.player_rank = rank;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_set_caesar_salary(int salary)
@@ -302,31 +271,31 @@ void scenario_editor_set_caesar_salary(int salary)
         salary = 60000;
     }
     scenario.caesar_salary = salary;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_set_initial_funds(int amount)
 {
     scenario.initial_funds = amount;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_set_rescue_loan(int amount)
 {
     scenario.rescue_loan = amount;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_toggle_rome_supplies_wheat(void)
 {
     scenario.rome_supplies_wheat = !scenario.rome_supplies_wheat;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_toggle_flotsam(void)
 {
     scenario.flotsam_enabled = !scenario.flotsam_enabled;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 int scenario_editor_milestone_year(int milestone_percentage)
@@ -358,13 +327,13 @@ void scenario_editor_set_milestone_year(int milestone_percentage, int year)
         default:
             return;
     }
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_set_start_year(int year)
 {
     scenario.start_year = year;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_toggle_open_play(void)
@@ -373,67 +342,67 @@ void scenario_editor_toggle_open_play(void)
     if (scenario.is_open_play) {
         scenario.open_play_scenario_id = 12; // fix it to 12: first unused entry
     }
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_toggle_culture(void)
 {
     scenario.win_criteria.culture.enabled = !scenario.win_criteria.culture.enabled;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_set_culture(int goal)
 {
     scenario.win_criteria.culture.goal = goal;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_toggle_prosperity(void)
 {
     scenario.win_criteria.prosperity.enabled = !scenario.win_criteria.prosperity.enabled;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_set_prosperity(int goal)
 {
     scenario.win_criteria.prosperity.goal = goal;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_toggle_peace(void)
 {
     scenario.win_criteria.peace.enabled = !scenario.win_criteria.peace.enabled;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_set_peace(int goal)
 {
     scenario.win_criteria.peace.goal = goal;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_toggle_favor(void)
 {
     scenario.win_criteria.favor.enabled = !scenario.win_criteria.favor.enabled;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_set_favor(int goal)
 {
     scenario.win_criteria.favor.goal = goal;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_toggle_population(void)
 {
     scenario.win_criteria.population.enabled = !scenario.win_criteria.population.enabled;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_set_population(int goal)
 {
     scenario.win_criteria.population.goal = goal;
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_toggle_time_limit(void)
@@ -443,14 +412,14 @@ void scenario_editor_toggle_time_limit(void)
         scenario.win_criteria.survival_time.enabled = 0;
     }
     scenario_criteria_init_max_year();
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_set_time_limit(int years)
 {
     scenario.win_criteria.time_limit.years = years;
     scenario_criteria_init_max_year();
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_toggle_survival_time(void)
@@ -460,14 +429,14 @@ void scenario_editor_toggle_survival_time(void)
         scenario.win_criteria.time_limit.enabled = 0;
     }
     scenario_criteria_init_max_year();
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 void scenario_editor_set_survival_time(int years)
 {
     scenario.win_criteria.survival_time.years = years;
     scenario_criteria_init_max_year();
-    scenario.is_saved = 0;
+    scenario_editor_set_as_unsaved();
 }
 
 int scenario_editor_get_custom_message_introduction(void)

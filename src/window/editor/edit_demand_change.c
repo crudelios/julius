@@ -14,6 +14,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "scenario/demand_change.h"
 #include "scenario/editor.h"
 #include "scenario/property.h"
 #include "window/editor/demand_changes.h"
@@ -31,6 +32,8 @@ static void button_amount(int param1, int param2);
 static void button_delete(int param1, int param2);
 static void button_save(int param1, int param2);
 
+#define NUM_BUTTONS (sizeof(buttons) / sizeof(generic_button))
+
 static generic_button buttons[] = {
     {30, 152, 60, 25, button_year, button_none},
     {190, 152, 120, 25, button_resource, button_none},
@@ -40,12 +43,9 @@ static generic_button buttons[] = {
     {320, 230, 100, 25, button_save, button_none}
 };
 
-static const uint8_t UNKNOWN[4] = { '?', '?', '?', 0 };
-static const uint8_t NA[4] = { 'N', '/', 'A', 0 };
-
 static struct {
     int id;
-    editor_demand_change demand_change;
+    demand_change_t demand_change;
     unsigned int focus_button_id;
     int *route_ids;
     const uint8_t **route_names;
@@ -91,74 +91,80 @@ static void init(int id)
     }
     memset(data.route_ids, 0, sizeof(int) * data.num_routes);
     memset(data.route_names, 0, sizeof(uint8_t *) * data.num_routes);
-    scenario_editor_demand_change_get(id, &data.demand_change);
+    const demand_change_t *demand_change = scenario_demand_change_get(id);
+    data.demand_change = *demand_change;
+
     for (int i = 1; i < trade_route_count(); i++) {
         empire_city *city = empire_city_get(empire_city_get_for_trade_route(i));
         if (city && (city->type == EMPIRE_CITY_TRADE || city->type == EMPIRE_CITY_FUTURE_TRADE)) {
             const uint8_t *city_name = empire_city_get_name(city);
             create_route_info(i, city_name);
         } else {
-            create_route_info(i, UNKNOWN);
+            create_route_info(i, lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_UNKNOWN_ROUTE));
         }
     }
-}
-
-static void draw_background(void)
-{
-    window_editor_map_draw_all();
 }
 
 static const uint8_t *get_text_for_route_id(int route_id)
 {
     if (!data.num_routes) {
-        return NA;
+        return lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_NO_ROUTES);;
     }
     // No route selected yet
     if (route_id == 0) {
-        return data.route_names[0];
+        return lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SET_A_ROUTE);;
     }
     for (unsigned int i = 0; i < data.num_routes; i++) {
         if (data.route_ids[i] == route_id) {
             return data.route_names[i];
         }
     }
-    return UNKNOWN;
+    return lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_UNKNOWN_ROUTE);
+}
+
+static void draw_background(void)
+{
+    window_editor_map_draw_all();
+
+    graphics_in_dialog();
+
+    outer_panel_draw(0, 100, 40, 11);
+    lang_text_draw(44, 94, 20, 114, FONT_LARGE_BLACK);
+
+    text_draw_number_centered_prefix(data.demand_change.year, '+', 30, 158, 60, FONT_NORMAL_BLACK);
+    lang_text_draw_year(scenario_property_start_year() + data.demand_change.year, 100, 158, FONT_NORMAL_BLACK);
+
+    text_draw_centered(resource_get_data(data.demand_change.resource)->text, 190, 158, 120, FONT_NORMAL_BLACK,
+        COLOR_MASK_NONE);
+
+    lang_text_draw(44, 97, 330, 158, FONT_NORMAL_BLACK);
+    text_draw_centered(get_text_for_route_id(data.demand_change.route_id), 420, 158, 200, FONT_NORMAL_BLACK, 0);
+
+    lang_text_draw(44, 100, 60, 198, FONT_NORMAL_BLACK);
+    text_draw_number_centered(data.demand_change.amount, 350, 198, 100, FONT_NORMAL_BLACK);
+
+    lang_text_draw_centered(44, 101, 30, 236, 250, FONT_NORMAL_BLACK);
+
+    lang_text_draw_centered(18, 3, 320, 236, 100, FONT_NORMAL_BLACK);
+
+    graphics_reset_dialog();
 }
 
 static void draw_foreground(void)
 {
     graphics_in_dialog();
 
-    outer_panel_draw(0, 100, 40, 11);
-    lang_text_draw(44, 94, 20, 114, FONT_LARGE_BLACK);
-
-    button_border_draw(30, 152, 60, 25, data.focus_button_id == 1);
-    text_draw_number_centered_prefix(data.demand_change.year, '+', 30, 158, 60, FONT_NORMAL_BLACK);
-    lang_text_draw_year(scenario_property_start_year() + data.demand_change.year, 100, 158, FONT_NORMAL_BLACK);
-
-    button_border_draw(190, 152, 120, 25, data.focus_button_id == 2);
-    text_draw_centered(resource_get_data(data.demand_change.resource)->text, 190, 158, 120, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
-
-    lang_text_draw(44, 97, 330, 158, FONT_NORMAL_BLACK);
-    button_border_draw(420, 152, 200, 25, data.focus_button_id == 3);
-    text_draw_centered(get_text_for_route_id(data.demand_change.route_id), 420, 158, 200, FONT_NORMAL_BLACK, 0);
-
-    lang_text_draw(44, 100, 60, 198, FONT_NORMAL_BLACK);
-    button_border_draw(350, 192, 100, 25, data.focus_button_id == 4);
-    text_draw_number_centered(data.demand_change.amount, 350, 198, 100, FONT_NORMAL_BLACK);
-
-    button_border_draw(30, 230, 250, 25, data.focus_button_id == 5);
-    lang_text_draw_centered(44, 101, 30, 236, 250, FONT_NORMAL_BLACK);
-
-    button_border_draw(320, 230, 100, 25, data.focus_button_id == 6);
-    lang_text_draw_centered(18, 3, 320, 236, 100, FONT_NORMAL_BLACK);
+    for (size_t i = 0; i < NUM_BUTTONS; i++) {
+        int focus = data.focus_button_id == i + 1;
+        button_border_draw(buttons[i].x, buttons[i].y, buttons[i].width, buttons[i].height, focus);
+    }
 
     graphics_reset_dialog();
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
-    if (generic_buttons_handle_mouse(mouse_in_dialog(m), 0, 0, buttons, 6, &data.focus_button_id)) {
+    if (generic_buttons_handle_mouse(mouse_in_dialog(m), 0, 0, buttons, NUM_BUTTONS, &data.focus_button_id)) {
         return;
     }
     if (input_go_back_requested(m, h)) {
@@ -222,13 +228,15 @@ static void button_amount(int param1, int param2)
 
 static void button_delete(int param1, int param2)
 {
-    scenario_editor_demand_change_delete(data.id);
+    scenario_demand_change_delete(data.id);
+    scenario_editor_set_as_unsaved();
     window_editor_demand_changes_show();
 }
 
 static void button_save(int param1, int param2)
 {
-    scenario_editor_demand_change_save(data.id, &data.demand_change);
+    scenario_demand_change_update(data.id, &data.demand_change);
+    scenario_editor_set_as_unsaved();
     window_editor_demand_changes_show();
 }
 
