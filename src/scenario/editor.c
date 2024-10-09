@@ -125,54 +125,6 @@ void scenario_editor_set_native_images(int image_hut, int image_meeting, int ima
     scenario.native_images.crops = image_crops;
 }
 
-void scenario_editor_price_change_get(int index, editor_price_change *price_change)
-{
-    price_change->year = scenario.price_changes[index].year;
-    price_change->resource = scenario.price_changes[index].resource;
-    price_change->amount = scenario.price_changes[index].amount;
-    price_change->is_rise = scenario.price_changes[index].is_rise;
-}
-
-static void sort_price_changes(void)
-{
-    for (int i = 0; i < MAX_PRICE_CHANGES; i++) {
-        if (!scenario.price_changes[i].resource) {
-            scenario.price_changes[i].year = 0;
-        }
-    }
-    for (int i = 0; i < MAX_PRICE_CHANGES; i++) {
-        for (int j = MAX_PRICE_CHANGES - 1; j > 0; j--) {
-            price_change_t *current = &scenario.price_changes[j];
-            price_change_t *prev = &scenario.price_changes[j-1];
-            if (current->year && (!prev->year || prev->year > current->year)) {
-                price_change_t tmp = *current;
-                *current = *prev;
-                *prev = tmp;
-            }
-        }
-    }
-}
-
-void scenario_editor_price_change_delete(int index)
-{
-    scenario.price_changes[index].year = 0;
-    scenario.price_changes[index].resource = 0;
-    scenario.price_changes[index].amount = 0;
-    scenario.price_changes[index].is_rise = 0;
-    sort_price_changes();
-    scenario_editor_set_as_unsaved();
-}
-
-void scenario_editor_price_change_save(int index, editor_price_change *price_change)
-{
-    scenario.price_changes[index].year = price_change->year;
-    scenario.price_changes[index].resource = price_change->resource;
-    scenario.price_changes[index].amount = price_change->amount;
-    scenario.price_changes[index].is_rise = price_change->is_rise;
-    sort_price_changes();
-    scenario_editor_set_as_unsaved();
-}
-
 void scenario_editor_cycle_image(int forward)
 {
     if (forward) {

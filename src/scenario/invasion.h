@@ -39,7 +39,7 @@ void scenario_invasion_init(void);
 int scenario_invasion_new(void);
 
 const invasion_t *scenario_invasion_get(int id);
-void scenario_invasion_update(int id, const invasion_t *invasion);
+void scenario_invasion_update(const invasion_t *invasion);
 void scenario_invasion_delete(int id);
 
 int scenario_invasion_exists_upcoming(void);

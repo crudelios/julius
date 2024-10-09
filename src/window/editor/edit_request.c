@@ -30,7 +30,6 @@ static void button_delete(int param1, int param2);
 static void button_save(int param1, int param2);
 
 static struct {
-    int id;
     scenario_request request;
     unsigned int focus_button_id;
     resource_type avaialble_resources[RESOURCE_MAX];
@@ -53,7 +52,6 @@ static generic_button buttons[] = {
 
 static void init(int id)
 {
-    data.id = id;
     const scenario_request *request = scenario_request_get(id);
     data.request = *request;
 }
@@ -80,7 +78,8 @@ static void draw_background(void)
     lang_text_draw(44, 72, 250, 192, FONT_NORMAL_BLACK);
     text_draw_number_centered(data.request.amount, 330, 192, 80, FONT_NORMAL_BLACK);
 
-    text_draw_centered(resource_get_data(data.request.resource)->text, 430, 192, 100, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    text_draw_centered(resource_get_data(data.request.resource)->text, 430, 192, 100, FONT_NORMAL_BLACK,
+        COLOR_MASK_NONE);
 
     lang_text_draw(44, 24, 40, 230, FONT_NORMAL_BLACK);
 
@@ -234,14 +233,14 @@ static void button_ignored_disfavor(int param1, int param2)
 
 static void button_delete(int param1, int param2)
 {
-    scenario_request_delete(data.id);
+    scenario_request_delete(data.request.id);
     scenario_editor_set_as_unsaved();
     window_go_back();
 }
 
 static void button_save(int param1, int param2)
 {
-    scenario_request_update(data.id, &data.request);
+    scenario_request_update(&data.request);
     scenario_editor_set_as_unsaved();
     window_go_back();
 }

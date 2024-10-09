@@ -102,6 +102,10 @@ static void draw_background(void)
     lang_text_draw_centered(13, 3, 0, 456, 640, FONT_NORMAL_BLACK);
     lang_text_draw_multiline(152, 2, 32, 376, 576, FONT_NORMAL_BLACK);
 
+    if (!data.invasions_in_use) {
+        lang_text_draw_centered(44, 20, 0, 165, 640, FONT_LARGE_BLACK);
+    }
+
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_NEW_INVASION, new_invasion_button.x + 8,
         new_invasion_button.y + 8, new_invasion_button.width - 16, FONT_NORMAL_BLACK);
 
@@ -128,8 +132,6 @@ static void draw_foreground(void)
 
     if (data.invasions_in_use) {
         grid_box_draw(&invasion_buttons);
-    } else {
-        lang_text_draw_centered(44, 20, 0, 165, 640, FONT_LARGE_BLACK);
     }
     button_border_draw(new_invasion_button.x, new_invasion_button.y,
         new_invasion_button.width, new_invasion_button.height, data.new_invasion_button_focused);

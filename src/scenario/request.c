@@ -180,18 +180,17 @@ const scenario_request *scenario_request_get(int id)
     return array_item(requests, id);
 }
 
-void scenario_request_update(int id, const scenario_request *request)
+void scenario_request_update(const scenario_request *request)
 {
-    scenario_request *base_request = array_item(requests, id);
+    scenario_request *base_request = array_item(requests, request->id);
     *base_request = *request;
-    base_request->id = id;
     array_trim(requests);
 }
 
 void scenario_request_delete(int id)
 {
     scenario_request *request = array_item(requests, id);
-    request->resource = RESOURCE_NONE;
+    memset(request, 0, sizeof(scenario_request));
     array_trim(requests);
 }
 

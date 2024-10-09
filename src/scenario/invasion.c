@@ -218,11 +218,10 @@ const invasion_t *scenario_invasion_get(int id)
     return array_item(data.invasions, id);
 }
 
-void scenario_invasion_update(int id, const invasion_t *invasion)
+void scenario_invasion_update(const invasion_t *invasion)
 {
-    invasion_t *base_invasion = array_item(data.invasions, id);
+    invasion_t *base_invasion = array_item(data.invasions, invasion->id);
     *base_invasion = *invasion;
-    base_invasion->id = id;
     array_trim(data.invasions);
 }
 

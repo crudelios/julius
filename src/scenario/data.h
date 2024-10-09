@@ -9,7 +9,6 @@
 
 #include <stdint.h>
 
-#define MAX_PRICE_CHANGES 20
 #define MAX_CUSTOM_VARIABLES 100
 
 #define MAX_HERD_POINTS 4
@@ -87,14 +86,6 @@ struct win_criteria_t {
 };
 
 typedef struct {
-    int year;
-    int month;
-    int resource;
-    int amount;
-    int is_rise;
-} price_change_t;
-
-typedef struct {
     struct win_criteria_t population;
     struct win_criteria_t culture;
     struct win_criteria_t prosperity;
@@ -153,8 +144,6 @@ extern struct scenario_t {
     } empire;
 
     custom_variable_t custom_variables[MAX_CUSTOM_VARIABLES];
-
-    price_change_t price_changes[MAX_PRICE_CHANGES];
 
     struct {
         int severity;

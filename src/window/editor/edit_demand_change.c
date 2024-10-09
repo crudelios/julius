@@ -44,7 +44,6 @@ static generic_button buttons[] = {
 };
 
 static struct {
-    int id;
     demand_change_t demand_change;
     unsigned int focus_button_id;
     int *route_ids;
@@ -72,7 +71,6 @@ static void create_route_info(int route_id, const uint8_t *city_name)
 
 static void init(int id)
 {
-    data.id = id;
     for (unsigned int i = 0; i < data.num_routes; i++) {
         free((uint8_t *) data.route_names[i]);
     }
@@ -228,14 +226,14 @@ static void button_amount(int param1, int param2)
 
 static void button_delete(int param1, int param2)
 {
-    scenario_demand_change_delete(data.id);
+    scenario_demand_change_delete(data.demand_change.id);
     scenario_editor_set_as_unsaved();
     window_editor_demand_changes_show();
 }
 
 static void button_save(int param1, int param2)
 {
-    scenario_demand_change_update(data.id, &data.demand_change);
+    scenario_demand_change_update(&data.demand_change);
     scenario_editor_set_as_unsaved();
     window_editor_demand_changes_show();
 }

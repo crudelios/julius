@@ -27,7 +27,7 @@ void scenario_demand_change_process(void);
 
 const demand_change_t *scenario_demand_change_get(int id);
 
-void scenario_demand_change_update(int id, const demand_change_t *demand_change);
+void scenario_demand_change_update(const demand_change_t *demand_change);
 
 void scenario_demand_change_delete(int id);
 

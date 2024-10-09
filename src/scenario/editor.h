@@ -3,13 +3,6 @@
 
 #include <stdint.h>
 
-typedef struct {
-    int year;
-    int resource;
-    int amount;
-    int is_rise;
-} editor_price_change;
-
 void scenario_editor_create(int map_size);
 
 int scenario_editor_is_saved(void);
@@ -17,10 +10,6 @@ void scenario_editor_set_as_saved(void);
 void scenario_editor_set_as_unsaved(void);
 
 void scenario_editor_set_native_images(int image_hut, int image_meeting, int image_crops);
-
-void scenario_editor_price_change_get(int index, editor_price_change *price_change);
-void scenario_editor_price_change_delete(int index);
-void scenario_editor_price_change_save(int index, editor_price_change *price_change);
 
 void scenario_editor_cycle_image(int forward);
 

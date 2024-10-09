@@ -30,7 +30,7 @@ static struct {
     size_t image;
     size_t herds;
     size_t original_demand_changes;
-    size_t price_changes_part1;
+    size_t original_price_changes;
     size_t gladiator_revolt;
     size_t emperor_change;
     size_t random_events;
@@ -103,8 +103,8 @@ static void calculate_buffer_offsets(int scenario_version)
         buffer_offsets.original_demand_changes = next_start_offset;
         next_start_offset = buffer_offsets.original_demand_changes + MAX_ORIGINAL_DEMAND_CHANGES * 9;
 
-        buffer_offsets.price_changes_part1 = next_start_offset;
-        next_start_offset = buffer_offsets.price_changes_part1 + MAX_PRICE_CHANGES * 6;
+        buffer_offsets.original_price_changes = next_start_offset;
+        next_start_offset = buffer_offsets.original_price_changes + MAX_ORIGINAL_PRICE_CHANGES * 6;
     }
 
     buffer_offsets.gladiator_revolt = next_start_offset;
@@ -242,24 +242,7 @@ void scenario_save_state(buffer *buf)
     for (int i = 0; i < MAX_HERD_POINTS; i++) {
         buffer_write_i16(buf, scenario.herd_points[i].y);
     }
-/***
 
-    for (int i = 0; i < MAX_PRICE_CHANGES; i++) {
-        buffer_write_i16(buf, scenario.price_changes[i].year);
-    }
-    for (int i = 0; i < MAX_PRICE_CHANGES; i++) {
-        buffer_write_u8(buf, scenario.price_changes[i].month);
-    }
-    for (int i = 0; i < MAX_PRICE_CHANGES; i++) {
-        buffer_write_u8(buf, scenario.price_changes[i].resource);
-    }
-    for (int i = 0; i < MAX_PRICE_CHANGES; i++) {
-        buffer_write_u8(buf, scenario.price_changes[i].amount);
-    }
-    for (int i = 0; i < MAX_PRICE_CHANGES; i++) {
-        buffer_write_u8(buf, scenario.price_changes[i].is_rise);
-    }
-***/
     buffer_write_i32(buf, scenario.gladiator_revolt.enabled);
     buffer_write_i32(buf, scenario.gladiator_revolt.year);
     buffer_write_i32(buf, scenario.emperor_change.enabled);
@@ -412,22 +395,7 @@ void scenario_load_state(buffer *buf, int version)
 
     if (version <= SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         scenario_demand_change_load_state_old_version(buf, version <= SCENARIO_LAST_UNVERSIONED);
-
-        for (int i = 0; i < MAX_PRICE_CHANGES; i++) {
-            scenario.price_changes[i].year = buffer_read_i16(buf);
-        }
-        for (int i = 0; i < MAX_PRICE_CHANGES; i++) {
-            scenario.price_changes[i].month = buffer_read_u8(buf);
-        }
-        for (int i = 0; i < MAX_PRICE_CHANGES; i++) {
-            scenario.price_changes[i].resource = buffer_read_u8(buf);
-        }
-        for (int i = 0; i < MAX_PRICE_CHANGES; i++) {
-            scenario.price_changes[i].amount = buffer_read_u8(buf);
-        }
-        for (int i = 0; i < MAX_PRICE_CHANGES; i++) {
-            scenario.price_changes[i].is_rise = buffer_read_u8(buf);
-        }
+        scenario_price_change_load_state_old_version(buf);
     }
 
     scenario.gladiator_revolt.enabled = buffer_read_i32(buf);
@@ -568,10 +536,7 @@ void scenario_load_state(buffer *buf, int version)
     if (resource_mapping_get_version() < RESOURCE_CURRENT_VERSION) {
         scenario_request_remap_resource();
         scenario_demand_change_remap_resource();
-        //scenario_price_change_remap_resource();
-        for (int i = 0; i < MAX_PRICE_CHANGES; i++) {
-            scenario.price_changes[i].resource = resource_remap(scenario.price_changes[i].resource);
-        }
+        scenario_price_change_remap_resource();
     }
 }
 

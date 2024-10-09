@@ -13,13 +13,14 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
-#include "scenario/data.h"
 #include "scenario/demand_change.h"
 #include "scenario/editor.h"
 #include "scenario/property.h"
 #include "window/editor/attributes.h"
 #include "window/editor/edit_demand_change.h"
 #include "window/editor/map.h"
+
+#include <stdlib.h>
 
 static void button_demand_change(unsigned int id, unsigned int mouse_x, unsigned int mouse_y);
 static void button_new_demand_change(int param0, int param1);
@@ -38,7 +39,7 @@ static struct {
 } data;
 
 static generic_button new_demand_change_button = {
-    195, 342, 250, 25, button_new_demand_change, button_none
+    195, 340, 250, 25, button_new_demand_change, button_none
 };
 
 static grid_box_type demand_change_buttons = {
@@ -121,7 +122,6 @@ static void draw_background(void)
         new_demand_change_button.y + 8, new_demand_change_button.width - 16, FONT_NORMAL_BLACK);
 
     graphics_reset_dialog();
-
 
     grid_box_request_refresh(&demand_change_buttons);
 }

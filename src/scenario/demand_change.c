@@ -98,11 +98,10 @@ const demand_change_t *scenario_demand_change_get(int id)
     return array_item(demand_changes, id);
 }
 
-void scenario_demand_change_update(int id, const demand_change_t *demand_change)
+void scenario_demand_change_update(const demand_change_t *demand_change)
 {
-    demand_change_t *base_demand_change = array_item(demand_changes, id);
+    demand_change_t *base_demand_change = array_item(demand_changes, demand_change->id);
     *base_demand_change = *demand_change;
-    base_demand_change->id = id;
     array_trim(demand_changes);
 }
 
@@ -196,4 +195,5 @@ void scenario_demand_change_load_state_old_version(buffer *buf, int is_legacy_ch
             demand_change->amount = buffer_read_i32(buf);
         }
     }
+    array_trim(demand_changes);
 }

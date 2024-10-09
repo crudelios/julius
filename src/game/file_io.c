@@ -57,6 +57,7 @@
 #include "scenario/invasion.h"
 #include "scenario/map.h"
 #include "scenario/message_media_text_blob.h"
+#include "scenario/price_change.h"
 #include "scenario/request.h"
 #include "scenario/scenario.h"
 #include "scenario/scenario_events_controller.h"
@@ -681,7 +682,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     if (version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         scenario_invasion_load_state(file->invasions);
         scenario_demand_change_load_state(file->demand_changes);
-    //    scenario_price_change_load_state(file->price_changes);
+        scenario_price_change_load_state(file->price_changes);
     //    scenario_building_load_state(file->allowed_buildings);
     //    scenario_custom_variable_load_state(file->custom_variables);
     }
@@ -716,7 +717,7 @@ static void scenario_save_to_state(scenario_state *file)
     scenario_request_save_state(file->requests);
     scenario_invasion_save_state(file->invasions);
     scenario_demand_change_save_state(file->demand_changes);
-    // scenario_price_change_save_state(file->price_changes);
+    scenario_price_change_save_state(file->price_changes);
     // scenario_building_save_state(file->allowed_buildings);
     // scenario_custom_variable_save_state(file->custom_variables);
     scenario_events_save_state(file->scenario_events, file->scenario_conditions, file->scenario_actions);
@@ -766,7 +767,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     if (scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         scenario_invasion_load_state(state->invasions);
         scenario_demand_change_load_state(state->demand_changes);
-    //    scenario_price_change_load_state(state->price_changes);
+        scenario_price_change_load_state(state->price_changes);
     //    scenario_building_load_state(state->allowed_buildings);
     //    scenario_custom_variable_load_state(state->custom_variables);
     }
@@ -911,8 +912,8 @@ static void savegame_save_to_state(savegame_state *state)
     scenario_save_state(state->scenario);
     scenario_request_save_state(state->requests);
     scenario_invasion_save_state(state->invasions);
-    // scenario_demand_change_save_state(state->demand_changes);
-    // scenario_price_change_save_state(state->price_changes);
+    scenario_demand_change_save_state(state->demand_changes);
+    scenario_price_change_save_state(state->price_changes);
     // scenario_building_save_state(state->allowed_buildings);
     // scenario_custom_variable_save_state(state->custom_variables);
     scenario_events_save_state(state->scenario_events, state->scenario_conditions, state->scenario_actions);

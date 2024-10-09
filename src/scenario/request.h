@@ -62,7 +62,7 @@ int scenario_request_count_visible(void);
 
 const scenario_request *scenario_request_get(int id);
 
-void scenario_request_update(int id, const scenario_request *request);
+void scenario_request_update(const scenario_request *request);
 
 void scenario_request_delete(int id);
 

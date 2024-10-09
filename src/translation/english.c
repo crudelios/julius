@@ -1551,6 +1551,8 @@ static translation_string all_strings[] = {
     {TR_EDITOR_NO_ROUTES, "(No trade routes)"},
     {TR_EDITOR_UNKNOWN_ROUTE, "(Unknown route)"},
     {TR_EDITOR_SET_A_ROUTE, "(Set a route)"},
+    {TR_EDITOR_NO_PRICE_CHANGES, "No price changes"},
+    {TR_EDITOR_NEW_PRICE_CHANGE, "New price change"},
     {TR_TOOLTIP_BUTTON_DELETE_COMMON_MESSAGES, "Delete common messages"}
 };
 

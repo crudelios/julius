@@ -76,7 +76,6 @@ static generic_button bottom_buttons[] = {
 };
 
 static struct {
-    int id;
     invasion_t invasion;
     unsigned int focus_button_id;
     unsigned int bottom_button_focus_id;
@@ -133,7 +132,6 @@ static void bound_invasion_values(void)
 
 static void init(int id)
 {
-    data.id = id;
     const invasion_t *invasion = scenario_invasion_get(id);
     data.invasion = *invasion;
     bound_invasion_values();
@@ -445,7 +443,7 @@ static void button_repeat_between(int amount_type, int param2)
 
 static void button_delete(int param1, int param2)
 {
-    scenario_invasion_delete(data.id);
+    scenario_invasion_delete(data.invasion.id);
     scenario_editor_set_as_unsaved();
     window_editor_invasions_show();
 }
@@ -457,7 +455,7 @@ static void button_save(int param1, int param2)
     } else if (data.repeat_type == INVASION_REPEAT_FOREVER) {
         data.invasion.repeat.times = INVASIONS_REPEAT_INFINITE;
     }
-    scenario_invasion_update(data.id, &data.invasion);
+    scenario_invasion_update(&data.invasion);
     scenario_editor_set_as_unsaved();
     window_editor_invasions_show();
 }
