@@ -180,8 +180,7 @@ static void button_rating_value(const generic_button *button)
         default:
             return;
     }
-    window_numeric_input_show(screen_dialog_offset_x() + 280, screen_dialog_offset_y() + 100,
-                              3, 100, callback);
+    window_numeric_input_show(0, 0, button, 3, 100, callback);
 }
 
 static void button_time_limit_toggle(const generic_button *button)
@@ -191,8 +190,7 @@ static void button_time_limit_toggle(const generic_button *button)
 
 static void button_time_limit_years(const generic_button *button)
 {
-    window_numeric_input_show(screen_dialog_offset_x() + 280, screen_dialog_offset_y() + 200,
-                              3, 999, scenario_editor_set_time_limit);
+    window_numeric_input_show(0, 0, button, 3, 999, scenario_editor_set_time_limit);
 }
 
 static void button_survival_toggle(const generic_button *button)
@@ -202,8 +200,7 @@ static void button_survival_toggle(const generic_button *button)
 
 static void button_survival_years(const generic_button *button)
 {
-    window_numeric_input_show(screen_dialog_offset_x() + 280, screen_dialog_offset_y() + 200,
-                              3, 999, scenario_editor_set_survival_time);
+    window_numeric_input_show(0, 0, button, 3, 999, scenario_editor_set_survival_time);
 }
 
 static void button_population_toggle(const generic_button *button)
@@ -213,8 +210,7 @@ static void button_population_toggle(const generic_button *button)
 
 static void button_population_value(const generic_button *button)
 {
-    window_numeric_input_show(screen_dialog_offset_x() + 280, screen_dialog_offset_y() + 200,
-                              5, 99999, scenario_editor_set_population);
+    window_numeric_input_show(0, 0, button, 5, 99999, scenario_editor_set_population);
 }
 
 static void button_open_play_toggle(const generic_button *button)

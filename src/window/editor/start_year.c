@@ -74,8 +74,7 @@ static void set_year(int value)
 
 static void button_year(const generic_button *button)
 {
-    window_numeric_input_show(screen_dialog_offset_x() + 140, screen_dialog_offset_y() + 80,
-                              4, 9999, set_year);
+    window_numeric_input_show(0, 0, button, 4, 9999, set_year);
 }
 
 void window_editor_start_year_show(void)

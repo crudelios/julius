@@ -177,7 +177,7 @@ static void set_year(int value)
 
 static void button_year(const generic_button *button)
 {
-    window_numeric_input_show(screen_dialog_offset_x() + 100, screen_dialog_offset_y() + 50, 3, 999, set_year);
+    window_numeric_input_show(0, 0, button, 3, 999, set_year);
 }
 
 static void set_resource(int value)
@@ -199,7 +199,7 @@ static void button_resource(const generic_button *button)
             total_resources++;
         }
     }
-    window_select_list_show_text(screen_dialog_offset_x() + 320, screen_dialog_offset_y() + 40,
+    window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), button,
         resource_texts, total_resources, set_resource);
 }
 
@@ -210,7 +210,7 @@ static void set_route_id(int index)
 
 static void button_route(const generic_button *button)
 {
-    window_select_list_show_text(screen_dialog_offset_x() + 200, screen_dialog_offset_y() + 50,
+    window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), button,
         data.route_names, data.num_routes, set_route_id);
 }
 
@@ -221,7 +221,7 @@ static void set_change_amount(int value)
 
 static void button_amount(const generic_button *button)
 {
-    window_numeric_input_show(screen_dialog_offset_x() + 100, screen_dialog_offset_y() + 50, 3, 999, set_change_amount);
+    window_numeric_input_show(0, 0, button, 3, 999, set_change_amount);
 }
 
 static void button_delete(const generic_button *button)

@@ -257,7 +257,7 @@ static void set_enemy(int enemy)
 static void button_enemy(const generic_button *button)
 {
     stop(1);
-    window_select_list_show(screen_dialog_offset_x() + 12, screen_dialog_offset_y() + 40, 37, 20, set_enemy);
+    window_select_list_show(screen_dialog_offset_x(), screen_dialog_offset_y(), button, 37, 20, set_enemy);
 }
 
 static void button_invasions(const generic_button *button)

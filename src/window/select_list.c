@@ -2,9 +2,9 @@
 
 #include "graphics/button.h"
 #include "graphics/color.h"
-#include "graphics/generic_button.h"
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
+#include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
@@ -78,10 +78,48 @@ static struct {
     unsigned int focus_button_id;
 } data;
 
-static void init_group(int x, int y, int group, int num_items, void (*callback)(int))
+static unsigned int items_in_first_list(void)
 {
-    data.x = x;
-    data.y = y;
+    return data.num_items / 2 + data.num_items % 2;
+}
+
+static void determine_offsets(int x, int y, const generic_button *button)
+{
+    if (!button) {
+        data.x = x;
+        data.y = y;
+        return;
+    }
+
+    data.x = x + button->x;
+    data.y = y + button->y;
+
+    int width;
+    int height;
+    if (data.num_items > MAX_ITEMS_PER_LIST) {
+        width = 26 * BLOCK_SIZE;
+        height = 20 * items_in_first_list() + 24;
+    } else {
+        width = data.width + BLOCK_SIZE - 1;
+        height = 20 * data.num_items + 24;
+    }
+
+    if (data.x + width > screen_width()) {
+        data.x -= width - button->width;
+    }
+
+    if (data.y + button->height + height > screen_height()) {
+        data.y -= height;
+        if (data.y < 0) {
+            data.y = screen_height() - height;
+        }
+    } else {
+        data.y += button->height;
+    }
+}
+
+static void init_group(int x, int y, const generic_button *button, int group, int num_items, void (*callback)(int))
+{
     data.mode = MODE_GROUP;
     data.group = group;
     data.width = BASE_LIST_WIDTH;
@@ -90,12 +128,12 @@ static void init_group(int x, int y, int group, int num_items, void (*callback)(
     for (int i = 0; i < MAX_ITEMS_PER_LIST; i++) {
         buttons_list1[i].width = data.width - 10;
     }
+    determine_offsets(x, y, button);
 }
 
-static void init_text(int x, int y, const uint8_t **items, int num_items, void (*callback)(int))
+static void init_text(int x, int y, const generic_button *button, const uint8_t **items, int num_items,
+    void (*callback)(int))
 {
-    data.x = x;
-    data.y = y;
     data.mode = MODE_TEXT;
     data.items = items;
     data.num_items = num_items;
@@ -120,11 +158,7 @@ static void init_text(int x, int y, const uint8_t **items, int num_items, void (
             buttons_list1[i].width = data.width - 10;
         }
     }
-}
-
-static unsigned int items_in_first_list(void)
-{
-    return data.num_items / 2 + data.num_items % 2;
+    determine_offsets(x, y, button);
 }
 
 static void draw_item(int item_id, int x, int y, int selected)
@@ -212,7 +246,8 @@ void button_select_item(const generic_button *button)
     }
 }
 
-void window_select_list_show(int x, int y, int group, int num_items, void (*callback)(int))
+void window_select_list_show(int x, int y, const generic_button *button, int group, int num_items,
+    void (*callback)(int))
 {
     window_type window = {
         WINDOW_SELECT_LIST,
@@ -220,11 +255,12 @@ void window_select_list_show(int x, int y, int group, int num_items, void (*call
         draw_foreground,
         handle_input
     };
-    init_group(x, y, group, num_items, callback);
+    init_group(x, y, button, group, num_items, callback);
     window_show(&window);
 }
 
-void window_select_list_show_text(int x, int y, const uint8_t **items, int num_items, void (*callback)(int))
+void window_select_list_show_text(int x, int y, const generic_button *button, const uint8_t **items, int num_items,
+    void (*callback)(int))
 {
     window_type window = {
         WINDOW_SELECT_LIST,
@@ -232,6 +268,6 @@ void window_select_list_show_text(int x, int y, const uint8_t **items, int num_i
         draw_foreground,
         handle_input
     };
-    init_text(x, y, items, num_items, callback);
+    init_text(x, y, button, items, num_items, callback);
     window_show(&window);
 }

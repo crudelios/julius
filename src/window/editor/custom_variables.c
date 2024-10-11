@@ -160,8 +160,7 @@ static void button_variable(const generic_button *button)
         return;
     }
     data.target_variable = data.list[button_index]->id;
-    window_numeric_input_bound_show(screen_dialog_offset_x() + 60, screen_dialog_offset_y() + 50, 9,
-        -1000000000, 1000000000, set_variable_value);
+    window_numeric_input_bound_show(0, 0, button, 9, -1000000000, 1000000000, set_variable_value);
 }
 
 static void set_variable_name(const uint8_t *value)

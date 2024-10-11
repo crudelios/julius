@@ -37,9 +37,9 @@ static void button_change_type(const generic_button *button);
 static void set_param_value(int value);
 static void set_parameter_being_edited(int value);
 static void set_resource_value(int value);
-static void resource_selection(void);
+static void resource_selection(const generic_button *button);
 static void custom_message_selection(void);
-static void change_parameter(xml_data_attribute_t *parameter, int param1);
+static void change_parameter(xml_data_attribute_t *parameter, const generic_button *button);
 
 static generic_button buttons[] = {
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (0 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, 0, 1},
@@ -191,13 +191,12 @@ static void button_change_type(const generic_button *button)
 
 static void button_amount(const generic_button *button)
 {
-    int param1 = button->parameter1;
-    switch (param1) {
-        case 1: change_parameter(&data.xml_info->xml_parm1, param1); break;
-        case 2: change_parameter(&data.xml_info->xml_parm2, param1); break;
-        case 3: change_parameter(&data.xml_info->xml_parm3, param1); break;
-        case 4: change_parameter(&data.xml_info->xml_parm4, param1); break;
-        case 5: change_parameter(&data.xml_info->xml_parm5, param1); break;
+    switch (button->parameter1) {
+        case 1: change_parameter(&data.xml_info->xml_parm1, button); break;
+        case 2: change_parameter(&data.xml_info->xml_parm2, button); break;
+        case 3: change_parameter(&data.xml_info->xml_parm3, button); break;
+        case 4: change_parameter(&data.xml_info->xml_parm4, button); break;
+        case 5: change_parameter(&data.xml_info->xml_parm5, button); break;
     }
 }
 
@@ -271,13 +270,13 @@ static void set_resource_value(int value)
     }
 }
 
-static void resource_selection(void)
+static void resource_selection(const generic_button *button)
 {
     static const uint8_t *resource_texts[RESOURCE_MAX];
     for (resource_type resource = RESOURCE_MIN_FOOD; resource < RESOURCE_MAX; resource++) {
         resource_texts[resource - 1] = resource_get_data(resource)->text;
     }
-    window_select_list_show_text(screen_dialog_offset_x() + 64, screen_dialog_offset_y() + 64,
+    window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), button,
         resource_texts, RESOURCE_MAX - 1, set_resource_value);
 }
 
@@ -314,13 +313,14 @@ static void custom_variable_selection(void)
     window_editor_custom_variables_select_show(set_param_custom_variable);
 }
 
-static void change_parameter(xml_data_attribute_t *parameter, int param1)
+static void change_parameter(xml_data_attribute_t *parameter, const generic_button *button)
 {
-    set_parameter_being_edited(param1);
+    set_parameter_being_edited(button->parameter1);
     switch (parameter->type) {
         case PARAMETER_TYPE_NUMBER:
         case PARAMETER_TYPE_MIN_MAX_NUMBER:
-            window_numeric_input_bound_show(screen_dialog_offset_x() + 60, screen_dialog_offset_y() + 50, 9, parameter->min_limit, parameter->max_limit, set_param_value);
+            window_numeric_input_bound_show(BUTTON_WIDTH / 2, 0, button, 9, parameter->min_limit, parameter->max_limit,
+                set_param_value);
             return;
         case PARAMETER_TYPE_ALLOWED_BUILDING:
         case PARAMETER_TYPE_BOOLEAN:
@@ -349,7 +349,7 @@ static void change_parameter(xml_data_attribute_t *parameter, int param1)
             window_editor_select_city_by_type_show(set_param_value, EMPIRE_CITY_FUTURE_TRADE);
             return;
         case PARAMETER_TYPE_RESOURCE:
-            resource_selection();
+            resource_selection(button);
             return;
         case PARAMETER_TYPE_CUSTOM_MESSAGE:
             custom_message_selection();

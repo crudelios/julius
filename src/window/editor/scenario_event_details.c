@@ -54,9 +54,9 @@ static scrollbar_type scrollbar = {
 
 static generic_button buttons[] = {
     {580, 32, 64, 14, button_delete_event},
-    {SHORT_BUTTON_LEFT_PADDING, EVENT_REPEAT_Y_OFFSET, SHORT_BUTTON_WIDTH, 14, button_amount, 0, SCENARIO_EVENT_DETAILS_SET_MAX_REPEATS},
-    {SHORT_BUTTON_LEFT_PADDING, EVENT_REPEAT_Y_OFFSET + 32, SHORT_BUTTON_WIDTH, 14, button_amount, 0, SCENARIO_EVENT_DETAILS_SET_REPEAT_MIN},
-    {SHORT_BUTTON_LEFT_PADDING, EVENT_REPEAT_Y_OFFSET + 64, SHORT_BUTTON_WIDTH, 14, button_amount, 0, SCENARIO_EVENT_DETAILS_SET_REPEAT_MAX},
+    {SHORT_BUTTON_LEFT_PADDING, EVENT_REPEAT_Y_OFFSET, SHORT_BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, 0, SCENARIO_EVENT_DETAILS_SET_MAX_REPEATS},
+    {SHORT_BUTTON_LEFT_PADDING, EVENT_REPEAT_Y_OFFSET + 32, SHORT_BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, 0, SCENARIO_EVENT_DETAILS_SET_REPEAT_MIN},
+    {SHORT_BUTTON_LEFT_PADDING, EVENT_REPEAT_Y_OFFSET + 64, SHORT_BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, 0, SCENARIO_EVENT_DETAILS_SET_REPEAT_MAX},
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (0 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click},
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (1 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, 0, 1},
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (2 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, 0, 2},
@@ -392,11 +392,11 @@ static void button_amount(const generic_button *button)
 {
     int param1 = button->parameter1;
     if (param1 == SCENARIO_EVENT_DETAILS_SET_MAX_REPEATS) {
-        window_numeric_input_show(screen_dialog_offset_x() + 60, screen_dialog_offset_y() + 50, 3, 100000, set_amount_max_repeats);
+        window_numeric_input_show(0, 0, button, 3, 100000, set_amount_max_repeats);
     } else if (param1 == SCENARIO_EVENT_DETAILS_SET_REPEAT_MIN) {
-        window_numeric_input_show(screen_dialog_offset_x() + 60, screen_dialog_offset_y() + 50, 3, 1000, set_amount_repeat_min);
+        window_numeric_input_show(0, 0, button, 3, 1000, set_amount_repeat_min);
     } else if (param1 == SCENARIO_EVENT_DETAILS_SET_REPEAT_MAX) {
-        window_numeric_input_show(screen_dialog_offset_x() + 60, screen_dialog_offset_y() + 50, 3, 1000, set_amount_repeat_max);
+        window_numeric_input_show(0, 0, button, 3, 1000, set_amount_repeat_max);
     }
 }
 

@@ -697,16 +697,16 @@ static void button_top(const generic_button *button)
     switch (option) {
         case BUTTON_CHANGE_ASSET_GROUP:
             if (data.xml_files->num_files > 0) {
-                window_select_list_show_text(button->x + data.x_offset_top + 16, button->y + 60 + button->height,
+                window_select_list_show_text(data.x_offset_top + 16, 60, button,
                     data.xml_file_names, data.xml_files->num_files, change_asset_group);
             }
             return;
         case BUTTON_CHANGE_TERRAIN:
-            window_select_list_show_text(button->x + data.x_offset_top + 16, button->y + 60 + button->height,
+            window_select_list_show_text(data.x_offset_top + 16, 60, button,
                 data.terrain_texts, TERRAIN_MAX, set_terrain);
             return;
         case BUTTON_CHANGE_ZOOM:
-            window_select_list_show_text(button->x + data.x_offset_top + 16, button->y + 60 + button->height,
+            window_select_list_show_text(data.x_offset_top + 16, 60, button,
                 data.zoom_texts, TOTAL_ZOOM_VALUES, set_zoom);
             return;
         case BUTTON_TOGGLE_ANIMATIONS:

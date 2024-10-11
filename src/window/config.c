@@ -1095,9 +1095,7 @@ static void button_language_select(const generic_button *button)
 {
     int height = button->parameter1;
 
-    window_select_list_show_text(
-        screen_dialog_offset_x() + button->x,
-        screen_dialog_offset_y() + height + button->height,
+    window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y() + height, button,
         data.language_options.options, data.language_options.total, set_language
     );
 }

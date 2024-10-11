@@ -165,8 +165,7 @@ static void button_earthquake_severity(const generic_button *button)
 
 static void button_earthquake_year(const generic_button *button)
 {
-    window_numeric_input_show(screen_dialog_offset_x() + 190, screen_dialog_offset_y() + 100,
-                              3, 999, scenario_editor_earthquake_set_year);
+    window_numeric_input_show(0, 0, button, 3, 999, scenario_editor_earthquake_set_year);
 }
 
 static void button_gladiator_toggle(const generic_button *button)
@@ -177,8 +176,7 @@ static void button_gladiator_toggle(const generic_button *button)
 
 static void button_gladiator_year(const generic_button *button)
 {
-    window_numeric_input_show(screen_dialog_offset_x() + 190, screen_dialog_offset_y() + 100,
-                              3, 999, scenario_editor_gladiator_revolt_set_year);
+    window_numeric_input_show(0, 0, button, 3, 999, scenario_editor_gladiator_revolt_set_year);
 }
 
 static void button_emperor_toggle(const generic_button *button)
@@ -189,8 +187,7 @@ static void button_emperor_toggle(const generic_button *button)
 
 static void button_emperor_year(const generic_button *button)
 {
-    window_numeric_input_show(screen_dialog_offset_x() + 190, screen_dialog_offset_y() + 100,
-                              3, 999, scenario_editor_emperor_change_set_year);
+    window_numeric_input_show(0, 0, button, 3, 999, scenario_editor_emperor_change_set_year);
 }
 
 static void button_sea_trade_toggle(const generic_button *button)
@@ -218,7 +215,7 @@ static void set_max_wages(int amount)
 
 static void button_max_wages(const generic_button *button)
 {
-    window_numeric_input_show(400, 256, 2, 99, set_max_wages);
+    window_numeric_input_show(0, 0, button, 2, 99, set_max_wages);
 }
 
 static void button_lower_wages_toggle(const generic_button *button)
@@ -234,7 +231,7 @@ static void set_min_wages(int amount)
 
 static void button_min_wages(const generic_button *button)
 {
-    window_numeric_input_show(400, 286, 2, 99, set_min_wages);
+    window_numeric_input_show(0, 0, button, 2, 99, set_min_wages);
 }
 
 static void button_contamination_toggle(const generic_button *button)

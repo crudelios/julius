@@ -190,7 +190,7 @@ void menu_file_new_map(int centered)
         x += 325;
         y += 200;
     }
-    window_select_list_show(x, y, 33, 7, map_size_selected);
+    window_select_list_show(x, y, 0, 33, 7, map_size_selected);
 }
 
 static void menu_file_load_map(int param)

@@ -2,10 +2,10 @@
 
 #include "core/string.h"
 #include "graphics/color.h"
-#include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
+#include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
@@ -13,6 +13,9 @@
 #include "sound/effect.h"
 
 #include <limits.h>
+
+#define WIDTH_BLOCKS 8
+#define HEIGHT_BLOCKS 15
 
 static void button_number(const generic_button *button);
 static void button_accept(const generic_button *button);
@@ -55,11 +58,38 @@ static struct {
     unsigned int focus_button_id;
 } data;
 
-static void init(int x, int y, int max_digits, int min_value, int max_value, void (*callback)(int))
+static void determine_offsets(int x, int y, const generic_button *button)
+{
+    x += screen_dialog_offset_x();
+    y += screen_dialog_offset_y();
+
+    if (!button) {
+        data.x = x;
+        data.y = y;
+        return;
+    }
+
+    data.x = x + button->x;
+    data.y = y + button->y;
+
+    if (data.x + WIDTH_BLOCKS * BLOCK_SIZE > screen_width()) {
+        data.x -= WIDTH_BLOCKS * BLOCK_SIZE - button->width;
+    }
+
+    if (data.y + button->height + HEIGHT_BLOCKS * BLOCK_SIZE > screen_height()) {
+        data.y -= HEIGHT_BLOCKS * BLOCK_SIZE;
+    } else {
+        data.y += button->height;
+    }
+}
+
+static void init(int x, int y, const generic_button *button, int max_digits,
+    int min_value, int max_value, void (*callback)(int))
 {
     data.is_negative_value = 0;
-    data.x = x;
-    data.y = y;
+
+    determine_offsets(x, y, button);
+    
     data.max_digits = max_digits;
     if (!min_value && !max_value) {
         data.min_value = INT_MIN;
@@ -93,7 +123,7 @@ static void draw_number_button(int x, int y, int number, int is_selected)
 
 static void draw_foreground(void)
 {
-    outer_panel_draw(data.x, data.y, 8, 15);
+    outer_panel_draw(data.x, data.y, WIDTH_BLOCKS, HEIGHT_BLOCKS);
 
     graphics_fill_rect(data.x + 16, data.y + 16, 96, 30, COLOR_BLACK);
     if (data.num_digits > 0) {
@@ -127,12 +157,20 @@ static void draw_foreground(void)
             data.focus_button_id == 14 ? COLOR_FONT_BLUE : COLOR_BLACK);
 }
 
+static int click_outside_window(const mouse *m)
+{
+    int width = WIDTH_BLOCKS * BLOCK_SIZE;
+    int height = HEIGHT_BLOCKS * BLOCK_SIZE;
+
+    return m->left.went_up && (m->x < data.x || m->x >= data.x + width || m->y < data.y || m->y >= data.y + height);
+}
+
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     if (generic_buttons_handle_mouse(m, data.x, data.y, buttons, 14, &data.focus_button_id)) {
         return;
     }
-    if (input_go_back_requested(m, h)) {
+    if (input_go_back_requested(m, h) || click_outside_window(m)) {
         close();
     }
     if (h->enter_pressed) {
@@ -219,12 +257,14 @@ static void input_delete(void)
     }
 }
 
-void window_numeric_input_show(int x, int y, int max_digits, int max_value, void (*callback)(int))
+void window_numeric_input_show(int x, int y, const generic_button *button,
+    int max_digits, int max_value, void (*callback)(int))
 {
-    window_numeric_input_bound_show(x, y, max_digits, 0, max_value, callback);
+    window_numeric_input_bound_show(x, y, button, max_digits, 0, max_value, callback);
 }
 
-void window_numeric_input_bound_show(int x, int y, int max_digits, int min_value, int max_value, void (*callback)(int))
+void window_numeric_input_bound_show(int x, int y, const generic_button *button, int max_digits,
+    int min_value, int max_value, void (*callback)(int))
 {
     window_type window = {
         WINDOW_NUMERIC_INPUT,
@@ -232,6 +272,6 @@ void window_numeric_input_bound_show(int x, int y, int max_digits, int min_value
         draw_foreground,
         handle_input,
     };
-    init(x, y, max_digits, min_value, max_value, callback);
+    init(x, y, button, max_digits, min_value, max_value, callback);
     window_show(&window);
 }

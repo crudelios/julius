@@ -222,8 +222,8 @@ static void button_pick_option(const generic_button *button)
         }
     };
 
-    window_select_list_show_text(screen_dialog_offset_x() + 150,
-        screen_dialog_offset_y() + path_button.y + path_button.height, texts, total_options, set_paths);
+    window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), button, texts, total_options,
+        set_paths);
 }
 
 static void copy_user_files(int accepted, int overwrite)

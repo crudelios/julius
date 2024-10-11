@@ -132,7 +132,7 @@ static void set_year(int value)
 
 static void button_year(const generic_button *button)
 {
-    window_numeric_input_show(screen_dialog_offset_x() + 100, screen_dialog_offset_y() + 50, 3, 999, set_year);
+    window_numeric_input_show(0, 0, button, 3, 999, set_year);
 }
 
 static void set_amount(int value)
@@ -148,10 +148,7 @@ static void button_amount(const generic_button *button)
         max_amount = 30000;
         max_digits = 5;
     }
-    window_numeric_input_show(
-        screen_dialog_offset_x() + 190, screen_dialog_offset_y() + 50,
-        max_digits, max_amount, set_amount
-    );
+    window_numeric_input_show(0, 0, button, max_digits, max_amount, set_amount);
 }
 
 static void set_resource(int value)
@@ -176,7 +173,7 @@ static void button_resource(const generic_button *button)
             total_resources++;
         }
     }
-    window_select_list_show_text(screen_dialog_offset_x() + 210, screen_dialog_offset_y() + 40,
+    window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), button,
         resource_texts, total_resources, set_resource);
 }
 
@@ -187,8 +184,7 @@ static void set_deadline_years(int value)
 
 static void button_deadline_years(const generic_button *button)
 {
-    window_numeric_input_show(screen_dialog_offset_x() + 220, screen_dialog_offset_y() + 100,
-        3, 999, set_deadline_years);
+    window_numeric_input_show(0, 0, button, 3, 999, set_deadline_years);
 }
 
 static void set_favor(int value)
@@ -198,7 +194,7 @@ static void set_favor(int value)
 
 static void button_favor(const generic_button *button)
 {
-    window_numeric_input_show(screen_dialog_offset_x() + 260, screen_dialog_offset_y() + 100, 3, 100, set_favor);
+    window_numeric_input_show(0, 0, button, 3, 100, set_favor);
 }
 
 static void set_extension_months(int value)
@@ -208,7 +204,7 @@ static void set_extension_months(int value)
 
 static void button_extension_months(const generic_button *button)
 {
-    window_numeric_input_show(screen_dialog_offset_x() + 260, screen_dialog_offset_y() + 100, 3, 120, set_extension_months);
+    window_numeric_input_show(0, 0, button, 3, 120, set_extension_months);
 }
 
 static void set_extension_disfavor(int value)
@@ -218,7 +214,7 @@ static void set_extension_disfavor(int value)
 
 static void button_extension_disfavor(const generic_button *button)
 {
-    window_numeric_input_show(screen_dialog_offset_x() + 260, screen_dialog_offset_y() + 100, 3, 100, set_extension_disfavor);
+    window_numeric_input_show(0, 0, button, 3, 100, set_extension_disfavor);
 }
 
 static void set_ignored_disfavor(int value)
@@ -228,7 +224,7 @@ static void set_ignored_disfavor(int value)
 
 static void button_ignored_disfavor(const generic_button *button)
 {
-    window_numeric_input_show(screen_dialog_offset_x() + 260, screen_dialog_offset_y() + 100, 3, 100, set_ignored_disfavor);
+    window_numeric_input_show(0, 0, button, 3, 100, set_ignored_disfavor);
 }
 
 static void button_delete(const generic_button *button)

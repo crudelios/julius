@@ -298,10 +298,8 @@ static void set_year(int value)
 
 static void button_year(const generic_button *button)
 {
-    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + button->x;
-    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y + button->height;
-
-    window_numeric_input_show(x_offset, y_offset, 3, 999, set_year);
+    window_numeric_input_show(data.section_title_width + SECTION_CONTENT_LEFT_OFFSET, BASE_Y_OFFSET, button,
+        3, 999, set_year);
 }
 
 static void set_amount_min(int value)
@@ -323,10 +321,9 @@ static void set_amount_max(int value)
 static void button_amount(const generic_button *button)
 {
     int amount_type = button->parameter1;
-    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + button->x;
-    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y + button->height;
 
-    window_numeric_input_show(x_offset, y_offset, 3, 200, amount_type == AMOUNT_MIN ? set_amount_min : set_amount_max);
+    window_numeric_input_show(data.section_title_width + SECTION_CONTENT_LEFT_OFFSET, BASE_Y_OFFSET, button, 3, 200,
+        amount_type == AMOUNT_MIN ? set_amount_min : set_amount_max);
 }
 
 static void set_type(int value)
@@ -336,10 +333,10 @@ static void set_type(int value)
 
 static void button_type(const generic_button *button)
 {
-    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + button->x;
-    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y + button->height;
+    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET;
+    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET;
 
-    window_select_list_show(x_offset, y_offset, 34, 4, set_type);
+    window_select_list_show(x_offset, y_offset, button, 34, 4, set_type);
 }
 
 static void set_from(int value)
@@ -352,10 +349,10 @@ static void button_from(const generic_button *button)
     if (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE) {
         return;
     }
-    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + button->x;
-    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y + button->height;
+    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET;
+    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET;
 
-    window_select_list_show(x_offset, y_offset, 35, 9, set_from);
+    window_select_list_show(x_offset, y_offset, button, 35, 9, set_from);
 }
 
 static void set_attack(int value)
@@ -368,10 +365,10 @@ static void button_attack(const generic_button *button)
     if (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE) {
         return;
     }
-    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + button->x;
-    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y + button->height;
+    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET;
+    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET;
 
-    window_select_list_show(x_offset, y_offset, 36, 5, set_attack);
+    window_select_list_show(x_offset, y_offset, button, 36, 5, set_attack);
 }
 
 static void button_repeat_type(const generic_button *button)
@@ -396,13 +393,8 @@ static void set_repeat_times(int value)
 
 static void button_repeat_times(const generic_button *button)
 {
-    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + button->x;
-    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y + button->height;
-    if (y_offset + 15 * BLOCK_SIZE > screen_height()) {
-        y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y - 15 * BLOCK_SIZE;
-    }
-
-    window_numeric_input_bound_show(x_offset, y_offset, 3, 1, 999, set_repeat_times);
+    window_numeric_input_bound_show(data.section_title_width + SECTION_CONTENT_LEFT_OFFSET, BASE_Y_OFFSET, button,
+        3, 1, 999, set_repeat_times);
 }
 
 static void set_repeat_interval_min(int value)
@@ -427,14 +419,9 @@ static void button_repeat_between(const generic_button *button)
     if (data.repeat_type == INVASION_REPEAT_NEVER) {
         return;
     }
-    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + button->x;
-    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y + button->height;
-    if (y_offset + 15 * BLOCK_SIZE > screen_height()) {
-        y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y - 15 * BLOCK_SIZE;
-    }
 
-    window_numeric_input_bound_show(x_offset, y_offset, 2, 3, 50,
-        amount_type == AMOUNT_MIN ? set_repeat_interval_min : set_repeat_interval_max);
+    window_numeric_input_bound_show(data.section_title_width + SECTION_CONTENT_LEFT_OFFSET, BASE_Y_OFFSET, button,
+        2, 3, 50, amount_type == AMOUNT_MIN ? set_repeat_interval_min : set_repeat_interval_max);
 }
 
 static void button_delete(const generic_button *button)
