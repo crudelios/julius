@@ -41,10 +41,10 @@ enum {
 static void init(int event_id);
 static void init_scroll_list(void);
 static void on_scroll(void);
-static void button_click(int index, int param2);
-static void button_amount(int param1, int param2);
-static void button_add(int param1, int param2);
-static void button_delete_event(int param1, int param2);
+static void button_click(const generic_button *button);
+static void button_amount(const generic_button *button);
+static void button_add(const generic_button *button);
+static void button_delete_event(const generic_button *button);
 static void add_new_condition(void);
 static void add_new_action(void);
 
@@ -53,22 +53,22 @@ static scrollbar_type scrollbar = {
 };
 
 static generic_button buttons[] = {
-    {580, 32, 64, 14, button_delete_event, button_none, 10, 0},
-    {SHORT_BUTTON_LEFT_PADDING, EVENT_REPEAT_Y_OFFSET, SHORT_BUTTON_WIDTH, 14, button_amount, button_none, SCENARIO_EVENT_DETAILS_SET_MAX_REPEATS, 0},
-    {SHORT_BUTTON_LEFT_PADDING, EVENT_REPEAT_Y_OFFSET + 32, SHORT_BUTTON_WIDTH, 14, button_amount, button_none, SCENARIO_EVENT_DETAILS_SET_REPEAT_MIN, 0},
-    {SHORT_BUTTON_LEFT_PADDING, EVENT_REPEAT_Y_OFFSET + 64, SHORT_BUTTON_WIDTH, 14, button_amount, button_none, SCENARIO_EVENT_DETAILS_SET_REPEAT_MAX, 0},
-    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (0 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, button_none, 0, 0},
-    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (1 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, button_none, 1, 0},
-    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (2 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, button_none, 2, 0},
-    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (3 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, button_none, 3, 0},
-    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (4 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, button_none, 4, 0},
-    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (5 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, button_none, 5, 0},
-    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (6 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, button_none, 6, 0},
-    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (7 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, button_none, 7, 0},
-    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (8 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, button_none, 8, 0},
-    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (9 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, button_none, 9, 0},
-    {SHORT_BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (10 * DETAILS_ROW_HEIGHT), SHORT_BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_add, button_none, SCENARIO_EVENT_DETAILS_ADD_CONDITION, 0},
-    {SHORT_BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (11 * DETAILS_ROW_HEIGHT), SHORT_BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_add, button_none, SCENARIO_EVENT_DETAILS_ADD_ACTION, 0}
+    {580, 32, 64, 14, button_delete_event},
+    {SHORT_BUTTON_LEFT_PADDING, EVENT_REPEAT_Y_OFFSET, SHORT_BUTTON_WIDTH, 14, button_amount, 0, SCENARIO_EVENT_DETAILS_SET_MAX_REPEATS},
+    {SHORT_BUTTON_LEFT_PADDING, EVENT_REPEAT_Y_OFFSET + 32, SHORT_BUTTON_WIDTH, 14, button_amount, 0, SCENARIO_EVENT_DETAILS_SET_REPEAT_MIN},
+    {SHORT_BUTTON_LEFT_PADDING, EVENT_REPEAT_Y_OFFSET + 64, SHORT_BUTTON_WIDTH, 14, button_amount, 0, SCENARIO_EVENT_DETAILS_SET_REPEAT_MAX},
+    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (0 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click},
+    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (1 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, 0, 1},
+    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (2 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, 0, 2},
+    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (3 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, 0, 3},
+    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (4 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, 0, 4},
+    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (5 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, 0, 5},
+    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (6 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, 0, 6},
+    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (7 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, 0, 7},
+    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (8 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, 0, 8},
+    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (9 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_click, 0, 9},
+    {SHORT_BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (10 * DETAILS_ROW_HEIGHT), SHORT_BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_add, 0, SCENARIO_EVENT_DETAILS_ADD_CONDITION},
+    {SHORT_BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (11 * DETAILS_ROW_HEIGHT), SHORT_BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_add, 0, SCENARIO_EVENT_DETAILS_ADD_ACTION}
 };
 #define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
 
@@ -360,14 +360,16 @@ static void add_new_action(void)
     window_request_refresh();
 }
 
-static void button_delete_event(int param1, int param2)
+static void button_delete_event(const generic_button *button)
 {
     scenario_event_delete(data.event);
     window_go_back();
 }
 
-static void button_click(int index, int param2)
+static void button_click(const generic_button *button)
 {
+    int index = button->parameter1;
+
     if (index > MAX_VISIBLE_ROWS ||
         index >= (int) data.total_sub_items) {
         return;
@@ -386,8 +388,9 @@ static void button_click(int index, int param2)
     }
 }
 
-static void button_amount(int param1, int param2)
+static void button_amount(const generic_button *button)
 {
+    int param1 = button->parameter1;
     if (param1 == SCENARIO_EVENT_DETAILS_SET_MAX_REPEATS) {
         window_numeric_input_show(screen_dialog_offset_x() + 60, screen_dialog_offset_y() + 50, 3, 100000, set_amount_max_repeats);
     } else if (param1 == SCENARIO_EVENT_DETAILS_SET_REPEAT_MIN) {
@@ -397,8 +400,9 @@ static void button_amount(int param1, int param2)
     }
 }
 
-static void button_add(int param1, int param2)
+static void button_add(const generic_button *button)
 {
+    int param1 = button->parameter1;
     if (param1 == SCENARIO_EVENT_DETAILS_ADD_CONDITION) {
         add_new_condition();
     } else if (param1 == SCENARIO_EVENT_DETAILS_ADD_ACTION) {

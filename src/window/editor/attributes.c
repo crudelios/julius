@@ -40,47 +40,47 @@
 
 #define BRIEF_DESC_LENGTH 64
 
-static void button_starting_conditions(int param1, int param2);
-static void button_requests(int param1, int param2);
-static void button_enemy(int param1, int param2);
-static void button_invasions(int param1, int param2);
-static void button_allowed_buildings(int param1, int param2);
-static void button_win_criteria(int param1, int param2);
-static void button_special_events(int param1, int param2);
-static void button_price_changes(int param1, int param2);
-static void button_demand_changes(int param1, int param2);
-static void button_scenario_events(int param1, int param2);
-static void button_custom_messages(int param1, int param2);
-static void button_change_intro(int param1, int param2);
-static void button_delete_intro(int param1, int param2);
-static void button_change_victory(int param1, int param2);
-static void button_delete_victory(int param1, int param2);
-static void button_return_to_city(int param1, int param2);
-static void change_climate(int param1, int param2);
-static void change_image(int forward, int param2);
+static void button_starting_conditions(const generic_button *button);
+static void button_requests(const generic_button *button);
+static void button_enemy(const generic_button *button);
+static void button_invasions(const generic_button *button);
+static void button_allowed_buildings(const generic_button *button);
+static void button_win_criteria(const generic_button *button);
+static void button_special_events(const generic_button *button);
+static void button_price_changes(const generic_button *button);
+static void button_demand_changes(const generic_button *button);
+static void button_scenario_events(const generic_button *button);
+static void button_custom_messages(const generic_button *button);
+static void button_change_intro(const generic_button *button);
+static void button_delete_intro(const generic_button *button);
+static void button_change_victory(const generic_button *button);
+static void button_delete_victory(const generic_button *button);
+static void button_return_to_city(const generic_button *button);
+static void button_change_climate(const generic_button *button);
+static void button_change_image(int forward, int param2);
 
 static generic_button buttons[] = {
-    {212, 76, 250, 30, button_starting_conditions, button_none, 1, 0},
-    {212, 116, 250, 30, change_climate, button_none, 2, 0},
-    {212, 156, 250, 30, button_requests, button_none, 3, 0},
-    {212, 196, 250, 30, button_enemy, button_none, 4, 0},
-    {212, 236, 250, 30, button_invasions, button_none, 5, 0},
-    {212, 276, 250, 30, button_allowed_buildings, button_none, 6, 0},
-    {212, 316, 250, 30, button_win_criteria, button_none, 7, 0},
-    {212, 356, 250, 30, button_special_events, button_none, 8, 0},
-    {212, 396, 250, 30, button_price_changes, button_none, 9, 0},
-    {212, 436, 250, 30, button_demand_changes, button_none, 10, 0},
-    {470,  76, 250, 30, button_scenario_events, button_none, 11, 0},
-    {470, 116, 250, 30, button_custom_messages, button_none, 12, 0},
-    {470, 156, 250, 30, button_change_intro, button_delete_intro, 13, 0},
-    {470, 196, 250, 30, button_change_victory, button_delete_victory, 14, 0},
-    {470, 436, 250, 30, button_return_to_city, button_none, 0, 0},
+    {212, 76, 250, 30, button_starting_conditions, 0, 1},
+    {212, 116, 250, 30, button_change_climate, 0, 2},
+    {212, 156, 250, 30, button_requests, 0, 3},
+    {212, 196, 250, 30, button_enemy, 0, 4},
+    {212, 236, 250, 30, button_invasions, 0, 5},
+    {212, 276, 250, 30, button_allowed_buildings, 0, 6},
+    {212, 316, 250, 30, button_win_criteria, 0, 7},
+    {212, 356, 250, 30, button_special_events, 0, 8},
+    {212, 396, 250, 30, button_price_changes, 0, 9},
+    {212, 436, 250, 30, button_demand_changes, 0, 10},
+    {470,  76, 250, 30, button_scenario_events, 0, 11},
+    {470, 116, 250, 30, button_custom_messages, 0, 12},
+    {470, 156, 250, 30, button_change_intro, button_delete_intro, 13},
+    {470, 196, 250, 30, button_change_victory, button_delete_victory, 14},
+    {470, 436, 250, 30, button_return_to_city},
 };
 #define NUMBER_OF_BUTTONS (sizeof(buttons) / sizeof(generic_button))
 
 static arrow_button image_arrows[] = {
-    {20, 424, 19, 24, change_image, 0, 0},
-    {44, 424, 21, 24, change_image, 1, 0},
+    {20, 424, 19, 24, button_change_image, 0, 0},
+    {44, 424, 21, 24, button_change_image, 1, 0},
 };
 
 static struct {
@@ -236,13 +236,13 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
-static void button_starting_conditions(int param1, int param2)
+static void button_starting_conditions(const generic_button *button)
 {
     stop(1);
     window_editor_starting_conditions_show();
 }
 
-static void button_requests(int param1, int param2)
+static void button_requests(const generic_button *button)
 {
     stop(1);
     window_editor_requests_show();
@@ -254,61 +254,61 @@ static void set_enemy(int enemy)
     start();
 }
 
-static void button_enemy(int param1, int param2)
+static void button_enemy(const generic_button *button)
 {
     stop(1);
     window_select_list_show(screen_dialog_offset_x() + 12, screen_dialog_offset_y() + 40, 37, 20, set_enemy);
 }
 
-static void button_invasions(int param1, int param2)
+static void button_invasions(const generic_button *button)
 {
     stop(1);
     window_editor_invasions_show();
 }
 
-static void button_allowed_buildings(int param1, int param2)
+static void button_allowed_buildings(const generic_button *button)
 {
     stop(1);
     window_editor_allowed_buildings_show();
 }
 
-static void button_win_criteria(int param1, int param2)
+static void button_win_criteria(const generic_button *button)
 {
     stop(1);
     window_editor_win_criteria_show();
 }
 
-static void button_special_events(int param1, int param2)
+static void button_special_events(const generic_button *button)
 {
     stop(1);
     window_editor_special_events_show();
 }
 
-static void button_price_changes(int param1, int param2)
+static void button_price_changes(const generic_button *button)
 {
     stop(1);
     window_editor_price_changes_show();
 }
 
-static void button_demand_changes(int param1, int param2)
+static void button_demand_changes(const generic_button *button)
 {
     stop(1);
     window_editor_demand_changes_show();
 }
 
-static void button_scenario_events(int param1, int param2)
+static void button_scenario_events(const generic_button *button)
 {
     stop(0);
     window_editor_scenario_events_show();
 }
 
-static void button_custom_messages(int param1, int param2)
+static void button_custom_messages(const generic_button *button)
 {
     stop(0);
     window_editor_custom_messages_show();
 }
 
-static void button_change_intro(int param1, int param2)
+static void button_change_intro(const generic_button *button)
 {
     stop(0);
     if (!scenario_editor_get_custom_message_introduction()) {
@@ -319,13 +319,13 @@ static void button_change_intro(int param1, int param2)
     }
 }
 
-static void button_delete_intro(int param1, int param2)
+static void button_delete_intro(const generic_button *button)
 {
     stop(0);
     scenario_editor_set_custom_message_introduction(0);
 }
 
-static void button_change_victory(int param1, int param2)
+static void button_change_victory(const generic_button *button)
 {
     stop(0);
     if (!scenario_editor_get_custom_victory_message()) {
@@ -336,19 +336,19 @@ static void button_change_victory(int param1, int param2)
     }
 }
 
-static void button_delete_victory(int param1, int param2)
+static void button_delete_victory(const generic_button *button)
 {
     stop(0);
     scenario_editor_set_custom_victory_message(0);
 }
 
-static void button_return_to_city(int param1, int param2)
+static void button_return_to_city(const generic_button *button)
 {
     stop(0);
     window_city_show();
 }
 
-static void change_climate(int param1, int param2)
+static void button_change_climate(const generic_button *button)
 {
     scenario_editor_cycle_climate();
     image_load_climate(scenario_property_climate(), editor_is_active(), 0, 0);
@@ -356,7 +356,7 @@ static void change_climate(int param1, int param2)
     window_request_refresh();
 }
 
-static void change_image(int forward, int param2)
+static void button_change_image(int forward, int param2)
 {
     scenario_editor_cycle_image(forward);
     window_request_refresh();

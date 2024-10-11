@@ -21,7 +21,7 @@
 #include "window/editor/map.h"
 
 static void button_edit_request(unsigned int id, unsigned int mouse_x, unsigned int mouse_y);
-static void button_new_request(int param0, int param1);
+static void button_new_request(const generic_button *button);
 static void draw_request_button(const grid_box_item *item);
 
 static struct {
@@ -33,7 +33,7 @@ static struct {
 } data;
 
 static generic_button new_request_button = {
-    195, 340, 250, 25, button_new_request, button_none
+    195, 340, 250, 25, button_new_request
 };
 
 static grid_box_type request_buttons = {
@@ -177,7 +177,7 @@ static void button_edit_request(unsigned int id, unsigned int mouse_x, unsigned 
     window_go_back();
 }
 
-static void button_new_request(int param0, int param1)
+static void button_new_request(const generic_button *button)
 {
     if (data.on_select) {
         return;

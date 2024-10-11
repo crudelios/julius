@@ -35,17 +35,17 @@ static void menu_file_confirm_exit(int accepted, int checked)
     }
 }
 
-static void button_click(int type, int param2);
+static void button_click(const generic_button *button);
 
 static unsigned int focus_button_id;
 
 static generic_button buttons[] = {
-    {192, 100, 192, 25, button_click, button_none, 1, 0},
-    {192, 140, 192, 25, button_click, button_none, 2, 0},
-    {192, 180, 192, 25, button_click, button_none, 3, 0},
-    {192, 220, 192, 25, button_click, button_none, 4, 0},
-    {192, 260, 192, 25, button_click, button_none, 5, 0},
-    {192, 300, 192, 25, button_click, button_none, 6, 0},
+    {192, 100, 192, 25, button_click, 0, 1},
+    {192, 140, 192, 25, button_click, 0, 2},
+    {192, 180, 192, 25, button_click, 0, 3},
+    {192, 220, 192, 25, button_click, 0, 4},
+    {192, 260, 192, 25, button_click, 0, 5},
+    {192, 300, 192, 25, button_click, 0, 6},
 };
 
 static void draw_foreground(void)
@@ -97,8 +97,9 @@ static void main_menu_confirmed(int confirmed, int checked)
     }
 }
 
-static void button_click(int type, int param2)
+static void button_click(const generic_button *button)
 {
+    int type = button->parameter1;
     if (type == 1) {
         window_go_back();
     } else if (type == 2) {

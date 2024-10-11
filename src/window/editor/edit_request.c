@@ -18,16 +18,16 @@
 #include "window/numeric_input.h"
 #include "window/select_list.h"
 
-static void button_year(int param1, int param2);
-static void button_amount(int param1, int param2);
-static void button_resource(int param1, int param2);
-static void button_deadline_years(int param1, int param2);
-static void button_favor(int param1, int param2);
-static void button_extension_months(int param1, int param2);
-static void button_extension_disfavor(int param1, int param2);
-static void button_ignored_disfavor(int param1, int param2);
-static void button_delete(int param1, int param2);
-static void button_save(int param1, int param2);
+static void button_year(const generic_button *button);
+static void button_amount(const generic_button *button);
+static void button_resource(const generic_button *button);
+static void button_deadline_years(const generic_button *button);
+static void button_favor(const generic_button *button);
+static void button_extension_months(const generic_button *button);
+static void button_extension_disfavor(const generic_button *button);
+static void button_ignored_disfavor(const generic_button *button);
+static void button_delete(const generic_button *button);
+static void button_save(const generic_button *button);
 
 static struct {
     scenario_request request;
@@ -38,16 +38,16 @@ static struct {
 #define NUM_BUTTONS (sizeof(buttons) / sizeof(generic_button))
 
 static generic_button buttons[] = {
-    {30, 186, 60, 25, button_year, button_none},
-    {330, 186, 80, 25, button_amount, button_none},
-    {430, 186, 100, 25, button_resource, button_none},
-    {70, 224, 140, 25, button_deadline_years, button_none},
-    {400, 224, 80, 25, button_favor, button_none},
-    {400, 264, 80, 25, button_extension_months, button_none},
-    {400, 304, 80, 25, button_extension_disfavor, button_none},
-    {400, 344, 80, 25, button_ignored_disfavor, button_none},
-    {110, 384, 250, 25, button_delete, button_none},
-    {400, 384, 100, 25, button_save, button_none}
+    {30, 186, 60, 25, button_year},
+    {330, 186, 80, 25, button_amount},
+    {430, 186, 100, 25, button_resource},
+    {70, 224, 140, 25, button_deadline_years},
+    {400, 224, 80, 25, button_favor},
+    {400, 264, 80, 25, button_extension_months},
+    {400, 304, 80, 25, button_extension_disfavor},
+    {400, 344, 80, 25, button_ignored_disfavor},
+    {110, 384, 250, 25, button_delete},
+    {400, 384, 100, 25, button_save}
 };
 
 static void init(int id)
@@ -121,7 +121,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (input_go_back_requested(m, h)) {
-        button_save(0, 0);
+        button_save(0);
     }
 }
 
@@ -130,7 +130,7 @@ static void set_year(int value)
     data.request.year = value;
 }
 
-static void button_year(int param1, int param2)
+static void button_year(const generic_button *button)
 {
     window_numeric_input_show(screen_dialog_offset_x() + 100, screen_dialog_offset_y() + 50, 3, 999, set_year);
 }
@@ -140,7 +140,7 @@ static void set_amount(int value)
     data.request.amount = value;
 }
 
-static void button_amount(int param1, int param2)
+static void button_amount(const generic_button *button)
 {
     int max_amount = 999;
     int max_digits = 3;
@@ -162,7 +162,7 @@ static void set_resource(int value)
     }
 }
 
-static void button_resource(int param1, int param2)
+static void button_resource(const generic_button *button)
 {
     static const uint8_t *resource_texts[RESOURCE_MAX + RESOURCE_TOTAL_SPECIAL];
     static int total_resources = 0;
@@ -185,7 +185,7 @@ static void set_deadline_years(int value)
     data.request.deadline_years = value;
 }
 
-static void button_deadline_years(int param1, int param2)
+static void button_deadline_years(const generic_button *button)
 {
     window_numeric_input_show(screen_dialog_offset_x() + 220, screen_dialog_offset_y() + 100,
         3, 999, set_deadline_years);
@@ -196,7 +196,7 @@ static void set_favor(int value)
     data.request.favor = value;
 }
 
-static void button_favor(int param1, int param2)
+static void button_favor(const generic_button *button)
 {
     window_numeric_input_show(screen_dialog_offset_x() + 260, screen_dialog_offset_y() + 100, 3, 100, set_favor);
 }
@@ -206,7 +206,7 @@ static void set_extension_months(int value)
     data.request.extension_months_to_comply = value;
 }
 
-static void button_extension_months(int param1, int param2)
+static void button_extension_months(const generic_button *button)
 {
     window_numeric_input_show(screen_dialog_offset_x() + 260, screen_dialog_offset_y() + 100, 3, 120, set_extension_months);
 }
@@ -216,7 +216,7 @@ static void set_extension_disfavor(int value)
     data.request.extension_disfavor = value;
 }
 
-static void button_extension_disfavor(int param1, int param2)
+static void button_extension_disfavor(const generic_button *button)
 {
     window_numeric_input_show(screen_dialog_offset_x() + 260, screen_dialog_offset_y() + 100, 3, 100, set_extension_disfavor);
 }
@@ -226,19 +226,19 @@ static void set_ignored_disfavor(int value)
     data.request.ignored_disfavor = value;
 }
 
-static void button_ignored_disfavor(int param1, int param2)
+static void button_ignored_disfavor(const generic_button *button)
 {
     window_numeric_input_show(screen_dialog_offset_x() + 260, screen_dialog_offset_y() + 100, 3, 100, set_ignored_disfavor);
 }
 
-static void button_delete(int param1, int param2)
+static void button_delete(const generic_button *button)
 {
     scenario_request_delete(data.request.id);
     scenario_editor_set_as_unsaved();
     window_go_back();
 }
 
-static void button_save(int param1, int param2)
+static void button_save(const generic_button *button)
 {
     scenario_request_update(&data.request);
     scenario_editor_set_as_unsaved();

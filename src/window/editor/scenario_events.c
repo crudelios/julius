@@ -32,9 +32,9 @@
 
 
 static void on_scroll(void);
-static void button_click(int type, int param2);
-static void button_event(int button_index, int param2);
-static void button_open_variables(int param1, int param2);
+static void button_click(const generic_button *button);
+static void button_event(const generic_button *button);
+static void button_open_variables(const generic_button *button);
 static void populate_list(int offset);
 static void add_new_event(void);
 
@@ -43,19 +43,19 @@ static scrollbar_type scrollbar = {
 };
 
 static generic_button buttons[] = {
-    {48, EVENTS_Y_OFFSET + (0 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, button_none, 1, 0},
-    {48, EVENTS_Y_OFFSET + (1 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, button_none, 2, 0},
-    {48, EVENTS_Y_OFFSET + (2 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, button_none, 3, 0},
-    {48, EVENTS_Y_OFFSET + (3 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, button_none, 4, 0},
-    {48, EVENTS_Y_OFFSET + (4 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, button_none, 5, 0},
-    {48, EVENTS_Y_OFFSET + (5 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, button_none, 6, 0},
-    {48, EVENTS_Y_OFFSET + (6 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, button_none, 7, 0},
-    {48, EVENTS_Y_OFFSET + (7 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, button_none, 8, 0},
-    {48, EVENTS_Y_OFFSET + (9 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, button_none, 9, 0},
-    {48, EVENTS_Y_OFFSET + (11 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, button_none, 10, 0},
-    {48, EVENTS_Y_OFFSET + (12 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, button_none, 11, 0},
-    {48, EVENTS_Y_OFFSET + (13 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, button_none, 12, 0},
-    {210, 100, BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_open_variables, button_none, 0, 0}
+    {48, EVENTS_Y_OFFSET + (0 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 1},
+    {48, EVENTS_Y_OFFSET + (1 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 2},
+    {48, EVENTS_Y_OFFSET + (2 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 3},
+    {48, EVENTS_Y_OFFSET + (3 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 4},
+    {48, EVENTS_Y_OFFSET + (4 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 5},
+    {48, EVENTS_Y_OFFSET + (5 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 6},
+    {48, EVENTS_Y_OFFSET + (6 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 7},
+    {48, EVENTS_Y_OFFSET + (7 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 8},
+    {48, EVENTS_Y_OFFSET + (9 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 9},
+    {48, EVENTS_Y_OFFSET + (11 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 10},
+    {48, EVENTS_Y_OFFSET + (12 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 11},
+    {48, EVENTS_Y_OFFSET + (13 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 12},
+    {210, 100, BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_open_variables}
 };
 #define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
 
@@ -176,9 +176,9 @@ static void draw_foreground(void)
     graphics_reset_dialog();
 }
 
-static void button_event(int button_index, int param2)
+static void button_event(const generic_button *button)
 {
-    int target_index = button_index - 1;
+    int target_index = button->parameter1 - 1;
     if (!data.list[target_index]) {
         return;
     }
@@ -205,8 +205,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
     populate_list(scrollbar.scroll_position);
 }
 
-static void button_click(int type, int param2)
+static void button_click(const generic_button *button)
 {
+    int type = button->parameter1;
     if (type == 9) {
         add_new_event();
     } else if (type == 10) {
@@ -219,7 +220,7 @@ static void button_click(int type, int param2)
     }
 }
 
-static void button_open_variables(int param1, int param2)
+static void button_open_variables(const generic_button *button)
 {
     window_editor_custom_variables_show();
 }

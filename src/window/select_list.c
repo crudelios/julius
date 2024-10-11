@@ -18,52 +18,52 @@ enum {
     MODE_GROUP,
 };
 
-static void select_item(int id, int list_id);
+static void button_select_item(const generic_button *button);
 
 static generic_button buttons_list1[MAX_ITEMS_PER_LIST] = {
-    {5, 8, 190, 18, select_item, button_none, 0, 0},
-    {5, 28, 190, 18, select_item, button_none, 1, 0},
-    {5, 48, 190, 18, select_item, button_none, 2, 0},
-    {5, 68, 190, 18, select_item, button_none, 3, 0},
-    {5, 88, 190, 18, select_item, button_none, 4, 0},
-    {5, 108, 190, 18, select_item, button_none, 5, 0},
-    {5, 128, 190, 18, select_item, button_none, 6, 0},
-    {5, 148, 190, 18, select_item, button_none, 7, 0},
-    {5, 168, 190, 18, select_item, button_none, 8, 0},
-    {5, 188, 190, 18, select_item, button_none, 9, 0},
-    {5, 208, 190, 18, select_item, button_none, 10, 0},
-    {5, 228, 190, 18, select_item, button_none, 11, 0},
-    {5, 248, 190, 18, select_item, button_none, 12, 0},
-    {5, 268, 190, 18, select_item, button_none, 13, 0},
-    {5, 288, 190, 18, select_item, button_none, 14, 0},
-    {5, 308, 190, 18, select_item, button_none, 15, 0},
-    {5, 328, 190, 18, select_item, button_none, 16, 0},
-    {5, 348, 190, 18, select_item, button_none, 17, 0},
-    {5, 368, 190, 18, select_item, button_none, 18, 0},
-    {5, 388, 190, 18, select_item, button_none, 19, 0},
+    {5, 8, 190, 18, button_select_item, 0, 0},
+    {5, 28, 190, 18, button_select_item, 0, 1},
+    {5, 48, 190, 18, button_select_item, 0, 2},
+    {5, 68, 190, 18, button_select_item, 0, 3},
+    {5, 88, 190, 18, button_select_item, 0, 4},
+    {5, 108, 190, 18, button_select_item, 0, 5},
+    {5, 128, 190, 18, button_select_item, 0, 6},
+    {5, 148, 190, 18, button_select_item, 0, 7},
+    {5, 168, 190, 18, button_select_item, 0, 8},
+    {5, 188, 190, 18, button_select_item, 0, 9},
+    {5, 208, 190, 18, button_select_item, 0, 10},
+    {5, 228, 190, 18, button_select_item, 0, 11},
+    {5, 248, 190, 18, button_select_item, 0, 12},
+    {5, 268, 190, 18, button_select_item, 0, 13},
+    {5, 288, 190, 18, button_select_item, 0, 14},
+    {5, 308, 190, 18, button_select_item, 0, 15},
+    {5, 328, 190, 18, button_select_item, 0, 16},
+    {5, 348, 190, 18, button_select_item, 0, 17},
+    {5, 368, 190, 18, button_select_item, 0, 18},
+    {5, 388, 190, 18, button_select_item, 0, 19},
 };
 
 static generic_button buttons_list2[MAX_ITEMS_PER_LIST] = {
-    {205, 8, 190, 18, select_item, button_none, 0, 1},
-    {205, 28, 190, 18, select_item, button_none, 1, 1},
-    {205, 48, 190, 18, select_item, button_none, 2, 1},
-    {205, 68, 190, 18, select_item, button_none, 3, 1},
-    {205, 88, 190, 18, select_item, button_none, 4, 1},
-    {205, 108, 190, 18, select_item, button_none, 5, 1},
-    {205, 128, 190, 18, select_item, button_none, 6, 1},
-    {205, 148, 190, 18, select_item, button_none, 7, 1},
-    {205, 168, 190, 18, select_item, button_none, 8, 1},
-    {205, 188, 190, 18, select_item, button_none, 9, 1},
-    {205, 208, 190, 18, select_item, button_none, 10, 1},
-    {205, 228, 190, 18, select_item, button_none, 11, 1},
-    {205, 248, 190, 18, select_item, button_none, 12, 1},
-    {205, 268, 190, 18, select_item, button_none, 13, 1},
-    {205, 288, 190, 18, select_item, button_none, 14, 1},
-    {205, 308, 190, 18, select_item, button_none, 15, 1},
-    {205, 328, 190, 18, select_item, button_none, 16, 1},
-    {205, 348, 190, 18, select_item, button_none, 17, 1},
-    {205, 368, 190, 18, select_item, button_none, 18, 1},
-    {205, 388, 190, 18, select_item, button_none, 19, 1},
+    {205, 8, 190, 18, button_select_item, 0, 0, 1},
+    {205, 28, 190, 18, button_select_item, 0, 1, 1},
+    {205, 48, 190, 18, button_select_item, 0, 2, 1},
+    {205, 68, 190, 18, button_select_item, 0, 3, 1},
+    {205, 88, 190, 18, button_select_item, 0, 4, 1},
+    {205, 108, 190, 18, button_select_item, 0, 5, 1},
+    {205, 128, 190, 18, button_select_item, 0, 6, 1},
+    {205, 148, 190, 18, button_select_item, 0, 7, 1},
+    {205, 168, 190, 18, button_select_item, 0, 8, 1},
+    {205, 188, 190, 18, button_select_item, 0, 9, 1},
+    {205, 208, 190, 18, button_select_item, 0, 10, 1},
+    {205, 228, 190, 18, button_select_item, 0, 11, 1},
+    {205, 248, 190, 18, button_select_item, 0, 12, 1},
+    {205, 268, 190, 18, button_select_item, 0, 13, 1},
+    {205, 288, 190, 18, button_select_item, 0, 14, 1},
+    {205, 308, 190, 18, button_select_item, 0, 15, 1},
+    {205, 328, 190, 18, button_select_item, 0, 16, 1},
+    {205, 348, 190, 18, button_select_item, 0, 17, 1},
+    {205, 368, 190, 18, button_select_item, 0, 18, 1},
+    {205, 388, 190, 18, button_select_item, 0, 19, 1},
 };
 
 static struct {
@@ -199,8 +199,11 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
-void select_item(int id, int list_id)
+void button_select_item(const generic_button *button)
 {
+    int id = button->parameter1;
+    int list_id = button->parameter2;
+
     window_go_back();
     if (list_id == 0) {
         data.callback(id);

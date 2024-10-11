@@ -25,22 +25,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void button_year(int param1, int param2);
-static void button_resource(int param1, int param2);
-static void button_route(int param1, int param2);
-static void button_amount(int param1, int param2);
-static void button_delete(int param1, int param2);
-static void button_save(int param1, int param2);
+static void button_year(const generic_button *button);
+static void button_resource(const generic_button *button);
+static void button_route(const generic_button *button);
+static void button_amount(const generic_button *button);
+static void button_delete(const generic_button *button);
+static void button_save(const generic_button *button);
 
 #define NUM_BUTTONS (sizeof(buttons) / sizeof(generic_button))
 
 static generic_button buttons[] = {
-    {30, 152, 60, 25, button_year, button_none},
-    {190, 152, 120, 25, button_resource, button_none},
-    {420, 152, 200, 25, button_route, button_none},
-    {350, 192, 100, 25, button_amount, button_none},
-    {30, 230, 250, 25, button_delete, button_none},
-    {320, 230, 100, 25, button_save, button_none}
+    {30, 152, 60, 25, button_year},
+    {190, 152, 120, 25, button_resource},
+    {420, 152, 200, 25, button_route},
+    {350, 192, 100, 25, button_amount},
+    {30, 230, 250, 25, button_delete},
+    {320, 230, 100, 25, button_save}
 };
 
 static struct {
@@ -166,7 +166,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (input_go_back_requested(m, h)) {
-        button_save(0, 0);
+        button_save(0);
     }
 }
 
@@ -175,7 +175,7 @@ static void set_year(int value)
     data.demand_change.year = value;
 }
 
-static void button_year(int param1, int param2)
+static void button_year(const generic_button *button)
 {
     window_numeric_input_show(screen_dialog_offset_x() + 100, screen_dialog_offset_y() + 50, 3, 999, set_year);
 }
@@ -185,7 +185,7 @@ static void set_resource(int value)
     data.demand_change.resource = data.available_resources[value];
 }
 
-static void button_resource(int param1, int param2)
+static void button_resource(const generic_button *button)
 {
     static const uint8_t *resource_texts[RESOURCE_MAX];
     static int total_resources = 0;
@@ -208,7 +208,7 @@ static void set_route_id(int index)
     data.demand_change.route_id = data.route_ids[index];
 }
 
-static void button_route(int param1, int param2)
+static void button_route(const generic_button *button)
 {
     window_select_list_show_text(screen_dialog_offset_x() + 200, screen_dialog_offset_y() + 50,
         data.route_names, data.num_routes, set_route_id);
@@ -219,19 +219,19 @@ static void set_change_amount(int value)
     data.demand_change.amount = value;
 }
 
-static void button_amount(int param1, int param2)
+static void button_amount(const generic_button *button)
 {
     window_numeric_input_show(screen_dialog_offset_x() + 100, screen_dialog_offset_y() + 50, 3, 999, set_change_amount);
 }
 
-static void button_delete(int param1, int param2)
+static void button_delete(const generic_button *button)
 {
     scenario_demand_change_delete(data.demand_change.id);
     scenario_editor_set_as_unsaved();
     window_editor_demand_changes_show();
 }
 
-static void button_save(int param1, int param2)
+static void button_save(const generic_button *button)
 {
     scenario_demand_change_update(&data.demand_change);
     scenario_editor_set_as_unsaved();

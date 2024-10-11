@@ -11,6 +11,7 @@
 #include "core/string.h"
 #include "empire/city.h"
 #include "figure/formation_legion.h"
+#include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -30,21 +31,21 @@
 #define ADVISOR_HEIGHT 27
 #define RESOURCE_INFO_MAX_TEXT 200
 
-static void button_donate_to_city(int param1, int param2);
-static void button_set_salary(int param1, int param2);
-static void button_gift_to_emperor(int param1, int param2);
-static void button_request(int index, int param2);
-static void button_request_resource(int index, int param2);
+static void button_donate_to_city(const generic_button *button);
+static void button_set_salary(const generic_button *button);
+static void button_gift_to_emperor(const generic_button *button);
+static void button_request(const generic_button *button);
+static void button_request_resource(const generic_button *button);
 
 static generic_button imperial_buttons[] = {
-    {320, 367, 250, 20, button_donate_to_city, button_none, 0, 0},
-    {70, 393, 500, 20, button_set_salary, button_none, 0, 0},
-    {320, 341, 250, 20, button_gift_to_emperor, button_none, 0, 0},
-    {38, 96, 560, 40, button_request, button_request_resource, 0, 0},
-    {38, 138, 560, 40, button_request, button_request_resource, 1, 0},
-    {38, 180, 560, 40, button_request, button_request_resource, 2, 0},
-    {38, 222, 560, 40, button_request, button_request_resource, 3, 0},
-    {38, 264, 560, 40, button_request, button_request_resource, 4, 0},
+    {320, 367, 250, 20, button_donate_to_city},
+    {70, 393, 500, 20, button_set_salary},
+    {320, 341, 250, 20, button_gift_to_emperor},
+    {38, 96, 560, 40, button_request, button_request_resource, 0},
+    {38, 138, 560, 40, button_request, button_request_resource, 1},
+    {38, 180, 560, 40, button_request, button_request_resource, 2},
+    {38, 222, 560, 40, button_request, button_request_resource, 3},
+    {38, 264, 560, 40, button_request, button_request_resource, 4},
 };
 
 static unsigned int focus_button_id;
@@ -177,17 +178,17 @@ static int handle_mouse(const mouse *m)
     return generic_buttons_handle_mouse(m, 0, 0, imperial_buttons, 3 + request_count, &focus_button_id);
 }
 
-static void button_donate_to_city(int param1, int param2)
+static void button_donate_to_city(const generic_button *button)
 {
     window_donate_to_city_show();
 }
 
-static void button_set_salary(int param1, int param2)
+static void button_set_salary(const generic_button *button)
 {
     window_set_salary_show();
 }
 
-static void button_gift_to_emperor(int param1, int param2)
+static void button_gift_to_emperor(const generic_button *button)
 {
     window_gift_to_emperor_show();
 }
@@ -213,8 +214,9 @@ static void confirm_send_goods(int accepted, int checked)
     }
 }
 
-void button_request(int index, int param2)
+void button_request(const generic_button *button)
 {
+    int index = button->parameter1;
     int status = city_request_get_status(index);
     if (!status) {
         return;
@@ -254,8 +256,9 @@ void button_request(int index, int param2)
 }
 
 // Used for showing the resource settings window on right click
-void button_request_resource(int index, int param2)
+void button_request_resource(const generic_button *button)
 {
+    int index = button->parameter1;
     // Make sure there's a request pending at this index
     if (!city_request_get_status(index)) {
         return;

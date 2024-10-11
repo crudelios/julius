@@ -35,9 +35,9 @@
 #define MAX_VARIABLE_NAME_SIZE 50
 
 static void on_scroll(void);
-static void button_variable(int button_index, int param2);
-static void button_name_click(int button_index, int param2);
-static void button_delete_variable(int button_index, int param2);
+static void button_variable(const generic_button *button);
+static void button_name_click(const generic_button *button);
+static void button_delete_variable(const generic_button *button);
 static void populate_list(int offset);
 
 static scrollbar_type scrollbar = {
@@ -45,22 +45,22 @@ static scrollbar_type scrollbar = {
 };
 
 static generic_button buttons[] = {
-    {BUTTONS_X_OFFSET_NAME, BUTTONS_Y_OFFSET + (0 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_NAME, BUTTONS_ROW_HEIGHT - 2, button_name_click, button_delete_variable, 0, 1},
-    {BUTTONS_X_OFFSET_VALUE, BUTTONS_Y_OFFSET + (0 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_VALUE, BUTTONS_ROW_HEIGHT - 2, button_variable, button_none, 0, 0},
-    {BUTTONS_X_OFFSET_NAME, BUTTONS_Y_OFFSET + (1 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_NAME, BUTTONS_ROW_HEIGHT - 2, button_name_click, button_delete_variable, 1, 1},
-    {BUTTONS_X_OFFSET_VALUE, BUTTONS_Y_OFFSET + (1 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_VALUE, BUTTONS_ROW_HEIGHT - 2, button_variable, button_none, 1, 0},
-    {BUTTONS_X_OFFSET_NAME, BUTTONS_Y_OFFSET + (2 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_NAME, BUTTONS_ROW_HEIGHT - 2, button_name_click, button_delete_variable, 2, 1},
-    {BUTTONS_X_OFFSET_VALUE, BUTTONS_Y_OFFSET + (2 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_VALUE, BUTTONS_ROW_HEIGHT - 2, button_variable, button_none, 2, 0},
-    {BUTTONS_X_OFFSET_NAME, BUTTONS_Y_OFFSET + (3 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_NAME, BUTTONS_ROW_HEIGHT - 2, button_name_click, button_delete_variable, 3, 1},
-    {BUTTONS_X_OFFSET_VALUE, BUTTONS_Y_OFFSET + (3 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_VALUE, BUTTONS_ROW_HEIGHT - 2, button_variable, button_none, 3, 0},
-    {BUTTONS_X_OFFSET_NAME, BUTTONS_Y_OFFSET + (4 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_NAME, BUTTONS_ROW_HEIGHT - 2, button_name_click, button_delete_variable, 4, 1},
-    {BUTTONS_X_OFFSET_VALUE, BUTTONS_Y_OFFSET + (4 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_VALUE, BUTTONS_ROW_HEIGHT - 2, button_variable, button_none, 4, 0},
-    {BUTTONS_X_OFFSET_NAME, BUTTONS_Y_OFFSET + (5 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_NAME, BUTTONS_ROW_HEIGHT - 2, button_name_click, button_delete_variable, 5, 1},
-    {BUTTONS_X_OFFSET_VALUE, BUTTONS_Y_OFFSET + (5 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_VALUE, BUTTONS_ROW_HEIGHT - 2, button_variable, button_none, 5, 0},
-    {BUTTONS_X_OFFSET_NAME, BUTTONS_Y_OFFSET + (6 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_NAME, BUTTONS_ROW_HEIGHT - 2, button_name_click, button_delete_variable, 6, 1},
-    {BUTTONS_X_OFFSET_VALUE, BUTTONS_Y_OFFSET + (6 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_VALUE, BUTTONS_ROW_HEIGHT - 2, button_variable, button_none, 6, 0},
-    {BUTTONS_X_OFFSET_NAME, BUTTONS_Y_OFFSET + (7 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_NAME, BUTTONS_ROW_HEIGHT - 2, button_name_click, button_delete_variable, 7, 1},
-    {BUTTONS_X_OFFSET_VALUE, BUTTONS_Y_OFFSET + (7 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_VALUE, BUTTONS_ROW_HEIGHT - 2, button_variable, button_none, 7, 0}
+    {BUTTONS_X_OFFSET_NAME, BUTTONS_Y_OFFSET + (0 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_NAME, BUTTONS_ROW_HEIGHT - 2, button_name_click, button_delete_variable},
+    {BUTTONS_X_OFFSET_VALUE, BUTTONS_Y_OFFSET + (0 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_VALUE, BUTTONS_ROW_HEIGHT - 2, button_variable},
+    {BUTTONS_X_OFFSET_NAME, BUTTONS_Y_OFFSET + (1 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_NAME, BUTTONS_ROW_HEIGHT - 2, button_name_click, button_delete_variable, 1},
+    {BUTTONS_X_OFFSET_VALUE, BUTTONS_Y_OFFSET + (1 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_VALUE, BUTTONS_ROW_HEIGHT - 2, button_variable, 0, 1},
+    {BUTTONS_X_OFFSET_NAME, BUTTONS_Y_OFFSET + (2 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_NAME, BUTTONS_ROW_HEIGHT - 2, button_name_click, button_delete_variable, 2},
+    {BUTTONS_X_OFFSET_VALUE, BUTTONS_Y_OFFSET + (2 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_VALUE, BUTTONS_ROW_HEIGHT - 2, button_variable, 0, 2},
+    {BUTTONS_X_OFFSET_NAME, BUTTONS_Y_OFFSET + (3 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_NAME, BUTTONS_ROW_HEIGHT - 2, button_name_click, button_delete_variable, 3},
+    {BUTTONS_X_OFFSET_VALUE, BUTTONS_Y_OFFSET + (3 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_VALUE, BUTTONS_ROW_HEIGHT - 2, button_variable, 0, 3},
+    {BUTTONS_X_OFFSET_NAME, BUTTONS_Y_OFFSET + (4 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_NAME, BUTTONS_ROW_HEIGHT - 2, button_name_click, button_delete_variable, 4},
+    {BUTTONS_X_OFFSET_VALUE, BUTTONS_Y_OFFSET + (4 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_VALUE, BUTTONS_ROW_HEIGHT - 2, button_variable, 0, 4},
+    {BUTTONS_X_OFFSET_NAME, BUTTONS_Y_OFFSET + (5 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_NAME, BUTTONS_ROW_HEIGHT - 2, button_name_click, button_delete_variable, 5},
+    {BUTTONS_X_OFFSET_VALUE, BUTTONS_Y_OFFSET + (5 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_VALUE, BUTTONS_ROW_HEIGHT - 2, button_variable, 0, 5},
+    {BUTTONS_X_OFFSET_NAME, BUTTONS_Y_OFFSET + (6 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_NAME, BUTTONS_ROW_HEIGHT - 2, button_name_click, button_delete_variable, 6},
+    {BUTTONS_X_OFFSET_VALUE, BUTTONS_Y_OFFSET + (6 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_VALUE, BUTTONS_ROW_HEIGHT - 2, button_variable, 0, 6},
+    {BUTTONS_X_OFFSET_NAME, BUTTONS_Y_OFFSET + (7 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_NAME, BUTTONS_ROW_HEIGHT - 2, button_name_click, button_delete_variable, 7},
+    {BUTTONS_X_OFFSET_VALUE, BUTTONS_Y_OFFSET + (7 * BUTTONS_ROW_HEIGHT), BUTTON_WIDTH_VALUE, BUTTONS_ROW_HEIGHT - 2, button_variable, 0, 7}
 };
 
 #define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
@@ -149,8 +149,10 @@ static void set_variable_value(int value)
     scenario_set_custom_variable_value(data.target_variable, value);
 }
 
-static void button_variable(int button_index, int param2)
+static void button_variable(const generic_button *button)
 {
+    int button_index = button->parameter1;
+
     if (data.select_only) {
         return;
     }
@@ -177,8 +179,10 @@ static void show_used_event_popup_dialog(const scenario_event_t *event)
         TR_EDITOR_CUSTOM_VARIABLE_UNABLE_TO_CHANGE_TEXT, 0, event_id_text);
 }
 
-static void button_name_click(int button_index, int param2)
+static void button_name_click(const generic_button *button)
 {
+    int button_index = button->parameter1;
+
     if (!data.list[button_index]) {
         return;
     };
@@ -207,8 +211,10 @@ static void button_name_click(int button_index, int param2)
     }
 }
 
-static void button_delete_variable(int button_index, int param2)
+static void button_delete_variable(const generic_button *button)
 {
+    int button_index = button->parameter1;
+
     if (data.select_only) {
         return;
     }

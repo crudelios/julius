@@ -1,5 +1,6 @@
 #include "invasions.h"
 
+#include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/grid_box.h"
@@ -17,7 +18,7 @@
 #include "window/editor/map.h"
 
 static void button_invasion(unsigned int id, unsigned int mouse_x, unsigned int mouse_y);
-static void button_new_invasion(int param0, int param1);
+static void button_new_invasion(const generic_button *button);
 static void draw_invasion_button(const grid_box_item *item);
 
 static struct {
@@ -29,7 +30,7 @@ static struct {
 } data;
 
 static generic_button new_invasion_button = {
-    195, 340, 250, 25, button_new_invasion, button_none
+    195, 340, 250, 25, button_new_invasion
 };
 
 static grid_box_type invasion_buttons = {
@@ -156,7 +157,7 @@ static void button_invasion(unsigned int id, unsigned int mouse_x, unsigned int 
     window_editor_edit_invasion_show(data.invasions[id]->id);
 }
 
-static void button_new_invasion(int param0, int param1)
+static void button_new_invasion(const generic_button *button)
 {
     int new_invasion_id = scenario_invasion_new();
     if (new_invasion_id >= 0) {

@@ -14,31 +14,31 @@
 
 #include <limits.h>
 
-static void button_number(int number, int param2);
-static void button_accept(int param1, int param2);
-static void button_negative(int param1, int param2);
-static void button_delete(int param1, int param2);
-static void button_cancel(int param1, int param2);
+static void button_number(const generic_button *button);
+static void button_accept(const generic_button *button);
+static void button_negative(const generic_button *button);
+static void button_delete(const generic_button *button);
+static void button_cancel(const generic_button *button);
 
 static void input_number(int number, int minus);
 static void input_accept(void);
 static void input_delete(void);
 
 static generic_button buttons[] = {
-    {21, 51, 25, 25, button_number, button_none, 1, 0},
-    {51, 51, 25, 25, button_number, button_none, 2, 0},
-    {81, 51, 25, 25, button_number, button_none, 3, 0},
-    {21, 81, 25, 25, button_number, button_none, 4, 0},
-    {51, 81, 25, 25, button_number, button_none, 5, 0},
-    {81, 81, 25, 25, button_number, button_none, 6, 0},
-    {21, 111, 25, 25, button_number, button_none, 7, 0},
-    {51, 111, 25, 25, button_number, button_none, 8, 0},
-    {81, 111, 25, 25, button_number, button_none, 9, 0},
-    {21, 141, 25, 25, button_number, button_none, 0, 0},
-    {51, 141, 25, 25, button_negative, button_none, 0, 0},
-    {51, 171, 55, 25, button_accept, button_none, 1, 0},
-    {21, 201, 25, 25, button_delete, button_none, 1, 0},
-    {51, 201, 55, 25, button_cancel, button_none, 1, 0}
+    {21, 51, 25, 25, button_number, 0, 1},
+    {51, 51, 25, 25, button_number, 0, 2},
+    {81, 51, 25, 25, button_number, 0, 3},
+    {21, 81, 25, 25, button_number, 0, 4},
+    {51, 81, 25, 25, button_number, 0, 5},
+    {81, 81, 25, 25, button_number, 0, 6},
+    {21, 111, 25, 25, button_number, 0, 7},
+    {51, 111, 25, 25, button_number, 0, 8},
+    {81, 111, 25, 25, button_number, 0, 9},
+    {21, 141, 25, 25, button_number, 0, 0},
+    {51, 141, 25, 25, button_negative},
+    {51, 171, 55, 25, button_accept},
+    {21, 201, 25, 25, button_delete},
+    {51, 201, 55, 25, button_cancel}
 };
 
 static struct {
@@ -143,12 +143,13 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
-static void button_number(int number, int param2)
+static void button_number(const generic_button *button)
 {
+    int number = button->parameter1;
     input_number(number, 0);
 }
 
-static void button_accept(int param1, int param2)
+static void button_accept(const generic_button *button)
 {
     input_accept();
 }
@@ -163,17 +164,17 @@ static void input_negative(void)
     }
 }
 
-static void button_negative(int param1, int param2)
+static void button_negative(const generic_button *button)
 {
     input_negative();
 }
 
-static void button_delete(int param1, int param2)
+static void button_delete(const generic_button *button)
 {
     input_delete();
 }
 
-static void button_cancel(int param1, int param2)
+static void button_cancel(const generic_button *button)
 {
     close();
 }

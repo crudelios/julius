@@ -22,7 +22,7 @@
 #include <stdlib.h>
 
 static void button_price_change(unsigned int id, unsigned int mouse_x, unsigned int mouse_y);
-static void button_new_price_change(int param0, int param1);
+static void button_new_price_change(const generic_button *button);
 static void draw_price_change_button(const grid_box_item *item);
 
 static struct {
@@ -47,7 +47,7 @@ static grid_box_type price_change_buttons = {
 };
 
 static generic_button new_price_change_button = {
-    195, 340, 250, 25, button_new_price_change, button_none
+    195, 340, 250, 25, button_new_price_change
 };
 
 static void limit_and_sort_list(void)
@@ -164,7 +164,7 @@ static void button_price_change(unsigned int id, unsigned int mouse_x, unsigned 
     window_editor_edit_price_change_show(id);
 }
 
-static void button_new_price_change(int param0, int param1)
+static void button_new_price_change(const generic_button *button)
 {
     int new_price_change_id = scenario_price_change_new();
     if (new_price_change_id >= 0) {

@@ -23,7 +23,7 @@
 #include <stdlib.h>
 
 static void button_demand_change(unsigned int id, unsigned int mouse_x, unsigned int mouse_y);
-static void button_new_demand_change(int param0, int param1);
+static void button_new_demand_change(const generic_button *button);
 static void draw_demand_change_button(const grid_box_item *item);
 
 typedef struct {
@@ -39,7 +39,7 @@ static struct {
 } data;
 
 static generic_button new_demand_change_button = {
-    195, 340, 250, 25, button_new_demand_change, button_none
+    195, 340, 250, 25, button_new_demand_change
 };
 
 static grid_box_type demand_change_buttons = {
@@ -212,7 +212,7 @@ static void button_demand_change(unsigned int id, unsigned int mouse_x, unsigned
     window_editor_edit_demand_change_show(data.demand_changes[id]->id);
 }
 
-static void button_new_demand_change(int param0, int param1)
+static void button_new_demand_change(const generic_button *button)
 {
     int new_demand_change_id = scenario_demand_change_new();
     if (new_demand_change_id >= 0) {

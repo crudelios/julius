@@ -31,9 +31,9 @@
 #define MAX_TEXT_LENGTH 50
 
 static void init(scenario_action_t *action);
-static void button_amount(int param1, int param2);
-static void button_delete(int param1, int param2);
-static void button_change_type(int param1, int param2);
+static void button_amount(const generic_button *button);
+static void button_delete(const generic_button *button);
+static void button_change_type(const generic_button *button);
 static void set_param_value(int value);
 static void set_parameter_being_edited(int value);
 static void set_resource_value(int value);
@@ -42,14 +42,15 @@ static void custom_message_selection(void);
 static void change_parameter(xml_data_attribute_t *parameter, int param1);
 
 static generic_button buttons[] = {
-    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (0 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, button_none, 1, 0},
-    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (1 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, button_none, 2, 0},
-    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (2 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, button_none, 3, 0},
-    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (3 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, button_none, 4, 0},
-    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (4 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, button_none, 5, 0},
-    {288, 32, 64, 14, button_delete, button_none, 0, 0},
-    {32, 64, BUTTON_WIDTH, 32, button_change_type, button_none, 0, 0}
+    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (0 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, 0, 1},
+    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (1 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, 0, 2},
+    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (2 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, 0, 3},
+    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (3 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, 0, 4},
+    {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (4 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, 0, 5},
+    {288, 32, 64, 14, button_delete},
+    {32, 64, BUTTON_WIDTH, 32, button_change_type}
 };
+
 #define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
 
 static struct {
@@ -177,19 +178,20 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
-static void button_delete(int param1, int param2)
+static void button_delete(const generic_button *button)
 {
     scenario_action_type_delete(data.action);
     close_window();
 }
 
-static void button_change_type(int param1, int param2)
+static void button_change_type(const generic_button *button)
 {
     window_editor_select_scenario_action_type_show(data.action);
 }
 
-static void button_amount(int param1, int param2)
+static void button_amount(const generic_button *button)
 {
+    int param1 = button->parameter1;
     switch (param1) {
         case 1: change_parameter(&data.xml_info->xml_parm1, param1); break;
         case 2: change_parameter(&data.xml_info->xml_parm2, param1); break;

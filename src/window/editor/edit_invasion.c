@@ -40,39 +40,39 @@ enum {
 #define BASE_Y_OFFSET 20
 #define SECTION_CONTENT_LEFT_OFFSET 96
 
-static void button_year(int param1, int param2);
-static void button_amount(int amount_type, int param2);
-static void button_type(int param1, int param2);
-static void button_from(int param1, int param2);
-static void button_attack(int param1, int param2);
-static void button_repeat_type(int repeat_type, int param2);
-static void button_repeat_times(int param1, int param2);
-static void button_repeat_between(int amount_type, int param2);
-static void button_delete(int param1, int param2);
-static void button_save(int param1, int param2);
+static void button_year(const generic_button *button);
+static void button_amount(const generic_button *button);
+static void button_type(const generic_button *button);
+static void button_from(const generic_button *button);
+static void button_attack(const generic_button *button);
+static void button_repeat_type(const generic_button *button);
+static void button_repeat_times(const generic_button *button);
+static void button_repeat_between(const generic_button *button);
+static void button_delete(const generic_button *button);
+static void button_save(const generic_button *button);
 
 #define NUMBER_OF_EDIT_BUTTONS (sizeof(edit_buttons) / sizeof(generic_button))
 
 static generic_button edit_buttons[] = {
-    {0, 52, 60, 25, button_year, button_none},
-    {80, 90, 50, 25, button_amount, button_none, AMOUNT_MIN},
-    {170, 90, 50, 25, button_amount, button_none, AMOUNT_MAX},
-    {0, 128, 220, 25, button_type, button_none},
-    {0, 166, 220, 25, button_from, button_none, 0, DISABLE_ON_DISTANT_BATTLE },
-    {0, 204, 220, 25, button_attack, button_none, 0, DISABLE_ON_DISTANT_BATTLE },
-    {0, 244, 220, 20, button_repeat_type, button_none, INVASION_REPEAT_NEVER},
-    {0, 274, 220, 20, button_repeat_type, button_none, INVASION_REPEAT_FOREVER},
-    {0, 304, 20, 20, button_repeat_type, button_none, INVASION_REPEAT_TIMES},
-    {30, 302, 190, 25, button_repeat_times, button_none},
-    {80, 340, 50, 25, button_repeat_between, button_none, AMOUNT_MIN, DISABLE_ON_NO_REPEAT},
-    {170, 340, 50, 25, button_repeat_between, button_none, AMOUNT_MAX, DISABLE_ON_NO_REPEAT},
+    {0, 52, 60, 25, button_year},
+    {80, 90, 50, 25, button_amount, 0, AMOUNT_MIN},
+    {170, 90, 50, 25, button_amount, 0, AMOUNT_MAX},
+    {0, 128, 220, 25, button_type},
+    {0, 166, 220, 25, button_from, 0, 0, DISABLE_ON_DISTANT_BATTLE},
+    {0, 204, 220, 25, button_attack, 0, 0, DISABLE_ON_DISTANT_BATTLE},
+    {0, 244, 220, 20, button_repeat_type, 0, INVASION_REPEAT_NEVER},
+    {0, 274, 220, 20, button_repeat_type, 0, INVASION_REPEAT_FOREVER},
+    {0, 304, 20, 20, button_repeat_type, 0, INVASION_REPEAT_TIMES},
+    {30, 302, 190, 25, button_repeat_times},
+    {80, 340, 50, 25, button_repeat_between, 0, AMOUNT_MIN, DISABLE_ON_NO_REPEAT},
+    {170, 340, 50, 25, button_repeat_between, 0, AMOUNT_MAX, DISABLE_ON_NO_REPEAT},
 };
 
 #define NUMBER_OF_BOTTOM_BUTTONS (sizeof(bottom_buttons) / sizeof(generic_button))
 
 static generic_button bottom_buttons[] = {
-    {242, 378, 250, 25, button_delete, button_none},
-    {508, 378, 100, 25, button_save, button_none},
+    {242, 378, 250, 25, button_delete},
+    {508, 378, 100, 25, button_save},
 };
 
 static struct {
@@ -287,7 +287,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (input_go_back_requested(m, h)) {
-        button_save(0, 0);
+        button_save(0);
     }
 }
 
@@ -296,11 +296,10 @@ static void set_year(int value)
     data.invasion.year = value;
 }
 
-static void button_year(int param1, int param2)
+static void button_year(const generic_button *button)
 {
-    const generic_button *btn = &edit_buttons[0];
-    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + btn->x;
-    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + btn->y + btn->height;
+    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + button->x;
+    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y + button->height;
 
     window_numeric_input_show(x_offset, y_offset, 3, 999, set_year);
 }
@@ -321,11 +320,11 @@ static void set_amount_max(int value)
     }
 }
 
-static void button_amount(int amount_type, int param2)
+static void button_amount(const generic_button *button)
 {
-    const generic_button *btn = &edit_buttons[1 + amount_type];
-    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + btn->x;
-    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + btn->y + btn->height;
+    int amount_type = button->parameter1;
+    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + button->x;
+    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y + button->height;
 
     window_numeric_input_show(x_offset, y_offset, 3, 200, amount_type == AMOUNT_MIN ? set_amount_min : set_amount_max);
 }
@@ -335,11 +334,10 @@ static void set_type(int value)
     data.invasion.type = value == 3 ? 4 : value;
 }
 
-static void button_type(int param1, int param2)
+static void button_type(const generic_button *button)
 {
-    const generic_button *btn = &edit_buttons[3];
-    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + btn->x;
-    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + btn->y + btn->height;
+    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + button->x;
+    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y + button->height;
 
     window_select_list_show(x_offset, y_offset, 34, 4, set_type);
 }
@@ -349,14 +347,13 @@ static void set_from(int value)
     data.invasion.from = value;
 }
 
-static void button_from(int param1, int param2)
+static void button_from(const generic_button *button)
 {
     if (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE) {
         return;
     }
-    const generic_button *btn = &edit_buttons[4];
-    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + btn->x;
-    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + btn->y + btn->height;
+    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + button->x;
+    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y + button->height;
 
     window_select_list_show(x_offset, y_offset, 35, 9, set_from);
 }
@@ -366,20 +363,20 @@ static void set_attack(int value)
     data.invasion.attack_type = value;
 }
 
-static void button_attack(int param1, int param2)
+static void button_attack(const generic_button *button)
 {
     if (data.invasion.type == INVASION_TYPE_DISTANT_BATTLE) {
         return;
     }
-    const generic_button *btn = &edit_buttons[5];
-    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + btn->x;
-    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + btn->y + btn->height;
+    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + button->x;
+    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y + button->height;
 
     window_select_list_show(x_offset, y_offset, 36, 5, set_attack);
 }
 
-static void button_repeat_type(int repeat_type, int param2)
+static void button_repeat_type(const generic_button *button)
 {
+    int repeat_type = button->parameter1;
     if (data.repeat_type == repeat_type) {
         return;
     }
@@ -397,13 +394,12 @@ static void set_repeat_times(int value)
     }
 }
 
-static void button_repeat_times(int param1, int param2)
+static void button_repeat_times(const generic_button *button)
 {
-    const generic_button *btn = &edit_buttons[9];
-    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + btn->x;
-    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + btn->y + btn->height;
+    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + button->x;
+    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y + button->height;
     if (y_offset + 15 * BLOCK_SIZE > screen_height()) {
-        y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + btn->y - 15 * BLOCK_SIZE;
+        y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y - 15 * BLOCK_SIZE;
     }
 
     window_numeric_input_bound_show(x_offset, y_offset, 3, 1, 999, set_repeat_times);
@@ -425,30 +421,30 @@ static void set_repeat_interval_max(int value)
     }
 }
 
-static void button_repeat_between(int amount_type, int param2)
+static void button_repeat_between(const generic_button *button)
 {
+    int amount_type = button->parameter1;
     if (data.repeat_type == INVASION_REPEAT_NEVER) {
         return;
     }
-    const generic_button *btn = &edit_buttons[10 + amount_type];
-    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + btn->x;
-    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + btn->y + btn->height;
+    int x_offset = screen_dialog_offset_x() + data.section_title_width + SECTION_CONTENT_LEFT_OFFSET + button->x;
+    int y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y + button->height;
     if (y_offset + 15 * BLOCK_SIZE > screen_height()) {
-        y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + btn->y - 15 * BLOCK_SIZE;
+        y_offset = screen_dialog_offset_y() + BASE_Y_OFFSET + button->y - 15 * BLOCK_SIZE;
     }
 
     window_numeric_input_bound_show(x_offset, y_offset, 2, 3, 50,
         amount_type == AMOUNT_MIN ? set_repeat_interval_min : set_repeat_interval_max);
 }
 
-static void button_delete(int param1, int param2)
+static void button_delete(const generic_button *button)
 {
     scenario_invasion_delete(data.invasion.id);
     scenario_editor_set_as_unsaved();
     window_editor_invasions_show();
 }
 
-static void button_save(int param1, int param2)
+static void button_save(const generic_button *button)
 {
     if (data.repeat_type == INVASION_REPEAT_NEVER) {
         data.invasion.repeat.times = 0;
