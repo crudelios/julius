@@ -15,9 +15,9 @@
 #include "scenario/invasion.h"
 #include "scenario/property.h"
 #include "scenario/types.h"
-#include "window/editor/invasions.h"
 #include "window/editor/map.h"
 #include "window/numeric_input.h"
+#include "window/plain_message_dialog.h"
 #include "window/select_list.h"
 
 enum {
@@ -39,6 +39,7 @@ enum {
 
 #define BASE_Y_OFFSET 20
 #define SECTION_CONTENT_LEFT_OFFSET 96
+#define MAX_POSSIBLE_ERRORS 3
 
 static void button_year(const generic_button *button);
 static void button_amount(const generic_button *button);
@@ -49,6 +50,7 @@ static void button_repeat_type(const generic_button *button);
 static void button_repeat_times(const generic_button *button);
 static void button_repeat_between(const generic_button *button);
 static void button_delete(const generic_button *button);
+static void button_cancel(const generic_button *button);
 static void button_save(const generic_button *button);
 
 #define NUMBER_OF_EDIT_BUTTONS (sizeof(edit_buttons) / sizeof(generic_button))
@@ -71,7 +73,8 @@ static generic_button edit_buttons[] = {
 #define NUMBER_OF_BOTTOM_BUTTONS (sizeof(bottom_buttons) / sizeof(generic_button))
 
 static generic_button bottom_buttons[] = {
-    {242, 378, 250, 25, button_delete},
+    {32, 378, 250, 25, button_delete},
+    {393, 378, 100, 25, button_cancel},
     {508, 378, 100, 25, button_save},
 };
 
@@ -80,7 +83,9 @@ static struct {
     unsigned int focus_button_id;
     unsigned int bottom_button_focus_id;
     int section_title_width;
+    int is_new_invasion;
     int repeat_type;
+    const uint8_t *errors[MAX_POSSIBLE_ERRORS];
 } data;
 
 #define NUMBER_OF_SECTIONS (sizeof(sections) / sizeof(sections[0]))
@@ -133,6 +138,7 @@ static void bound_invasion_values(void)
 static void init(int id)
 {
     const invasion_t *invasion = scenario_invasion_get(id);
+    data.is_new_invasion = invasion->type == INVASION_TYPE_NONE;
     data.invasion = *invasion;
     bound_invasion_values();
 
@@ -187,7 +193,7 @@ static void draw_background(void)
         FONT_NORMAL_BLACK);
 
     font_t enabled_font = data.invasion.type == INVASION_TYPE_DISTANT_BATTLE ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
-    color_t enabled_color = data.invasion.type == INVASION_TYPE_DISTANT_BATTLE ? COLOR_FONT_GRAY : COLOR_MASK_NONE;
+    color_t enabled_color = data.invasion.type == INVASION_TYPE_DISTANT_BATTLE ? COLOR_FONT_LIGHT_GRAY : COLOR_MASK_NONE;
 
     // Invasion from text
     btn = &edit_buttons[4];
@@ -227,7 +233,7 @@ static void draw_background(void)
 
     // Invasion interval text
     enabled_font = data.repeat_type == INVASION_REPEAT_NEVER ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
-    enabled_color = data.repeat_type == INVASION_REPEAT_NEVER ? COLOR_FONT_GRAY : COLOR_MASK_NONE;
+    enabled_color = data.repeat_type == INVASION_REPEAT_NEVER ? COLOR_FONT_LIGHT_GRAY : COLOR_MASK_NONE;
 
     btn = &edit_buttons[10];
     lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_INVASION_BETWEEN, x_offset, BASE_Y_OFFSET + btn->y + 6,
@@ -243,9 +249,11 @@ static void draw_background(void)
         BASE_Y_OFFSET + btn->y + 6, enabled_font, enabled_color);
 
     // Bottom button labels
-    lang_text_draw_centered(44, 26, bottom_buttons[0].x, BASE_Y_OFFSET + bottom_buttons[0].y + 6, bottom_buttons[0].width,
+    lang_text_draw_centered_colored(44, 26, bottom_buttons[0].x, BASE_Y_OFFSET + bottom_buttons[0].y + 6,
+        bottom_buttons[0].width, FONT_NORMAL_PLAIN, data.is_new_invasion ? COLOR_FONT_LIGHT_GRAY : COLOR_RED);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUTTON_CANCEL, bottom_buttons[1].x, BASE_Y_OFFSET + bottom_buttons[1].y + 6, bottom_buttons[1].width,
         FONT_NORMAL_BLACK);
-    lang_text_draw_centered(18, 3, bottom_buttons[1].x, BASE_Y_OFFSET + bottom_buttons[1].y + 6, bottom_buttons[1].width,
+    lang_text_draw_centered(18, 3, bottom_buttons[2].x, BASE_Y_OFFSET + bottom_buttons[2].y + 6, bottom_buttons[2].width,
         FONT_NORMAL_BLACK);
 
     graphics_reset_dialog();
@@ -270,8 +278,12 @@ static void draw_foreground(void)
     }
 
     for (size_t i = 0; i < NUMBER_OF_BOTTOM_BUTTONS; i++) {
+        int focus = data.bottom_button_focus_id == i + 1;
+        if (i == 0 && data.is_new_invasion) {
+            focus = 0;
+        }
         button_border_draw(bottom_buttons[i].x, BASE_Y_OFFSET + bottom_buttons[i].y, bottom_buttons[i].width,
-            bottom_buttons[i].height, data.bottom_button_focus_id == i + 1);
+            bottom_buttons[i].height, focus);
     }
 
     graphics_reset_dialog();
@@ -287,6 +299,10 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (input_go_back_requested(m, h)) {
+        button_cancel(0);
+        return;
+    }
+    if (h->enter_pressed) {
         button_save(0);
     }
 }
@@ -426,13 +442,49 @@ static void button_repeat_between(const generic_button *button)
 
 static void button_delete(const generic_button *button)
 {
+    if (data.is_new_invasion) {
+        return;
+    }
     scenario_invasion_delete(data.invasion.id);
     scenario_editor_set_as_unsaved();
-    window_editor_invasions_show();
+    window_go_back();
+}
+
+static void button_cancel(const generic_button *button)
+{
+    window_go_back();
+}
+
+static unsigned int validate(void)
+{
+    unsigned int num_errors = 0;
+
+    for (int i = 0; i < MAX_POSSIBLE_ERRORS; i++) {
+        data.errors[i] = 0;
+    }
+
+    if (data.invasion.type == INVASION_TYPE_NONE) {
+        data.errors[num_errors++] = translation_for(TR_EDITOR_EDIT_INVASION_NO_TYPE);
+    }
+    if (data.invasion.amount.min <= 0) {
+        data.errors[num_errors++] = translation_for(TR_EDITOR_EDIT_INVASION_NO_SOLDIERS);
+    }
+    if (data.invasion.year == 0) {
+        data.errors[num_errors++] = translation_for(TR_EDITOR_EDIT_INVASION_SET_YEAR);
+    }
+
+    return num_errors;
 }
 
 static void button_save(const generic_button *button)
 {
+    unsigned int num_errors = validate();
+    if (num_errors) {
+        window_plain_message_dialog_show_text_list(TR_EDITOR_FORM_ERRORS_FOUND, TR_EDITOR_FORM_HAS_FOLLOWING_ERRORS,
+            data.errors, num_errors);
+        return;
+    }
+
     if (data.repeat_type == INVASION_REPEAT_NEVER) {
         data.invasion.repeat.times = 0;
     } else if (data.repeat_type == INVASION_REPEAT_FOREVER) {
@@ -440,7 +492,7 @@ static void button_save(const generic_button *button)
     }
     scenario_invasion_update(&data.invasion);
     scenario_editor_set_as_unsaved();
-    window_editor_invasions_show();
+    window_go_back();
 }
 
 void window_editor_edit_invasion_show(int id)

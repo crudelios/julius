@@ -94,6 +94,8 @@ static void update_invasion_list(void)
 
 static void draw_background(void)
 {
+    update_invasion_list();
+
     window_editor_map_draw_all();
 
     graphics_in_dialog();
@@ -111,8 +113,6 @@ static void draw_background(void)
         new_invasion_button.y + 8, new_invasion_button.width - 16, FONT_NORMAL_BLACK);
 
     graphics_reset_dialog();
-
-    update_invasion_list();
 
     grid_box_request_refresh(&invasion_buttons);
 }

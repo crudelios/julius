@@ -14,8 +14,8 @@
 #include "scenario/property.h"
 #include "scenario/request.h"
 #include "window/editor/map.h"
-#include "window/editor/requests.h"
 #include "window/numeric_input.h"
+#include "window/plain_message_dialog.h"
 #include "window/select_list.h"
 
 static void button_year(const generic_button *button);
@@ -27,12 +27,17 @@ static void button_extension_months(const generic_button *button);
 static void button_extension_disfavor(const generic_button *button);
 static void button_ignored_disfavor(const generic_button *button);
 static void button_delete(const generic_button *button);
+static void button_cancel(const generic_button *button);
 static void button_save(const generic_button *button);
+
+#define MAX_POSSIBLE_ERRORS 3
 
 static struct {
     scenario_request request;
     unsigned int focus_button_id;
+    int is_new_request;
     resource_type avaialble_resources[RESOURCE_MAX];
+    const uint8_t *errors[MAX_POSSIBLE_ERRORS];
 } data;
 
 #define NUM_BUTTONS (sizeof(buttons) / sizeof(generic_button))
@@ -46,13 +51,15 @@ static generic_button buttons[] = {
     {400, 264, 80, 25, button_extension_months},
     {400, 304, 80, 25, button_extension_disfavor},
     {400, 344, 80, 25, button_ignored_disfavor},
-    {110, 384, 250, 25, button_delete},
-    {400, 384, 100, 25, button_save}
+    {16, 384, 250, 25, button_delete},
+    {377, 384, 100, 25, button_cancel},
+    {492, 384, 100, 25, button_save}
 };
 
 static void init(int id)
 {
     const scenario_request *request = scenario_request_get(id);
+    data.is_new_request = request->resource == RESOURCE_NONE;
     data.request = *request;
 }
 
@@ -83,7 +90,7 @@ static void draw_background(void)
 
     lang_text_draw(44, 24, 40, 230, FONT_NORMAL_BLACK);
 
-    lang_text_draw_amount(8, 8, data.request.deadline_years, 80, 230, FONT_NORMAL_BLACK);
+    lang_text_draw_amount_centered(8, 8, data.request.deadline_years, 70, 230, 140, FONT_NORMAL_BLACK);
 
     lang_text_draw(44, 73, 300, 230, FONT_NORMAL_BLACK);
 
@@ -97,8 +104,11 @@ static void draw_background(void)
 
     lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_FAVOUR_IGNORED, 70, 350, FONT_NORMAL_BLACK);
     text_draw_number_centered_prefix(data.request.ignored_disfavor, '-', 400, 350, 80, FONT_NORMAL_BLACK);
-    lang_text_draw_centered(18, 3, 400, 390, 100, FONT_NORMAL_BLACK);
-    lang_text_draw_centered(44, 25, 110, 390, 250, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(18, 3, 492, 390, 100, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUTTON_CANCEL, 377, 390, 100, FONT_NORMAL_BLACK);
+
+    lang_text_draw_centered_colored(44, 25, 16, 390, 250, FONT_NORMAL_PLAIN,
+        data.is_new_request ? COLOR_FONT_LIGHT_GRAY : COLOR_RED);
 
     graphics_reset_dialog();
 }
@@ -109,6 +119,9 @@ static void draw_foreground(void)
 
     for (size_t i = 0; i < NUM_BUTTONS; i++) {
         int focus = data.focus_button_id == i + 1;
+        if (i == 8 && data.is_new_request) {
+            focus = 0;
+        }
         button_border_draw(buttons[i].x, buttons[i].y, buttons[i].width, buttons[i].height, focus);
     }
 
@@ -121,6 +134,10 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (input_go_back_requested(m, h)) {
+        button_cancel(0);
+        return;
+    }
+    if (h->enter_pressed) {
         button_save(0);
     }
 }
@@ -165,7 +182,7 @@ static void button_resource(const generic_button *button)
     static int total_resources = 0;
     if (!total_resources) {
         for (resource_type resource = RESOURCE_NONE; resource < RESOURCE_MAX + RESOURCE_TOTAL_SPECIAL; resource++) {
-            if (!resource_is_storable(resource) && resource < RESOURCE_MAX) {
+            if ((!resource_is_storable(resource) && resource < RESOURCE_MAX) || resource == RESOURCE_TROOPS) {
                 continue;
             }
             resource_texts[total_resources] = resource_get_data(resource)->text;
@@ -229,13 +246,48 @@ static void button_ignored_disfavor(const generic_button *button)
 
 static void button_delete(const generic_button *button)
 {
+    if (data.is_new_request) {
+        return;
+    }
     scenario_request_delete(data.request.id);
     scenario_editor_set_as_unsaved();
     window_go_back();
 }
 
+static void button_cancel(const generic_button *button)
+{
+    window_go_back();
+}
+
+static unsigned int validate(void)
+{
+    unsigned int num_errors = 0;
+
+    for (int i = 0; i < MAX_POSSIBLE_ERRORS; i++) {
+        data.errors[i] = 0;
+    }
+
+    if (data.request.resource == RESOURCE_NONE) {
+        data.errors[num_errors++] = translation_for(TR_EDITOR_EDIT_REQUEST_NO_RESOURCE);
+    }
+    if (data.request.amount <= 0) {
+        data.errors[num_errors++] = translation_for(TR_EDITOR_EDIT_REQUEST_NO_AMOUNT);
+    }
+    if (data.request.deadline_years == 0) {
+        data.errors[num_errors++] = translation_for(TR_EDITOR_EDIT_REQUEST_SET_DEADLINE);
+    }
+
+    return num_errors;
+}
+
 static void button_save(const generic_button *button)
 {
+    unsigned int num_errors = validate();
+    if (num_errors) {
+        window_plain_message_dialog_show_text_list(TR_EDITOR_FORM_ERRORS_FOUND, TR_EDITOR_FORM_HAS_FOLLOWING_ERRORS,
+            data.errors, num_errors);
+        return;
+    }
     scenario_request_update(&data.request);
     scenario_editor_set_as_unsaved();
     window_go_back();

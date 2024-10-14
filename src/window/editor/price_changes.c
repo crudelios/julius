@@ -97,9 +97,9 @@ static void update_price_changes_list(void)
 
 static void draw_background(void)
 {
-    window_editor_map_draw_all();
-
     update_price_changes_list();
+
+    window_editor_map_draw_all();
 
     graphics_in_dialog();
 
@@ -127,8 +127,10 @@ static void draw_price_change_button(const grid_box_item *item)
     text_draw_number(price_change->year, '+', " ", item->x + 10, item->y + 7, FONT_NORMAL_BLACK, 0);
     lang_text_draw_year(scenario_property_start_year() + price_change->year, item->x + 65, item->y + 7,
         FONT_NORMAL_BLACK);
-    image_draw(resource_get_data(price_change->resource)->image.editor.icon, item->x + 140, item->y + 4,
-        COLOR_MASK_NONE, SCALE_NONE);
+    int image_id = resource_get_data(price_change->resource)->image.editor.icon;
+    const image *img = image_get(image_id);
+    int base_height = (item->height - img->original.height) / 2;
+    image_draw(image_id, item->x + 140, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
     int width = lang_text_draw(44, price_change->is_rise ? 104 : 103, item->x + 170, item->y + 7, FONT_NORMAL_BLACK);
     text_draw_number(price_change->amount, '@', " ", item->x + 170 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
 }

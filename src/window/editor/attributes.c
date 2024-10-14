@@ -121,7 +121,7 @@ static void draw_background(void)
 
     graphics_in_dialog();
 
-    outer_panel_draw(0, 28, 46, 34);
+    outer_panel_draw(0, 30, 46, 28);
 
     button_border_draw(18, 278, 184, 144, 0);
     int group_id = editor_is_active() ? image_group(GROUP_EDITOR_SCENARIO_IMAGE) : image_group(GROUP_SCENARIO_IMAGE);

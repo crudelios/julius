@@ -97,12 +97,18 @@ static void update_request_list(void)
 
 static void draw_background(void)
 {
+    update_request_list();
+
     window_editor_map_draw_all();
 
     graphics_in_dialog();
 
     outer_panel_draw(0, 0, 40, 30);
     lang_text_draw(44, 14, 20, 12, FONT_LARGE_BLACK);
+
+    if (!data.requests_in_use) {
+        lang_text_draw_centered(44, 19, 0, 165, 640, FONT_LARGE_BLACK);
+    }
 
     if (!data.on_select) {
         lang_text_draw_centered(13, 3, 0, 456, 640, FONT_NORMAL_BLACK);
@@ -112,8 +118,6 @@ static void draw_background(void)
     }
 
     graphics_reset_dialog();
-
-    update_request_list();
 
     grid_box_request_refresh(&request_buttons);
 }
@@ -127,8 +131,10 @@ static void draw_request_button(const grid_box_item *item)
     int width = text_draw_number(request->amount, '@', " ", item->x + 110, item->y + 7, FONT_NORMAL_BLACK, 0);
     int image_id = resource_get_data(request->resource)->image.editor.icon;
     const image *img = image_get(image_id);
-    int base_height = (item->height - img->height) / 2;
+    int base_height = (item->height - img->original.height) / 2;
     image_draw(image_id, item->x + 110 + width, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
+    text_draw(resource_get_data(request->resource)->text, item->x + 110 + width + img->width + 10, item->y + 7,
+        FONT_NORMAL_BLACK, 0);
 }
 
 static void draw_foreground(void)
@@ -137,8 +143,6 @@ static void draw_foreground(void)
 
     if (data.requests_in_use) {
         grid_box_draw(&request_buttons);
-    } else {
-        lang_text_draw_centered(44, 19, 0, 165, 640, FONT_LARGE_BLACK);
     }
 
     if (!data.on_select) {

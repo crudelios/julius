@@ -5,6 +5,7 @@
 #include "game/system.h"
 #include "graphics/image_button.h"
 #include "graphics/panel.h"
+#include "graphics/screen.h"
 #include "graphics/text.h"
 #include "input/keyboard.h"
 
@@ -29,7 +30,7 @@ void input_box_start(input_box *box)
         clear_text_button.x_offset -= CLEAR_BUTTON_WIDTH;
     }
     clear_text_button.y_offset = box->y + 3;
-    system_keyboard_set_input_rect(box->x, box->y,
+    system_keyboard_set_input_rect(box->x + screen_dialog_offset_x(), box->y + screen_dialog_offset_y(),
         box->width_blocks * BLOCK_SIZE - 35, box->height_blocks * BLOCK_SIZE);
     if (box->on_change) {
         box->old_text = malloc(sizeof(uint8_t) * box->text_length);

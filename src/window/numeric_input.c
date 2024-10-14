@@ -1,6 +1,7 @@
 #include "numeric_input.h"
 
 #include "core/string.h"
+#include "game/system.h"
 #include "graphics/color.h"
 #include "graphics/graphics.h"
 #include "graphics/lang_text.h"
@@ -103,11 +104,13 @@ static void init(int x, int y, const generic_button *button, int max_digits,
     data.value = 0;
     data.focus_button_id = 0;
     keyboard_start_capture_numeric(input_number);
+    system_keyboard_set_input_rect(data.x + 16, data.y + 16, 96, 30);
 }
 
 static void close(void)
 {
     keyboard_stop_capture_numeric();
+    system_keyboard_set_input_rect(0, 0, 0, 0);
     window_go_back();
 }
 

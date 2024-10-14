@@ -103,9 +103,9 @@ static void update_demand_changes_list(void)
 
 static void draw_background(void)
 {
-    window_editor_map_draw_all();
-
     update_demand_changes_list();
+
+    window_editor_map_draw_all();
 
     graphics_in_dialog();
 
@@ -168,8 +168,10 @@ static void draw_demand_change_button(const grid_box_item *item)
     text_draw_number(demand_change->year, '+', " ", item->x + 10, item->y + 7, FONT_NORMAL_BLACK, 0);
     lang_text_draw_year(scenario_property_start_year() + demand_change->year, item->x + 35, item->y + 7,
         FONT_NORMAL_BLACK);
-    image_draw(resource_get_data(demand_change->resource)->image.editor.icon, item->x + 115, item->y + 4,
-        COLOR_MASK_NONE, SCALE_NONE);
+    int image_id = resource_get_data(demand_change->resource)->image.editor.icon;
+    const image *img = image_get(image_id);
+    int base_height = (item->height - img->original.height) / 2;
+    image_draw(image_id, item->x + 115, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
     int width = lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_SHORT_ROUTE_TEXT, item->x + 140, item->y + 7,
         FONT_NORMAL_BLACK);
     width += text_draw_number(demand_change->route_id, '@', " ", item->x + 140 + width, item->y + 7,
