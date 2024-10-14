@@ -5,9 +5,7 @@
 
 #include <stdint.h>
 
-#define SCENARIO_EVENTS_ARRAY_SIZE_STEP 100
-#define SCENARIO_ACTIONS_ARRAY_SIZE_STEP 20
-#define SCENARIO_CONDITIONS_ARRAY_SIZE_STEP 20
+#define EVENT_NAME_LENGTH 32
 
 typedef enum {
     EVENT_STATE_UNDEFINED = 0,
@@ -16,6 +14,11 @@ typedef enum {
     EVENT_STATE_PAUSED = 3,
     EVENT_STATE_DELETED = 4
 } event_state;
+
+typedef enum {
+    SCENARIO_CONDITION_FULFILLMENT_ALL = 0,
+    SCENARIO_CONDITION_FULFILLMENT_ANY = 1
+} event_condition_fulfillment;
 
 typedef enum {
     CONDITION_TYPE_UNDEFINED = 0,
@@ -136,6 +139,8 @@ typedef struct {
     int max_number_of_repeats;
     int execution_count;
     int months_until_active;
+    uint8_t name[EVENT_NAME_LENGTH];
+    event_condition_fulfillment fulfillment_type;
     array(scenario_condition_t) conditions;
     array(scenario_action_t) actions;
 } scenario_event_t;

@@ -178,7 +178,7 @@ static void load_link_condition(scenario_condition_t *condition, int link_type, 
     }
 }
 
-static void info_load_state(buffer *buf)
+static void info_load_state(buffer *buf, int is_new_version)
 {
     int buffer_size, version, array_size, struct_size;
     buffer_load_dynamic_piece_header_data(buf,
@@ -189,7 +189,7 @@ static void info_load_state(buffer *buf)
 
     for (int i = 0; i < array_size; i++) {
         scenario_event_t *event = scenario_event_create(0, 0, 0);
-        scenario_event_load_state(buf, event);
+        scenario_event_load_state(buf, event, is_new_version);
     }
 }
 
@@ -244,10 +244,10 @@ static void actions_load_state(buffer *buf)
     }
 }
 
-void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions)
+void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions, int is_new_version)
 {
     scenario_events_clear();
-    info_load_state(buf_events);
+    info_load_state(buf_events, is_new_version);
     conditions_load_state(buf_conditions);
     actions_load_state(buf_actions);
 

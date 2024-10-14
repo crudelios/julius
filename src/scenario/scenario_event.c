@@ -1,9 +1,13 @@
 #include "scenario_event.h"
 
+#include "core/encoding.h"
 #include "core/log.h"
 #include "core/random.h"
 #include "scenario/action_types/action_handler.h"
 #include "scenario/condition_types/condition_handler.h"
+
+#define SCENARIO_ACTIONS_ARRAY_SIZE_STEP 20
+#define SCENARIO_CONDITIONS_ARRAY_SIZE_STEP 20
 
 static int condition_in_use(const scenario_condition_t *condition)
 {
@@ -43,9 +47,13 @@ void scenario_event_save_state(buffer *buf, scenario_event_t *event)
     buffer_write_i32(buf, event->execution_count);
     buffer_write_i16(buf, event->conditions.size);
     buffer_write_i16(buf, event->actions.size);
+    buffer_write_u8(buf, event->fulfillment_type);
+    char name_utf8[EVENT_NAME_LENGTH * 2];
+    encoding_to_utf8(event->name, name_utf8, EVENT_NAME_LENGTH * 2, 0);
+    buffer_write_raw(buf, name_utf8, EVENT_NAME_LENGTH * 2);
 }
 
-void scenario_event_load_state(buffer *buf, scenario_event_t *event)
+void scenario_event_load_state(buffer *buf, scenario_event_t *event, int is_new_version)
 {
     int saved_id = buffer_read_i32(buf);
     event->state = buffer_read_i16(buf);
@@ -56,6 +64,12 @@ void scenario_event_load_state(buffer *buf, scenario_event_t *event)
     event->execution_count = buffer_read_i32(buf);
     int conditions_count = buffer_read_i16(buf);
     int actions_count = buffer_read_i16(buf);
+    if (is_new_version) {
+        event->fulfillment_type = buffer_read_u8(buf);
+        char name_utf8[EVENT_NAME_LENGTH * 2];
+        buffer_read_raw(buf, name_utf8, EVENT_NAME_LENGTH * 2);
+        encoding_from_utf8(name_utf8, event->name, EVENT_NAME_LENGTH);
+    }
 
     if (!array_init(event->conditions, SCENARIO_CONDITIONS_ARRAY_SIZE_STEP, 0, condition_in_use) ||
         !array_expand(event->conditions, conditions_count)) {
@@ -140,7 +154,7 @@ int scenario_event_can_repeat(scenario_event_t *event)
         ((event->execution_count < event->max_number_of_repeats) || (event->max_number_of_repeats <= 0));
 }
 
-int scenario_event_all_conditions_met(scenario_event_t *event)
+static int conditions_fulfilled(scenario_event_t *event)
 {
     if (event->state != EVENT_STATE_ACTIVE) {
         return 0;
@@ -151,8 +165,11 @@ int scenario_event_all_conditions_met(scenario_event_t *event)
     
     scenario_condition_t *current;
     array_foreach(event->conditions, current) {
-        if (scenario_condition_type_is_met(current) == 0) {
+        if (event->fulfillment_type == SCENARIO_CONDITION_FULFILLMENT_ALL && !scenario_condition_type_is_met(current)) {
             return 0;
+        }
+        if (event->fulfillment_type == SCENARIO_CONDITION_FULFILLMENT_ANY && scenario_condition_type_is_met(current)) {
+            return 1;
         }
     }
 
@@ -179,7 +196,7 @@ int scenario_event_decrease_pause_time(scenario_event_t *event, int months_passe
 
 int scenario_event_conditional_execute(scenario_event_t *event)
 {
-    if (scenario_event_all_conditions_met(event)) {
+    if (conditions_fulfilled(event)) {
         int result = scenario_event_execute(event);
         event->execution_count++;
         if (scenario_event_can_repeat(event)) {
