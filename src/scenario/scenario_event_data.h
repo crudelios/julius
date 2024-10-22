@@ -6,6 +6,9 @@
 #include <stdint.h>
 
 #define EVENT_NAME_LENGTH 32
+#define CONDITION_GROUP_ITEMS_ARRAY_SIZE_STEP 2
+#define CONDITION_GROUP_STRUCT_SIZE (2 * sizeof(uint32_t) + 1 * sizeof(uint16_t) + 1 * sizeof(uint8_t))
+#define CONDITION_STRUCT_SIZE (5 * sizeof(uint32_t) + 1 * sizeof(uint8_t))
 
 typedef enum {
     EVENT_STATE_UNDEFINED = 0,
@@ -16,9 +19,9 @@ typedef enum {
 } event_state;
 
 typedef enum {
-    SCENARIO_CONDITION_FULFILLMENT_ALL = 0,
-    SCENARIO_CONDITION_FULFILLMENT_ANY = 1
-} event_condition_fulfillment;
+    FULFILLMENT_TYPE_ALL = 0,
+    FULFILLMENT_TYPE_ANY = 1
+} fulfillment_type;
 
 typedef enum {
     CONDITION_TYPE_UNDEFINED = 0,
@@ -92,7 +95,8 @@ typedef enum {
 
 typedef enum {
     LINK_TYPE_UNDEFINED = -1,
-    LINK_TYPE_SCENARIO_EVENT = 0
+    LINK_TYPE_SCENARIO_EVENT = 0,
+    LINK_TYPE_SCENARIO_CONDITION_GROUP = 1
 } link_type_t;
 
 enum {
@@ -123,6 +127,11 @@ typedef struct {
 } scenario_condition_t;
 
 typedef struct {
+    fulfillment_type type;
+    array(scenario_condition_t) conditions;
+} scenario_condition_group_t;
+
+typedef struct {
     action_types type;
     int parameter1;
     int parameter2;
@@ -132,7 +141,7 @@ typedef struct {
 } scenario_action_t;
 
 typedef struct {
-    int id;
+    unsigned int id;
     event_state state;
     int repeat_months_min;
     int repeat_months_max;
@@ -140,8 +149,7 @@ typedef struct {
     int execution_count;
     int months_until_active;
     uint8_t name[EVENT_NAME_LENGTH];
-    event_condition_fulfillment fulfillment_type;
-    array(scenario_condition_t) conditions;
+    array(scenario_condition_group_t) condition_groups;
     array(scenario_action_t) actions;
 } scenario_event_t;
 

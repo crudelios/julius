@@ -1542,7 +1542,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_INVASION_REPEAT_FOREVER, "Repeat forever"},
     {TR_EDITOR_INVASION_REPEAT_ONCE, "Repeat once"},
     {TR_EDITOR_INVASION_REPEAT_TWICE, "Repeat twice"},
-    {TR_EDITOR_INVASION_REPEAT_TEXT, "Repeat "},
+    {TR_EDITOR_INVASION_REPEAT_TEXT, "Repeat"},
     {TR_EDITOR_INVASION_REPEAT_TIMES, " times"},
     {TR_EDITOR_INVASION_REPEAT_FREQUENCY, "Repeat frequency:"},
     {TR_EDITOR_INVASION_REPEAT_FREQUENCY_YEARS, "years"},

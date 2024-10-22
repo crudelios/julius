@@ -11,11 +11,11 @@
 #define array(T) \
 struct { \
     T **items; \
-    int size; \
-    int blocks; \
-    int block_offset; \
-    int bit_offset; \
-    void (*constructor)(T *, int); \
+    unsigned int size; \
+    unsigned int blocks; \
+    unsigned int block_offset; \
+    unsigned int bit_offset; \
+    void (*constructor)(T *, unsigned int); \
     int (*in_use)(const T *); \
 }
 
@@ -56,22 +56,48 @@ struct { \
 /**
  * Creates a new item for the array, either by finding an available empty item or by expanding the array.
  * @param a The array structure
+ * @param ptr A pointer that will get the new item. Will be null if there was a memory allocation error.
+ */
+#define array_new_item(a, ptr) \
+{ \
+    ptr = 0; \
+    int error = 0; \
+    if ((a).in_use) { \
+        for (unsigned int array_index = 0; array_index < (a).size; array_index++) { \
+            if (!(a).in_use(array_item(a, array_index))) { \
+                ptr = array_item(a, array_index); \
+                memset(ptr, 0, sizeof(**(a).items)); \
+                if ((a).constructor) { \
+                    (a).constructor(ptr, array_index); \
+                } \
+                break; \
+            } \
+        } \
+    } \
+    if (!error && !ptr) { \
+        ptr = array_advance(a); \
+    } \
+}
+
+/**
+ * Creates a new item for the array, either by finding an available empty item or by expanding the array.
+ * @param a The array structure
  * @param index The index upon which to start searching for a free slot. If index is greater than the array size,
  *        the array will be expanded.
  * @param ptr A pointer that will get the new item. Will be null if there was a memory allocation error.
  */
-#define array_new_item(a, index, ptr) \
+#define array_new_item_after_index(a, index, ptr) \
 { \
     ptr = 0; \
     int error = 0; \
-    while ((a).size < index) { \
+    while (index > (a).size) { \
         if (!array_advance(a)) { \
             error = 1; \
             break; \
         } \
     } \
     if (!error && (a).in_use) { \
-        for (int array_index = index; array_index < (a).size; array_index++) { \
+        for (unsigned int array_index = index; array_index < (a).size; array_index++) { \
             if (!(a).in_use(array_item(a, array_index))) { \
                 ptr = array_item(a, array_index); \
                 memset(ptr, 0, sizeof(**(a).items)); \
@@ -152,16 +178,16 @@ struct { \
  * @note You can use the array_index parameter to retrieve the index of the current item
  */
 #define array_foreach(a, item) \
-    for(int array_index = 0; array_index < (a).size && ((item) = array_item(a, array_index)) != 0; array_index++)
+    for(unsigned int array_index = 0; array_index < (a).size && ((item) = array_item(a, array_index)) != 0; array_index++)
 
 /**
  * Iterates through an array, calling the callback function for each item
  * @param a The array structure
- * @param callback The function callback to call for each item, in the format "callback(T *item, int array_index)"
+ * @param callback The function callback to call for each item, in the format "callback(T *item, unsigned int array_index)"
  * @note You can use the array_index parameter to retrieve the index of the current item
  */
 #define array_foreach_callback(a, callback) \
-    for(int array_index = 0; array_index < (a).size && array_item(a, array_index) != 0; array_index++) { \
+    for(unsigned int array_index = 0; array_index < (a).size && array_item(a, array_index) != 0; array_index++) { \
         callback(array_item(a, array_index)); \
     }
 
@@ -215,12 +241,12 @@ struct { \
 /**
  * This function is private and should not be used
  */
-int array_add_blocks(void ***data, int *blocks, int items_per_block, int item_size, int num_blocks);
+int array_add_blocks(void ***data, unsigned int *blocks, unsigned int items_per_block, unsigned int item_size, unsigned int num_blocks);
 
 /**
  * This function is private and should not be used
  */
-void array_free(void **data, int blocks);
+void array_free(void **data, unsigned int blocks);
 
 /**
  * Private helper compile-time functions for finding the next power of two into which a number fits

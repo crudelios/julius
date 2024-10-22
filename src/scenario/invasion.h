@@ -14,7 +14,7 @@ typedef enum {
 } invasion_old_state_sections;
 
 typedef struct {
-    int id;
+    unsigned int id;
     int year;
     int type;
     struct {

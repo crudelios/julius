@@ -13,10 +13,9 @@
 
 #define DEMAND_CHANGES_STRUCT_SIZE_CURRENT (1 * sizeof(int32_t) + 1 * sizeof(int16_t) + 3 * sizeof(uint8_t))
 
-
 static array(demand_change_t) demand_changes;
 
-static void new_demand_change(demand_change_t *demand_change, int index)
+static void new_demand_change(demand_change_t *demand_change, unsigned int index)
 {
     demand_change->id = index;
 }
@@ -47,7 +46,7 @@ void scenario_demand_change_init(void)
 int scenario_demand_change_new(void)
 {
     demand_change_t *demand_change;
-    array_new_item(demand_changes, 0, demand_change);
+    array_new_item(demand_changes, demand_change);
     return demand_change ? demand_change->id : -1;
 }
 
@@ -127,7 +126,7 @@ int scenario_demand_change_count_total(void)
 
 void scenario_demand_change_save_state(buffer *buf)
 {
-    buffer_init_dynamic_piece(buf, 0, demand_changes.size, DEMAND_CHANGES_STRUCT_SIZE_CURRENT);
+    buffer_init_dynamic_array(buf, demand_changes.size, DEMAND_CHANGES_STRUCT_SIZE_CURRENT);
 
     const demand_change_t *demand_change;
     array_foreach(demand_changes, demand_change) {
@@ -141,9 +140,7 @@ void scenario_demand_change_save_state(buffer *buf)
 
 void scenario_demand_change_load_state(buffer *buf)
 {
-    int size;
-
-    buffer_load_dynamic_piece_header_data(buf, 0, 0, &size, 0);
+    int size = buffer_load_dynamic_array(buf);
 
     if (!array_init(demand_changes, DEMAND_CHANGES_ARRAY_SIZE_STEP, new_demand_change, demand_change_in_use) ||
         !array_expand(demand_changes, size)) {

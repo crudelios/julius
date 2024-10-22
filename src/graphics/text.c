@@ -518,7 +518,7 @@ int text_draw_label_and_number(const uint8_t *label, int value, const char *post
 {
     uint8_t str[2 * NUMBER_BUFFER_LENGTH];
     uint8_t *pos = label ? string_copy(label, str, NUMBER_BUFFER_LENGTH) : str;
-    number_to_string(pos, value, 0, postfix);
+    number_to_string(pos, value, ' ', postfix);
     return text_draw(str, x_offset, y_offset, font, color);
 }
 
@@ -526,7 +526,7 @@ void text_draw_label_and_number_centered(const uint8_t *label, int value, const 
 {
     uint8_t str[2 * NUMBER_BUFFER_LENGTH];
     uint8_t *pos = label ? string_copy(label, str, NUMBER_BUFFER_LENGTH) : str;
-    number_to_string(pos, value, 0, postfix);
+    number_to_string(pos, value, ' ', postfix);
     text_draw_centered(str, x_offset, y_offset, box_width, font, color);
 }
 

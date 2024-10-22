@@ -85,7 +85,7 @@ static const struct {
 };
 
 typedef struct {
-    int id;
+    unsigned int id;
     int in_use;
     int handled;
     int invasion_path_id;
@@ -108,7 +108,7 @@ static struct {
 } data;
 
 
-static void new_invasion(invasion_t *invasion, int index)
+static void new_invasion(invasion_t *invasion, unsigned int index)
 {
     invasion->id = index;
 }
@@ -118,7 +118,7 @@ static int invasion_in_use(const invasion_t *invasion)
     return invasion->type != INVASION_TYPE_NONE;
 }
 
-static void new_warning(invasion_warning *warning, int index)
+static void new_warning(invasion_warning *warning, unsigned int index)
 {
     warning->id = index;
 }
@@ -209,7 +209,7 @@ void scenario_invasion_init(void)
 int scenario_invasion_new(void)
 {
     invasion_t *invasion;
-    array_new_item(data.invasions, 0, invasion);
+    array_new_item(data.invasions, invasion);
     return invasion ? invasion->id : -1;
 }
 
@@ -672,7 +672,7 @@ void scenario_invasion_warning_save_state(buffer *invasion_id, buffer *warnings)
 {
     buffer_write_u16(invasion_id, data.last_internal_invasion_id);
 
-    buffer_init_dynamic_piece(warnings, 0, data.warnings.size, WARNINGS_STRUCT_SIZE_CURRENT);
+    buffer_init_dynamic_array(warnings, data.warnings.size, WARNINGS_STRUCT_SIZE_CURRENT);
 
     const invasion_warning *w;
     array_foreach(data.warnings, w) {
@@ -695,12 +695,7 @@ void scenario_invasion_warning_load_state(buffer *invasion_id, buffer *warnings,
 {
     data.last_internal_invasion_id = buffer_read_u16(invasion_id);
 
-    int size;
-    if (has_dynamic_warnings) {
-        buffer_load_dynamic_piece_header_data(warnings, 0, 0, &size, 0);
-    } else {
-        size = MAX_ORIGINAL_INVASION_WARNINGS;
-    }
+    int size = has_dynamic_warnings ? buffer_load_dynamic_array(warnings) : MAX_ORIGINAL_INVASION_WARNINGS;
 
     if (!array_init(data.warnings, WARNINGS_ARRAY_SIZE_STEP, new_warning, warning_in_use) ||
         !array_expand(data.warnings, size)) {
@@ -730,7 +725,7 @@ void scenario_invasion_warning_load_state(buffer *invasion_id, buffer *warnings,
 
 void scenario_invasion_save_state(buffer *buf)
 {
-    buffer_init_dynamic_piece(buf, 0, data.invasions.size, INVASIONS_STRUCT_SIZE_CURRENT);
+    buffer_init_dynamic_array(buf, data.invasions.size, INVASIONS_STRUCT_SIZE_CURRENT);
 
     const invasion_t *invasion;
     array_foreach(data.invasions, invasion) {
@@ -749,8 +744,7 @@ void scenario_invasion_save_state(buffer *buf)
 
 void scenario_invasion_load_state(buffer *buf)
 {
-    int size;
-    buffer_load_dynamic_piece_header_data(buf, 0, 0, &size, 0);
+    int size = buffer_load_dynamic_array(buf);
 
     if (!array_init(data.invasions, INVASIONS_ARRAY_SIZE_STEP, new_invasion, invasion_in_use) ||
         !array_expand(data.invasions, size)) {
@@ -775,8 +769,7 @@ void scenario_invasion_load_state(buffer *buf)
 
 int scenario_invasion_count_active_from_buffer(buffer *buf)
 {
-    int size;
-    buffer_load_dynamic_piece_header_data(buf, 0, 0, &size, 0);
+    int size = buffer_load_dynamic_array(buf);
 
     int num_invasions = 0;
 

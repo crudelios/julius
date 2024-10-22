@@ -15,6 +15,7 @@
 #include "input/input.h"
 #include "scenario/editor_events.h"
 #include "scenario/property.h"
+#include "scenario/scenario_event.h"
 #include "scenario/scenario_events_controller.h"
 #include "scenario/scenario_events_parameter_data.h"
 #include "window/city.h"
@@ -99,7 +100,9 @@ static void populate_list(int offset)
 
 static void add_new_event(void)
 {
-    scenario_event_create(0, 0, 0);
+    scenario_event_t *event = scenario_event_create(0, 0, 0);
+    array_advance(event->condition_groups);
+
     init_list();
     window_request_refresh();
 }
@@ -109,7 +112,7 @@ static void draw_background(void)
     window_editor_map_draw_all();
 }
 
-static int color_from_state(event_state state)
+static color_t color_from_state(event_state state)
 {
     if (!editor_is_active()) {
         if (state == EVENT_STATE_ACTIVE) {
@@ -136,14 +139,19 @@ static void draw_foreground(void)
     for (unsigned int i = 0; i < MAX_VISIBLE_ROWS; i++) {
         if (data.list[i]) {
             large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / 16, data.focus_button_id == i + 1 ? 1 : 0);
+            color_t color = color_from_state(data.list[i]->state);
 
             if (data.list[i]->state != EVENT_STATE_UNDEFINED) {
-                text_draw_label_and_number(0, data.list[i]->id, "", buttons[i].x, buttons[i].y + 8,
-                    FONT_NORMAL_GREEN, color_from_state(data.list[i]->state));
-                text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENTS_CONDITIONS),
-                    data.list[i]->conditions.size, "", 100, buttons[i].y + 8, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
-                text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENTS_ACTIONS),
-                    data.list[i]->actions.size, "", 250, buttons[i].y + 8, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+                text_draw_number(data.list[i]->id, 0, "", buttons[i].x + 6, buttons[i].y + 8, FONT_NORMAL_GREEN, color);
+                if (!*data.list[i]->name) {
+                    text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENTS_CONDITIONS),
+                        scenario_event_count_conditions(data.list[i]), "", 100, buttons[i].y + 8,
+                        FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+                    text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENTS_ACTIONS),
+                        data.list[i]->actions.size, "", 250, buttons[i].y + 8, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
+                } else {
+                    text_draw(data.list[i]->name, 100, buttons[i].y + 8, FONT_NORMAL_GREEN, color);
+                }
             } else {
                 text_draw_centered(translation_for(TR_EDITOR_SCENARIO_EVENT_DELETED), 48, buttons[i].y + 8,
                     BUTTON_WIDTH, FONT_NORMAL_GREEN, 0);

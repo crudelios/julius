@@ -18,7 +18,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define XML_TOTAL_ELEMENTS 62
+#define XML_TOTAL_ELEMENTS 63
 #define ERROR_MESSAGE_LENGTH 200
 
 static struct {
@@ -28,11 +28,14 @@ static struct {
     uint8_t error_line_number_text[50];
     int version;
     scenario_event_t *current_event;
+    scenario_condition_group_t *current_group;
     int variables_count;
 } data;
 
 static int xml_import_start_scenario_events(void);
 static int xml_import_start_event(void);
+static int xml_import_start_group(void);
+static void xml_import_end_group(void);
 static int xml_import_create_condition(void);
 static int xml_import_create_action(void);
 static int xml_import_start_custom_variables(void);
@@ -59,24 +62,25 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "events", xml_import_start_scenario_events },
     { "event", xml_import_start_event, 0, "events" },
     { "conditions", 0, 0, "event" },
+    { "group", xml_import_start_group, xml_import_end_group, "conditions" },
     { "actions", 0, 0, "event" },
-    { "time", xml_import_create_condition, 0, "conditions" },
-    { "difficulty", xml_import_create_condition, 0, "conditions" },
-    { "money", xml_import_create_condition, 0, "conditions" },
-    { "savings", xml_import_create_condition, 0, "conditions" },
-    { "stats_favor", xml_import_create_condition, 0, "conditions" },
-    { "stats_prosperity", xml_import_create_condition, 0, "conditions" }, //10
-    { "stats_culture", xml_import_create_condition, 0, "conditions" },
-    { "stats_peace", xml_import_create_condition, 0, "conditions" },
-    { "trade_sell_price", xml_import_create_condition, 0, "conditions" },
-    { "population_unemployed", xml_import_create_condition, 0, "conditions" },
-    { "rome_wages", xml_import_create_condition, 0, "conditions|actions" },
-    { "city_population", xml_import_create_condition, 0, "conditions" },
-    { "building_count_active", xml_import_create_condition, 0, "conditions" },
-    { "stats_health", xml_import_create_condition, 0, "conditions" },
-    { "count_own_troops", xml_import_create_condition, 0, "conditions" },
-    { "request_is_ongoing", xml_import_create_condition, 0, "conditions" }, //20
-    { "tax_rate", xml_import_create_condition, 0, "conditions" },
+    { "time", xml_import_create_condition, 0, "conditions|group" },
+    { "difficulty", xml_import_create_condition, 0, "conditions|group" },
+    { "money", xml_import_create_condition, 0, "conditions|group" },
+    { "savings", xml_import_create_condition, 0, "conditions|group" },
+    { "stats_favor", xml_import_create_condition, 0, "conditions|group" },
+    { "stats_prosperity", xml_import_create_condition, 0, "conditions|group" }, //10
+    { "stats_culture", xml_import_create_condition, 0, "conditions|group" },
+    { "stats_peace", xml_import_create_condition, 0, "conditions|group" },
+    { "trade_sell_price", xml_import_create_condition, 0, "conditions|group" },
+    { "population_unemployed", xml_import_create_condition, 0, "conditions|group" },
+    { "rome_wages", xml_import_create_condition, 0, "conditions|group" },
+    { "city_population", xml_import_create_condition, 0, "conditions|group" },
+    { "building_count_active", xml_import_create_condition, 0, "conditions|group" },
+    { "stats_health", xml_import_create_condition, 0, "conditions|group" },
+    { "count_own_troops", xml_import_create_condition, 0, "conditions|group" },
+    { "request_is_ongoing", xml_import_create_condition, 0, "conditions|group" }, //20
+    { "tax_rate", xml_import_create_condition, 0, "conditions|group" },
     { "favor_add", xml_import_create_action, 0, "actions" },
     { "money_add", xml_import_create_action, 0, "actions" },
     { "savings_add", xml_import_create_action, 0, "actions" },
@@ -95,25 +99,25 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "request_immediately_start", xml_import_create_action, 0, "actions" },
     { "show_custom_message", xml_import_create_action, 0, "actions" },
     { "tax_rate_set", xml_import_create_action, 0, "actions" },
-    { "building_count_any", xml_import_create_condition, 0, "conditions" }, //40
-    { "variable_check", xml_import_create_condition, 0, "conditions" },
-    { "trade_route_open", xml_import_create_condition, 0, "conditions" },
-    { "trade_route_price", xml_import_create_condition, 0, "conditions" },
+    { "building_count_any", xml_import_create_condition, 0, "conditions|group" }, //40
+    { "variable_check", xml_import_create_condition, 0, "conditions|group" },
+    { "trade_route_open", xml_import_create_condition, 0, "conditions|group" },
+    { "trade_route_price", xml_import_create_condition, 0, "conditions|group" },
     { "change_variable", xml_import_create_action, 0, "actions" },
     { "change_trade_route_open_price", xml_import_create_action, 0, "actions" },
     { "variables", xml_import_start_custom_variables, 0, "events" },
     { "variable", xml_import_create_custom_variable, 0, "variables" },
     { "change_city_rating", xml_import_create_action, 0, "actions" },
     { "change_resource_stockpiles", xml_import_create_action, 0, "actions" },
-    { "resource_stored_count", xml_import_create_condition, 0, "conditions" }, //50
-    { "resource_storage_available", xml_import_create_condition, 0, "conditions" },
+    { "resource_stored_count", xml_import_create_condition, 0, "conditions|group" }, //50
+    { "resource_storage_available", xml_import_create_condition, 0, "conditions|group" },
     { "trade_route_set_open", xml_import_create_action, 0, "actions" },
     { "trade_route_add_new_resource", xml_import_create_action, 0, "actions" },
     { "trade_set_buy_price_only", xml_import_create_action, 0, "actions" },
     { "trade_set_sell_price_only", xml_import_create_action, 0, "actions" },
     { "building_force_collapse", xml_import_create_action, 0, "actions" },
     { "invasion_start_immediate", xml_import_create_action, 0, "actions" },
-    { "building_count_area", xml_import_create_condition, 0, "conditions" },
+    { "building_count_area", xml_import_create_condition, 0, "conditions|group" },
     { "cause_blessing", xml_import_create_action, 0, "actions" },
     { "cause_minor_curse", xml_import_create_action, 0, "actions" }, // 60
     { "cause_major_curse", xml_import_create_action, 0, "actions" },
@@ -215,6 +219,42 @@ static condition_types get_condition_type_from_element_name(const char *name)
     return CONDITION_TYPE_UNDEFINED;
 }
 
+static scenario_condition_group_t *get_first_group(void)
+{
+    if (data.current_event->condition_groups.size == 0) {
+        return array_advance(data.current_event->condition_groups);
+    }
+    return array_item(data.current_event->condition_groups, 0);
+}
+
+static int xml_import_start_group(void)
+{
+    if (!data.success) {
+        return 0;
+    }
+
+    fulfillment_type type = FULFILLMENT_TYPE_ANY;
+    if (xml_parser_has_attribute("fulfillment_type")) {
+        const char *values[2] = { "all", "any" };
+        int result = xml_parser_get_attribute_enum("type", values, 2, 0);
+        if (result != -1) {
+            type = result;
+        }
+    }
+    // Only group 0 has fulfillment type all
+    if (type == FULFILLMENT_TYPE_ALL) {
+        data.current_group = get_first_group();
+    } else {
+        array_new_item_after_index(data.current_event->condition_groups, 1, data.current_group);
+    }
+    return data.current_group != 0;
+}
+
+static void xml_import_end_group(void)
+{
+    data.current_group = 0;
+}
+
 static int condition_populate_parameters(scenario_condition_t *condition)
 {
     scenario_condition_data_t *condition_data = scenario_events_parameter_data_get_conditions_xml_attributes(condition->type);
@@ -240,8 +280,8 @@ static int xml_import_create_condition(void)
         log_info("Invalid condition type specified", 0, 0);
         return 0;
     }
-
-    scenario_condition_t *condition = scenario_event_condition_create(data.current_event, type);
+    scenario_condition_group_t *group = data.current_group ? data.current_group : get_first_group();
+    scenario_condition_t *condition = scenario_event_condition_create(group, type);
     return condition_populate_parameters(condition);
 }
 

@@ -22,7 +22,7 @@
 
 static array(scenario_request) requests;
 
-static void new_request(scenario_request *request, int index)
+static void new_request(scenario_request *request, unsigned int index)
 {
     request->id = index;
     request->deadline_years = REQUESTS_DEFAULT_DEADLINE_YEARS;
@@ -74,7 +74,7 @@ void scenario_request_init(void)
 int scenario_request_new(void)
 {
     scenario_request *request;
-    array_new_item(requests, 0, request);
+    array_new_item(requests, request);
     return request ? request->id : -1;
 }
 
@@ -337,10 +337,7 @@ static void request_save(buffer *list, const scenario_request *request)
 void scenario_request_save_state(buffer *list)
 {
     int32_t struct_size = REQUESTS_STRUCT_SIZE_CURRENT;
-    buffer_init_dynamic_piece(list,
-        SCENARIO_CURRENT_VERSION,
-        requests.size,
-        struct_size);
+    buffer_init_dynamic_array(list, requests.size, struct_size);
 
     const scenario_request *request;
     array_foreach(requests, request) {
@@ -367,13 +364,7 @@ static void request_load(buffer *list, scenario_request *request)
 
 void scenario_request_load_state(buffer *list)
 {
-    int buffer_size, version, array_size, struct_size;
-
-    buffer_load_dynamic_piece_header_data(list,
-        &buffer_size,
-        &version,
-        &array_size,
-        &struct_size);
+    int array_size = buffer_load_dynamic_array(list);
 
     if (!array_init(requests, REQUESTS_ARRAY_SIZE_STEP, new_request, request_in_use) ||
         !array_expand(requests, array_size)) {

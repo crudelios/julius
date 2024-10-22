@@ -226,7 +226,7 @@ static void add_asset_image_to_list(layer *l)
 {
     packed_asset *asset = get_asset_image_from_list(l);
     if (!asset) {
-        array_new_item(packed_assets, 1, asset);
+        array_new_item_after_index(packed_assets, 1, asset);
         if (!asset) {
             log_error("Out of memory.", 0, 0);
             return;

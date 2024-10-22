@@ -9,7 +9,7 @@
 #define MAX_ORIGINAL_DEMAND_CHANGES 20
 
 typedef struct {
-    int id;
+    unsigned int id;
     int year;
     int month;
     int resource;

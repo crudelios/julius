@@ -14,7 +14,7 @@
 
 static array(price_change_t) price_changes;
 
-static void new_price_change(price_change_t *price_change, int index)
+static void new_price_change(price_change_t *price_change, unsigned int index)
 {
     price_change->id = index;
 }
@@ -46,7 +46,7 @@ void scenario_price_change_init(void)
 int scenario_price_change_new(void)
 {
     price_change_t *price_change;
-    array_new_item(price_changes, 0, price_change);
+    array_new_item(price_changes, price_change);
     return price_change ? price_change->id : -1;
 }
 
@@ -109,7 +109,7 @@ int scenario_price_change_count_total(void)
 
 void scenario_price_change_save_state(buffer *buf)
 {
-    buffer_init_dynamic_piece(buf, 0, price_changes.size, PRICE_CHANGES_STRUCT_SIZE_CURRENT);
+    buffer_init_dynamic_array(buf, price_changes.size, PRICE_CHANGES_STRUCT_SIZE_CURRENT);
 
     const price_change_t *price_change;
     array_foreach(price_changes, price_change) {
@@ -123,9 +123,7 @@ void scenario_price_change_save_state(buffer *buf)
 
 void scenario_price_change_load_state(buffer *buf)
 {
-    int size;
-
-    buffer_load_dynamic_piece_header_data(buf, 0, 0, &size, 0);
+    int size = buffer_load_dynamic_array(buf);
 
     if (!array_init(price_changes, PRICE_CHANGES_ARRAY_SIZE_STEP, new_price_change, price_change_in_use) ||
         !array_expand(price_changes, size)) {

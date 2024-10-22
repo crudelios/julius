@@ -21,7 +21,7 @@ typedef enum {
 } scenario_request_state;
 
 typedef struct {
-    int id;
+    unsigned int id;
     int year;
     int resource;
     int amount;
