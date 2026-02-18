@@ -31,6 +31,7 @@ static struct {
     int finished;
     int in_animation;
     image_groups *current_group;
+    asset_image *main_image;
     asset_image *current_image;
     int initialized;
 } data;
@@ -60,6 +61,7 @@ static int xml_start_assetlist_element(void)
         return 0;
     }
     data.current_group->name = name;
+    data.main_image = 0;
     data.current_image = 0;
     set_asset_image_base_path(data.current_group->name);
     return 1;
@@ -71,10 +73,11 @@ static int xml_start_image_element(void)
     if (!img) {
         return 0;
     }
-    if (!data.current_image) {
+    if (!data.main_image) {
         data.current_group->first_image_index = img->index;
     }
     data.current_group->last_image_index = img->index;
+    data.main_image = img;
     data.current_image = img;
 
     img->id = xml_parser_copy_attribute_string("id");
@@ -130,7 +133,7 @@ static int xml_start_layer_element(void)
 
 static int xml_start_animation_element(void)
 {
-    asset_image *img = data.current_image;
+    asset_image *img = data.main_image;
     if (img->img.animation) {
         return 1;
     }
@@ -189,10 +192,10 @@ static int xml_start_frame_element(void)
     img->img.height += offset_y;
     asset_image_check_and_handle_reference(img);
 #else
-    data.current_image->has_frame_elements = 1;
+    data.main_image->has_frame_elements = 1;
 #endif
     data.current_group->last_image_index = img->index;
-    data.current_image->img.animation->num_sprites++;
+    data.main_image->img.animation->num_sprites++;
 
     return 1;
 }
@@ -206,18 +209,18 @@ static void xml_end_assetlist_element(void)
 static void xml_end_image_element(void)
 {
 #ifndef BUILDING_ASSET_PACKER
-    image *img = &data.current_image->img;
+    image *img = &data.main_image->img;
     if (img->is_isometric) {
         if (((img->width + 2) % (FOOTPRINT_WIDTH + 2)) != 0) {
-            log_info("Isometric image has invalid width", data.current_image->id, img->width);
+            log_info("Isometric image has invalid width", data.main_image->id, img->width);
         }
     }
     if (!img->width || !img->height) {
-        asset_image_unload(data.current_image);
+        asset_image_unload(data.main_image);
         return;
     }
 
-    asset_image_check_and_handle_reference(data.current_image);
+    asset_image_check_and_handle_reference(data.main_image);
 #endif
 }
 

@@ -13,6 +13,7 @@ typedef struct {
     image img;
     const color_t *data;
     int is_reference;
+    int has_dynamic_layers;
 #ifdef BUILDING_ASSET_PACKER
     int has_frame_elements;
     int has_defined_size;

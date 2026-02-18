@@ -55,6 +55,11 @@ typedef struct image {
     } original;
     int is_isometric;
     struct image *top;
+    struct {
+        image *next;
+        int x_offset_from_base;
+        int y_offset_from_base;
+    } dynamic_layer;
     image_animation *animation;
     struct {
         int id;
