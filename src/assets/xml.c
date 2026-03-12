@@ -33,6 +33,8 @@ static struct {
     image_groups *current_group;
     asset_image *main_image;
     asset_image *current_image;
+    int last_image_was_dynamic_layer;
+    int image_has_layers;
     int initialized;
 } data;
 
@@ -99,7 +101,10 @@ static int xml_start_image_element(void)
 
     img->last_layer = &img->first_layer;
     if (path || group) {
-        asset_image_add_layer(img, path, group, image_id, 0, 0, 0, 0, 0, 0, INVERT_NONE, ROTATE_NONE, PART_BOTH, 0);
+        data.image_has_layers = asset_image_add_layer(img, path, group, image_id, 0, 0, 0, 0, 0, 0,
+            INVERT_NONE, ROTATE_NONE, PART_BOTH, 0);
+    } else {
+        data.image_has_layers = 0;
     }
     return 1;
 }
@@ -109,6 +114,12 @@ static int xml_start_layer_element(void)
     asset_image *img = data.current_image;
     static const char *part_values[2] = { "footprint", "top" };
     static const char *mask_values[2] = { "grayscale", "alpha" };
+
+    int is_dynamic_layer = xml_parser_get_attribute_bool("dynamic");
+
+    if (is_dynamic_layer) {
+        data.main_image->has_dynamic_layers = 1;
+    }
 
     const char *path = xml_parser_get_attribute_string("src");
     const char *group = xml_parser_get_attribute_string("group");
@@ -124,10 +135,24 @@ static int xml_start_layer_element(void)
     layer_isometric_part part = xml_parser_get_attribute_enum("part", part_values, 2, PART_FOOTPRINT);
     layer_mask mask = xml_parser_get_attribute_enum("mask", mask_values, 2, LAYER_MASK_GRAYSCALE);
 
+    if ((is_dynamic_layer && !data.image_has_layers) || data.last_image_was_dynamic_layer) {
+        asset_image *layer_img = asset_image_create();
+        if (!layer_img) {
+            return 0;
+        }
+        layer_img->id = xml_parser_copy_attribute_string("id");
+        data.current_group->last_image_index = layer_img->index;
+        data.current_image = layer_img;
+        data.main_image->has_dynamic_layers = 1;
+        data.main_image->img.dynamic_layer.next = layer_img.img->img.dynamic_layer.next = img->img.dynamic_layer.next;
+    }
+
     if (!asset_image_add_layer(img, path, group, image_id, src_x, src_y,
         offset_x, offset_y, width, height, invert, rotate, part == PART_NONE ? PART_BOTH : part, mask)) {
         log_info("Invalid layer for image", img->id, 0);
     }
+    data.last_image_was_dynamic_layer = is_dynamic_layer;
+    data.image_has_layers = 1;
     return 1;
 }
 
@@ -219,6 +244,8 @@ static void xml_end_image_element(void)
         asset_image_unload(data.main_image);
         return;
     }
+
+    data.last_image_was_dynamic_layer = 0;
 
     asset_image_check_and_handle_reference(data.main_image);
 #endif
