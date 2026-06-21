@@ -50,6 +50,8 @@
 
 #define IMAGE_TYPE_ISOMETRIC 30
 
+#define IMAGE_TOTAL_ENTRIES 10500
+
 enum {
     NO_EXTRA_FONT = 0,
     FULL_CHARSET_IN_FONT = 1,
@@ -98,6 +100,90 @@ typedef enum {
 static const int FOOTPRINT_X_START_PER_HEIGHT[] = {
     28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0,
     0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+};
+
+typedef enum {
+    CLIMATE_CENTRAL = 0, // Means North and South are different from Central, but equal to each other
+    CLIMATE_NORTH = 1,
+    CLIMATE_SOUTH = 2,
+    CLIMATE_BOTH = 3,
+    CLIMATE_MAX = 3
+} climate_type;
+
+/*
+ * Each entry describes a run of image IDs with the same climate rule.
+ * "id" is the first image ID in the run and "count" includes that ID.
+ */
+static const struct {
+    unsigned int id;
+    climate_type type;
+    unsigned int count;
+} different_climate_images[] = {
+    { 201, CLIMATE_BOTH, 44 },      { 245, CLIMATE_NORTH, 1 },      { 246, CLIMATE_BOTH, 302 },      { 591, CLIMATE_BOTH, 34 },
+    { 625, CLIMATE_NORTH, 4 },      { 629, CLIMATE_BOTH, 1 },       { 630, CLIMATE_NORTH, 10 },      { 640, CLIMATE_BOTH, 18 },
+    { 666, CLIMATE_NORTH, 2 },      { 668, CLIMATE_BOTH, 31 },      { 700, CLIMATE_BOTH, 1 },        { 701, CLIMATE_NORTH, 2 },
+    { 703, CLIMATE_BOTH, 3 },       { 706, CLIMATE_NORTH, 3 },      { 709, CLIMATE_BOTH, 7 },        { 716, CLIMATE_NORTH, 1 },
+    { 717, CLIMATE_BOTH, 1 },       { 718, CLIMATE_NORTH, 1 },      { 720, CLIMATE_NORTH, 1 },       { 721, CLIMATE_BOTH, 1 },
+    { 722, CLIMATE_NORTH, 3 },      { 725, CLIMATE_BOTH, 3 },       { 728, CLIMATE_NORTH, 2 },       { 730, CLIMATE_BOTH, 2 },
+    { 734, CLIMATE_NORTH, 1 },      { 736, CLIMATE_NORTH, 1 },      { 739, CLIMATE_NORTH, 2 },       { 743, CLIMATE_NORTH, 36 },
+    { 825, CLIMATE_BOTH, 46 },      { 1053, CLIMATE_SOUTH, 33 },    { 1089, CLIMATE_SOUTH, 9 },      { 2779, CLIMATE_BOTH, 24 },
+    { 2812, CLIMATE_SOUTH, 1 },     { 2819, CLIMATE_CENTRAL, 1 },   { 2823, CLIMATE_BOTH, 1 },       { 2827, CLIMATE_BOTH, 3 },
+    { 2832, CLIMATE_SOUTH, 6 },     { 2840, CLIMATE_BOTH, 7 },      { 2863, CLIMATE_BOTH, 10 },      { 2883, CLIMATE_BOTH, 6 },
+    { 2889, CLIMATE_SOUTH, 1 },     { 2890, CLIMATE_BOTH, 4 },      { 2894, CLIMATE_SOUTH, 4 },      { 2898, CLIMATE_BOTH, 1 },
+    { 2899, CLIMATE_SOUTH, 5 },     { 2904, CLIMATE_BOTH, 7 },      { 2911, CLIMATE_SOUTH, 3 },      { 2914, CLIMATE_BOTH, 12 },
+    { 2930, CLIMATE_CENTRAL, 1 },   { 2932, CLIMATE_BOTH, 12 },     { 2957, CLIMATE_BOTH, 1 },       { 2978, CLIMATE_SOUTH, 1 },
+    { 2979, CLIMATE_BOTH, 1 },      { 2988, CLIMATE_BOTH, 1 },      { 3003, CLIMATE_BOTH, 1 },       { 3004, CLIMATE_CENTRAL, 1 },
+    { 3020, CLIMATE_NORTH, 1 },     { 3152, CLIMATE_SOUTH, 3 },     { 3177, CLIMATE_BOTH, 1 },       { 3181, CLIMATE_BOTH, 1 },
+    { 3182, CLIMATE_CENTRAL, 1 },   { 3209, CLIMATE_CENTRAL, 2 },   { 3214, CLIMATE_BOTH, 1 },       { 3218, CLIMATE_CENTRAL, 1 },
+    { 3226, CLIMATE_BOTH, 5 },      { 3231, CLIMATE_SOUTH, 11 },    { 3242, CLIMATE_BOTH, 1 },       { 3254, CLIMATE_BOTH, 1 },
+    { 3266, CLIMATE_BOTH, 1 },      { 3277, CLIMATE_BOTH, 4 },      { 3292, CLIMATE_BOTH, 7 },       { 3300, CLIMATE_BOTH, 2 },
+    { 3303, CLIMATE_BOTH, 3 },      { 5446, CLIMATE_BOTH, 6 },      { 5452, CLIMATE_SOUTH, 15 },     { 5572, CLIMATE_BOTH, 5 },
+    { 7798, CLIMATE_BOTH, 8 },      { 7806, CLIMATE_SOUTH, 4 },     { 7810, CLIMATE_BOTH, 4 },       { 7816, CLIMATE_BOTH, 1 },
+    { 7817, CLIMATE_NORTH, 1 },     { 7818, CLIMATE_BOTH, 6 },      { 7824, CLIMATE_SOUTH, 1 },      { 8952, CLIMATE_NORTH, 1 }
+};
+
+/*
+ * Each entry describes a run of image IDs with the same climate rule.
+ * "id" is the first image ID in the run and "count" includes that ID.
+ */
+static const struct {
+    unsigned int id;
+    climate_type type;
+    unsigned int count;
+} different_climate_editor_images[] = {
+    { 201, CLIMATE_BOTH, 44 },      { 245, CLIMATE_NORTH, 1 },      { 246, CLIMATE_BOTH, 302 },      { 591, CLIMATE_BOTH, 34 },
+    { 625, CLIMATE_NORTH, 4 },      { 629, CLIMATE_BOTH, 1 },       { 630, CLIMATE_NORTH, 10 },      { 640, CLIMATE_BOTH, 18 },
+    { 666, CLIMATE_NORTH, 2 },      { 668, CLIMATE_BOTH, 31 },      { 700, CLIMATE_BOTH, 1 },        { 701, CLIMATE_NORTH, 2 },
+    { 703, CLIMATE_BOTH, 3 },       { 706, CLIMATE_NORTH, 3 },      { 709, CLIMATE_BOTH, 7 },        { 716, CLIMATE_NORTH, 1 },
+    { 717, CLIMATE_BOTH, 1 },       { 718, CLIMATE_NORTH, 1 },      { 720, CLIMATE_NORTH, 1 },       { 721, CLIMATE_BOTH, 1 },
+    { 722, CLIMATE_NORTH, 3 },      { 725, CLIMATE_BOTH, 3 },       { 728, CLIMATE_NORTH, 2 },       { 730, CLIMATE_BOTH, 2 },
+    { 734, CLIMATE_NORTH, 1 },      { 736, CLIMATE_NORTH, 1 },      { 739, CLIMATE_NORTH, 2 },       { 743, CLIMATE_NORTH, 36 },
+    { 825, CLIMATE_BOTH, 46 },      { 1053, CLIMATE_BOTH, 18 },     { 1071, CLIMATE_SOUTH, 1 },      { 1072, CLIMATE_BOTH, 14 },
+    { 1089, CLIMATE_SOUTH, 9 },     { 1098, CLIMATE_BOTH, 6 },      { 1104, CLIMATE_SOUTH, 3 },      { 2782, CLIMATE_BOTH, 24 },
+    { 2815, CLIMATE_SOUTH, 1 },     { 2822, CLIMATE_CENTRAL, 1 },   { 2826, CLIMATE_BOTH, 1 },       { 2830, CLIMATE_BOTH, 8 },
+    { 2930, CLIMATE_BOTH, 6 },      { 2936, CLIMATE_SOUTH, 15 },    { 3056, CLIMATE_BOTH, 5 },       { 3105, CLIMATE_BOTH, 8 },
+    { 3113, CLIMATE_SOUTH, 4 },     { 3117, CLIMATE_BOTH, 4 },      { 3123, CLIMATE_BOTH, 1 },       { 3124, CLIMATE_NORTH, 1 },
+    { 3125, CLIMATE_BOTH, 6 },      { 3131, CLIMATE_SOUTH, 1 }
+};
+
+/*
+ * Each entry changes the active regular-image offset from "image_id" onward.
+ * The active regular ID is editor_id + offset until the next entry.
+ */
+static const struct {
+    unsigned int image_id;
+    int offset;
+} editor_to_regular_images[] = {
+    { 1107, -3 }, { 2833, 51 }, { 2838, 2516 }, { 3063, 4674 }, { 3102, 4675 },
+    { 3105, 4693 }, { 3221, 4750 }, { 3376, 5632 }, { 3377, 4576 }
+};
+
+/*
+ * Toggle boundaries for editor image IDs that do not have a regular match.
+ * Start in the 'has regular match' state and flip state at each listed ID.
+ */
+static const unsigned int editor_images_without_regular_toggle[] = {
+    888, 889, 890, 891, 1083, 1086, 1098, 1107, 2924, 2930, 3375, 3376
 };
 
 static const char MAIN_GRAPHICS_SG2[][NAME_SIZE] = {
@@ -152,6 +238,7 @@ static const char ENEMY_GRAPHICS_SG2[][NAME_SIZE] = {
     "North African.sg2",
     "Phoenician.sg2",
 };
+
 static const char ENEMY_GRAPHICS_555[][NAME_SIZE] = {
     "goths.555",
     "Etruscan.555",
@@ -236,7 +323,7 @@ static struct {
 
     uint16_t group_image_ids[IMAGE_MAX_GROUPS];
     char bitmaps[100][200];
-    image main[IMAGE_MAIN_ENTRIES];
+    image main[CLIMATE_MAX][IMAGE_TOTAL_ENTRIES];
     image enemy[ENEMY_ENTRIES];
     image *font;
     image_draw_data *external_draw_data;
@@ -676,17 +763,26 @@ static void fix_animation_offsets(void)
     data.main[image_group(GROUP_BUILDING_ENGINEERS_POST)].animation->sprite_offset_y += 1;
 }
 
-int image_load_climate(int climate_id, int is_editor, int force_reload, int keep_atlas_buffers)
+static int prepare_images(int is_editor, int climate_id)
 {
-    if (climate_id == data.current_climate && is_editor == data.is_editor && !force_reload &&
-        graphics_renderer()->has_image_atlas(ATLAS_MAIN)) {
-        return 1;
-    }
+    
+}
+
+int image_load(void)
+{
     graphics_renderer()->get_max_image_size(&data.max_image_width, &data.max_image_height);
 
-    for (int i = 0; i < IMAGE_MAIN_ENTRIES; i++) {
-        free(data.main[i].top);
-        free(data.main[i].animation);
+    for (int i = 0; i < IMAGE_TOTAL_ENTRIES; i++) {
+        free(data.main[0][i].top);
+        free(data.main[0][i].animation);
+        data.main[0][i].animation = 0;
+        data.main[0][i].top = 0;
+        free(data.main[1][i].top);
+        free(data.main[1][i].animation);
+        data.main[1][i].animation = 0;
+        data.main[1][i].top = 0;
+        free(data.main[2][i].top);
+        free(data.main[2][i].animation);
     }
 
     memset(data.main, 0, sizeof(data.main));
